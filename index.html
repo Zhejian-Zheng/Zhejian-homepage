@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zhejian - Personal Homepage</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 背景动画 -->
+        <div class="background-animation">
+            <div class="particles"></div>
+        </div>
+
+        <!-- 主要内容 -->
+        <main class="main-content">
+            <!-- 头像区域 -->
+            <div class="avatar-section">
+                <div class="avatar-container">
+                    <div class="avatar">
+                        <img src="assets/images/avatar.svg" alt="头像" id="avatar">
+                    </div>
+                    <div class="avatar-border"></div>
+                </div>
+            </div>
+
+            <!-- 个人信息 -->
+            <div class="profile-section">
+                <h1 class="name">Zhejian Zheng</h1>
+                <p class="title">Software Engineer & Developer</p>
+                <p class="bio">热爱编程，专注于前端开发和用户体验设计</p>
+                
+                <!-- 一言 -->
+                <div class="hitokoto">
+                    <p id="hitokoto-text">正在加载一言...</p>
+                    <span id="hitokoto-author">—— 一言</span>
+                </div>
+            </div>
+
+            <!-- 社交链接 -->
+            <div class="social-links">
+                <a href="https://github.com/yourusername" target="_blank" class="social-link github">
+                    <i class="fab fa-github"></i>
+                </a>
+                <a href="https://twitter.com/yourusername" target="_blank" class="social-link twitter">
+                    <i class="fab fa-twitter"></i>
+                </a>
+                <a href="https://www.linkedin.com/in/zhejian-zheng-9a5563312/" target="_blank" class="social-link linkedin">
+                    <i class="fab fa-linkedin"></i>
+                </a>
+                <a href="mailto:your.email@example.com" class="social-link email">
+                    <i class="fas fa-envelope"></i>
+                </a>
+            </div>
+
+            <!-- 导航链接 -->
+            <div class="nav-links">
+                <a href="#about" class="nav-link">关于我</a>
+                <a href="#projects" class="nav-link">项目</a>
+                <a href="#blog" class="nav-link">博客</a>
+                <a href="#contact" class="nav-link">联系</a>
+            </div>
+
+            <!-- 技能标签 -->
+            <div class="skills">
+                <span class="skill-tag">JavaScript</span>
+                <span class="skill-tag">React</span>
+                <span class="skill-tag">Vue.js</span>
+                <span class="skill-tag">Node.js</span>
+                <span class="skill-tag">Python</span>
+                <span class="skill-tag">Git</span>
+            </div>
+        </main>
+
+        <!-- 全屏切换按钮 -->
+        <button id="fullscreen-toggle" class="fullscreen-toggle" title="切换全屏">
+            <i class="fas fa-expand"></i>
+        </button>
+        
+        <!-- 页脚 -->
+        <footer class="footer">
+            <p>&copy; 2024 Zhejian Zheng. Made with ❤️</p>
+        </footer>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="assets/js/main.js"></script>
+</body>
+</html> 
