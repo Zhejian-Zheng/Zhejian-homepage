@@ -17,6 +17,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 初始化全屏切换
     initFullscreenToggle();
+    
+    // 初始化背景图片
+    initBackgroundImage();
 });
 
 // 一言API初始化
@@ -368,6 +371,74 @@ function initFullscreenToggle() {
             fullscreenToggle.title = '进入全屏';
         }
     }
+}
+
+// 背景图片功能
+function initBackgroundImage() {
+    const backgroundToggle = document.getElementById('background-toggle');
+    const icon = backgroundToggle.querySelector('i');
+    
+    // 背景图片类别
+    const categories = [
+        'nature', 'landscape', 'city', 'architecture', 
+        'technology', 'abstract', 'minimal', 'space'
+    ];
+    
+    // 获取随机背景图片
+    async function fetchRandomBackground() {
+        try {
+            backgroundToggle.classList.add('loading');
+            icon.className = 'fas fa-spinner fa-spin';
+            
+            const category = categories[Math.floor(Math.random() * categories.length)];
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            // 使用 Unsplash API 获取随机图片
+            const response = await fetch(`https://source.unsplash.com/random/${width}x${height}/?${category}`);
+            
+            if (response.ok) {
+                const imageUrl = response.url;
+                
+                // 预加载图片
+                const img = new Image();
+                img.onload = function() {
+                    document.body.style.backgroundImage = `linear-gradient(rgba(102, 126, 234, 0.7), rgba(118, 75, 162, 0.7)), url('${imageUrl}')`;
+                    backgroundToggle.classList.remove('loading');
+                    icon.className = 'fas fa-image';
+                };
+                img.onerror = function() {
+                    console.error('背景图片加载失败');
+                    backgroundToggle.classList.remove('loading');
+                    icon.className = 'fas fa-image';
+                };
+                img.src = imageUrl;
+            } else {
+                throw new Error('获取背景图片失败');
+            }
+        } catch (error) {
+            console.error('背景图片API错误:', error);
+            backgroundToggle.classList.remove('loading');
+            icon.className = 'fas fa-image';
+            
+            // 使用备用渐变背景
+            document.body.style.backgroundImage = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        }
+    }
+    
+    // 点击切换背景
+    backgroundToggle.addEventListener('click', fetchRandomBackground);
+    
+    // 页面加载时立即获取第一张背景图片
+    fetchRandomBackground();
+    
+    // 键盘快捷键：B键切换背景
+    document.addEventListener('keydown', function(e) {
+        if (e.key.toLowerCase() === 'b' && !e.ctrlKey && !e.metaKey) {
+            e.preventDefault();
+            fetchRandomBackground();
+        }
+    });
 }
 
 // 添加性能监控

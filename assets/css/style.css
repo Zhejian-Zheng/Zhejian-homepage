@@ -8,9 +8,16 @@
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     height: 100vh;
     overflow: hidden;
     color: #333;
+    transition: background-image 1s ease-in-out;
+    margin: 0;
+    padding: 0;
 }
 
 .container {
@@ -39,11 +46,22 @@ body {
     position: absolute;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.4) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.4) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.4) 0%, transparent 50%),
-                radial-gradient(circle at 60% 60%, rgba(255, 219, 120, 0.3) 0%, transparent 50%);
+    background: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 60% 60%, rgba(255, 219, 120, 0.2) 0%, transparent 50%);
     animation: float 30s ease-in-out infinite;
+}
+
+/* 背景遮罩 */
+.background-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: -1;
 }
 
 @keyframes float {
@@ -54,8 +72,8 @@ body {
 
 /* 主要内容 */
 .main-content {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
+    background: transparent;
+    backdrop-filter: blur(10px);
     border-radius: 0;
     padding: 2rem;
     box-shadow: none;
@@ -139,26 +157,25 @@ body {
 .name {
     font-size: 2.5rem;
     font-weight: 700;
-    color: #2d3748;
+    color: white;
     margin-bottom: 0.5rem;
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .title {
     font-size: 1.2rem;
-    color: #718096;
+    color: rgba(255, 255, 255, 0.9);
     margin-bottom: 1rem;
     font-weight: 500;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .bio {
     font-size: 1rem;
-    color: #4a5568;
+    color: rgba(255, 255, 255, 0.8);
     line-height: 1.6;
     margin-bottom: 2rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* 一言 */
@@ -269,13 +286,14 @@ body {
 }
 
 .nav-link {
-    color: #4a5568;
+    color: rgba(255, 255, 255, 0.9);
     text-decoration: none;
     font-weight: 500;
     padding: 0.5rem 1rem;
     border-radius: 8px;
     transition: all 0.3s ease;
     position: relative;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .nav-link::before {
@@ -291,7 +309,7 @@ body {
 }
 
 .nav-link:hover {
-    color: #667eea;
+    color: white;
 }
 
 .nav-link:hover::before {
@@ -308,13 +326,15 @@ body {
 }
 
 .skill-tag {
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
     color: white;
     padding: 0.5rem 1rem;
     border-radius: 20px;
     font-size: 0.9rem;
     font-weight: 500;
     transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .skill-tag:hover {
@@ -486,6 +506,41 @@ html, body {
     transform: scale(0.95);
 }
 
+/* 背景切换按钮 */
+.background-toggle {
+    position: fixed;
+    top: 1rem;
+    right: 5rem;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.background-toggle:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+.background-toggle:active {
+    transform: scale(0.95);
+}
+
+.background-toggle.loading {
+    pointer-events: none;
+    opacity: 0.6;
+}
+
 @media (max-width: 768px) {
     .fullscreen-toggle {
         width: 45px;
@@ -493,5 +548,13 @@ html, body {
         font-size: 1rem;
         top: 0.5rem;
         right: 0.5rem;
+    }
+    
+    .background-toggle {
+        width: 45px;
+        height: 45px;
+        font-size: 1rem;
+        top: 0.5rem;
+        right: 4rem;
     }
 } 

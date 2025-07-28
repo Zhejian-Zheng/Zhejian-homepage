@@ -57,7 +57,17 @@ const CONFIG = {
     settings: {
         enableAnimations: true,
         enableParallax: true,
-        enableLoadingBar: true
+        enableLoadingBar: true,
+        enableBackgroundImage: true
+    },
+
+    // 背景图片设置
+    background: {
+        enabled: true,
+        categories: ['nature', 'landscape', 'city', 'architecture', 'technology', 'abstract', 'minimal', 'space'],
+        overlayOpacity: 0.7,
+        autoChange: false,
+        changeInterval: 30000 // 30秒
     }
 };
 
