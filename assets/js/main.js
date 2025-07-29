@@ -234,9 +234,23 @@ function initNavLinks() {
     
     navLinks.forEach(link => {
         link.addEventListener('click', function(e) {
+            const href = this.getAttribute('href');
+            
+            // Check if it's an external link (starts with http or is a file path)
+            if (href.startsWith('http') || href.includes('.html') || href.includes('.php') || href.includes('.htm')) {
+                // Allow external links to work normally
+                // Add click feedback before navigation
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+                return; // Don't prevent default for external links
+            }
+            
+            // For internal anchor links, prevent default and handle manually
             e.preventDefault();
             
-            const target = this.getAttribute('href').substring(1);
+            const target = href.substring(1);
             
             // Here you can add page navigation logic
             console.log('Navigate to:', target);
