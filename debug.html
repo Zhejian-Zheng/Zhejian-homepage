@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - File Paths</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #005a87;
+        }
+    </style>
+</head>
+<body>
+    <h1>Debug - File Paths and Resources</h1>
+    
+    <div class="test-section">
+        <h2>Current Location</h2>
+        <p><strong>URL:</strong> <span id="current-url"></span></p>
+        <p><strong>Pathname:</strong> <span id="current-pathname"></span></p>
+    </div>
+    
+    <div class="test-section">
+        <h2>Resource Tests</h2>
+        <button onclick="testResource('../assets/css/style.css')">Test CSS</button>
+        <button onclick="testResource('../assets/images/profile image.jpg')">Test Image</button>
+        <button onclick="testResource('../config.js')">Test Config</button>
+        <button onclick="testResource('../assets/js/main.js')">Test JS</button>
+        <div id="test-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Navigation Tests</h2>
+        <button onclick="testNavigation('pages/index.html')">Test pages/index.html</button>
+        <button onclick="testNavigation('pages/about.html')">Test pages/about.html</button>
+        <div id="nav-results"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Service Worker Status</h2>
+        <div id="sw-status"></div>
+    </div>
+
+    <script>
+        // Display current location
+        document.getElementById('current-url').textContent = window.location.href;
+        document.getElementById('current-pathname').textContent = window.location.pathname;
+        
+        // Test resource loading
+        async function testResource(path) {
+            const resultsDiv = document.getElementById('test-results');
+            const resultDiv = document.createElement('div');
+            resultDiv.innerHTML = `<strong>Testing:</strong> ${path}`;
+            
+            try {
+                const response = await fetch(path);
+                if (response.ok) {
+                    resultDiv.innerHTML += ` <span class="success">✓ Success (${response.status})</span>`;
+                } else {
+                    resultDiv.innerHTML += ` <span class="error">✗ Error (${response.status})</span>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML += ` <span class="error">✗ Failed: ${error.message}</span>`;
+            }
+            
+            resultsDiv.appendChild(resultDiv);
+        }
+        
+        // Test navigation
+        async function testNavigation(path) {
+            const resultsDiv = document.getElementById('nav-results');
+            const resultDiv = document.createElement('div');
+            resultDiv.innerHTML = `<strong>Testing:</strong> ${path}`;
+            
+            try {
+                const response = await fetch(path);
+                if (response.ok) {
+                    resultDiv.innerHTML += ` <span class="success">✓ Success (${response.status})</span>`;
+                } else {
+                    resultDiv.innerHTML += ` <span class="error">✗ Error (${response.status})</span>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML += ` <span class="error">✗ Failed: ${error.message}</span>`;
+            }
+            
+            resultsDiv.appendChild(resultDiv);
+        }
+        
+        // Check Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                const swStatus = document.getElementById('sw-status');
+                if (registrations.length > 0) {
+                    swStatus.innerHTML = '<span class="success">✓ Service Worker registered</span>';
+                    registrations.forEach(function(registration) {
+                        swStatus.innerHTML += `<br><small>Scope: ${registration.scope}</small>`;
+                    });
+                } else {
+                    swStatus.innerHTML = '<span class="info">ℹ No Service Worker registered</span>';
+                }
+            });
+        } else {
+            document.getElementById('sw-status').innerHTML = '<span class="error">✗ Service Worker not supported</span>';
+        }
+    </script>
+</body>
+</html> 

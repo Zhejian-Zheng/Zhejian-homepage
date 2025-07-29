@@ -579,11 +579,11 @@ function initBackgroundImage() {
     
     // Local background image options
     const backgroundImages = [
-        'assets/images/backgrounds/yosemite-8177850.jpg',
-        'assets/images/backgrounds/berchtesgaden-2928711.jpg',
-        'assets/images/backgrounds/ball-63527.jpg',
-        'assets/images/backgrounds/cityscape-6942013.jpg',
-        'assets/images/backgrounds/berlin-6755246.jpg'
+        '/assets/images/backgrounds/yosemite-8177850.jpg',
+        '/assets/images/backgrounds/berchtesgaden-2928711.jpg',
+        '/assets/images/backgrounds/ball-63527.jpg',
+        '/assets/images/backgrounds/cityscape-6942013.jpg',
+        '/assets/images/backgrounds/berlin-6755246.jpg'
     ];
     
     // Check if device is mobile

@@ -1,9 +1,11 @@
-const CACHE_NAME = 'zhejian-homepage-v1.0.0';
+const CACHE_NAME = 'zhejian-homepage-v2.1.0';
 const urlsToCache = [
   '/',
-  '/index.html',
+  '/pages/index.html',
+  '/pages/about.html',
   '/config.js',
-  '/assets/css/style.css',
+  '/assets/css/style.css?v=1.9',
+  '/assets/css/about.css?v=1.9',
   '/assets/js/main.js',
   '/assets/images/profile image.jpg',
   '/assets/images/backgrounds/yosemite-8177850.jpg',
@@ -66,7 +68,7 @@ self.addEventListener('fetch', function(event) {
       .catch(function() {
         // If both cache and network fail, show offline page
         if (event.request.destination === 'document') {
-          return caches.match('/index.html');
+          return caches.match('/pages/index.html');
         }
       })
   );

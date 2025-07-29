@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Background Image Test - Mobile Chrome</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 1rem;
+            font-family: 'Inter', sans-serif;
+            color: white;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: scroll;
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            -webkit-background-position: center;
+            -moz-background-position: center;
+            -o-background-position: center;
+            -webkit-background-attachment: scroll;
+            -moz-background-attachment: scroll;
+            -o-background-attachment: scroll;
+        }
+        
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .test-section {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+        
+        .test-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            margin: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .test-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .status {
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+        }
+        
+        .status.success {
+            background: rgba(76, 175, 80, 0.3);
+            border: 1px solid rgba(76, 175, 80, 0.5);
+        }
+        
+        .status.error {
+            background: rgba(244, 67, 54, 0.3);
+            border: 1px solid rgba(244, 67, 54, 0.5);
+        }
+        
+        .status.info {
+            background: rgba(33, 150, 243, 0.3);
+            border: 1px solid rgba(33, 150, 243, 0.5);
+        }
+        
+        .background-preview {
+            width: 100%;
+            height: 200px;
+            border-radius: 8px;
+            margin: 1rem 0;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .device-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .info-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.8rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #f093fb;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Background Image Test for Mobile Chrome</h1>
+        
+        <!-- Device Information -->
+        <div class="test-section">
+            <h3>Device Information</h3>
+            <div class="device-info" id="deviceInfo">
+                <!-- Device info will be displayed here -->
+            </div>
+        </div>
+        
+        <!-- Background Test -->
+        <div class="test-section">
+            <h3>Background Image Tests</h3>
+            <button class="test-button" onclick="testBackground1()">Test Background 1 (Yosemite)</button>
+            <button class="test-button" onclick="testBackground2()">Test Background 2 (Berchtesgaden)</button>
+            <button class="test-button" onclick="testBackground3()">Test Background 3 (Ball)</button>
+            <button class="test-button" onclick="testBackground4()">Test Background 4 (Cityscape)</button>
+            <button class="test-button" onclick="testBackground5()">Test Background 5 (Berlin)</button>
+            <button class="test-button" onclick="resetBackground()">Reset to Gradient</button>
+            <div id="backgroundStatus"></div>
+        </div>
+        
+        <!-- Background Preview -->
+        <div class="test-section">
+            <h3>Background Preview</h3>
+            <div class="background-preview" id="backgroundPreview"></div>
+        </div>
+        
+        <!-- Mobile Chrome Specific Tests -->
+        <div class="test-section">
+            <h3>Mobile Chrome Specific Tests</h3>
+            <button class="test-button" onclick="testMobileOptimizations()">Test Mobile Optimizations</button>
+            <button class="test-button" onclick="testHardwareAcceleration()">Test Hardware Acceleration</button>
+            <button class="test-button" onclick="testImagePreloading()">Test Image Preloading</button>
+            <div id="mobileTestStatus"></div>
+        </div>
+        
+        <!-- Debug Information -->
+        <div class="test-section">
+            <h3>Debug Information</h3>
+            <div id="debugInfo"></div>
+        </div>
+    </div>
+
+    <script>
+        const backgroundImages = [
+            '/assets/images/backgrounds/yosemite-8177850.jpg',
+            '/assets/images/backgrounds/berchtesgaden-2928711.jpg',
+            '/assets/images/backgrounds/ball-63527.jpg',
+            '/assets/images/backgrounds/cityscape-6942013.jpg',
+            '/assets/images/backgrounds/berlin-6755246.jpg'
+        ];
+        
+        // Device information detection
+        function detectDeviceInfo() {
+            const deviceInfo = document.getElementById('deviceInfo');
+            const info = [
+                { label: 'User Agent', value: navigator.userAgent },
+                { label: 'Platform', value: navigator.platform },
+                { label: 'Screen Size', value: `${screen.width}x${screen.height}` },
+                { label: 'Viewport Size', value: `${window.innerWidth}x${window.innerHeight}` },
+                { label: 'Device Pixel Ratio', value: window.devicePixelRatio },
+                { label: 'Touch Support', value: 'ontouchstart' in window ? 'Yes' : 'No' },
+                { label: 'Max Touch Points', value: navigator.maxTouchPoints || 'Not supported' },
+                { label: 'Chrome Version', value: getChromeVersion() },
+                { label: 'Is Mobile Chrome', value: isMobileChrome() ? 'Yes' : 'No' }
+            ];
+            
+            deviceInfo.innerHTML = info.map(item => `
+                <div class="info-item">
+                    <div class="info-label">${item.label}:</div>
+                    <div>${item.value}</div>
+                </div>
+            `).join('');
+        }
+        
+        function getChromeVersion() {
+            const userAgent = navigator.userAgent;
+            const chromeMatch = userAgent.match(/Chrome\/(\d+)/);
+            return chromeMatch ? chromeMatch[1] : 'Unknown';
+        }
+        
+        function isMobileChrome() {
+            const userAgent = navigator.userAgent;
+            return userAgent.includes('Chrome') && userAgent.includes('Mobile');
+        }
+        
+        // Background test functions
+        function testBackground1() {
+            setBackground(backgroundImages[0], 'Yosemite');
+        }
+        
+        function testBackground2() {
+            setBackground(backgroundImages[1], 'Berchtesgaden');
+        }
+        
+        function testBackground3() {
+            setBackground(backgroundImages[2], 'Ball');
+        }
+        
+        function testBackground4() {
+            setBackground(backgroundImages[3], 'Cityscape');
+        }
+        
+        function testBackground5() {
+            setBackground(backgroundImages[4], 'Berlin');
+        }
+        
+        function setBackground(imageUrl, name) {
+            const status = document.getElementById('backgroundStatus');
+            const preview = document.getElementById('backgroundPreview');
+            
+            status.innerHTML = `<div class="status info">Loading ${name} background...</div>`;
+            
+            // Preload image
+            const img = new Image();
+            img.onload = function() {
+                // Set body background
+                document.body.style.backgroundImage = `url('${imageUrl}')`;
+                document.body.style.backgroundSize = 'cover';
+                document.body.style.backgroundPosition = 'center';
+                document.body.style.backgroundRepeat = 'no-repeat';
+                document.body.style.backgroundAttachment = 'scroll';
+                
+                // Set preview
+                preview.style.backgroundImage = `url('${imageUrl}')`;
+                
+                status.innerHTML = `<div class="status success">${name} background loaded successfully</div>`;
+                updateDebugInfo();
+            };
+            
+            img.onerror = function() {
+                status.innerHTML = `<div class="status error">Failed to load ${name} background</div>`;
+            };
+            
+            img.src = imageUrl;
+        }
+        
+        function resetBackground() {
+            document.body.style.backgroundImage = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            document.getElementById('backgroundPreview').style.backgroundImage = 'none';
+            document.getElementById('backgroundStatus').innerHTML = '<div class="status info">Reset to gradient background</div>';
+            updateDebugInfo();
+        }
+        
+        // Mobile Chrome specific tests
+        function testMobileOptimizations() {
+            const status = document.getElementById('mobileTestStatus');
+            const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            
+            if (isMobile) {
+                // Apply mobile optimizations
+                document.body.style.backgroundAttachment = 'scroll';
+                document.body.style.webkitTransform = 'translateZ(0)';
+                document.body.style.transform = 'translateZ(0)';
+                document.body.style.webkitBackfaceVisibility = 'hidden';
+                document.body.style.backfaceVisibility = 'hidden';
+                document.body.style.willChange = 'background-image';
+                
+                status.innerHTML = '<div class="status success">Mobile optimizations applied</div>';
+            } else {
+                status.innerHTML = '<div class="status info">Not a mobile device</div>';
+            }
+        }
+        
+        function testHardwareAcceleration() {
+            const status = document.getElementById('mobileTestStatus');
+            
+            // Force hardware acceleration
+            document.body.style.webkitTransform = 'translate3d(0, 0, 0)';
+            document.body.style.transform = 'translate3d(0, 0, 0)';
+            document.body.style.webkitBackfaceVisibility = 'hidden';
+            document.body.style.backfaceVisibility = 'hidden';
+            document.body.style.webkitPerspective = '1000px';
+            document.body.style.perspective = '1000px';
+            
+            status.innerHTML = '<div class="status success">Hardware acceleration enabled</div>';
+        }
+        
+        function testImagePreloading() {
+            const status = document.getElementById('mobileTestStatus');
+            
+            // Preload all images
+            let loadedCount = 0;
+            const totalImages = backgroundImages.length;
+            
+            backgroundImages.forEach((imageUrl, index) => {
+                const img = new Image();
+                img.onload = function() {
+                    loadedCount++;
+                    if (loadedCount === totalImages) {
+                        status.innerHTML = '<div class="status success">All images preloaded successfully</div>';
+                    }
+                };
+                img.onerror = function() {
+                    status.innerHTML = `<div class="status error">Failed to preload image ${index + 1}</div>`;
+                };
+                img.src = imageUrl;
+            });
+            
+            status.innerHTML = '<div class="status info">Preloading images...</div>';
+        }
+        
+        function updateDebugInfo() {
+            const debugInfo = document.getElementById('debugInfo');
+            const currentBg = document.body.style.backgroundImage;
+            const bgSize = document.body.style.backgroundSize;
+            const bgPosition = document.body.style.backgroundPosition;
+            const bgAttachment = document.body.style.backgroundAttachment;
+            
+            debugInfo.innerHTML = `
+                <div class="info-item">
+                    <div class="info-label">Current Background:</div>
+                    <div>${currentBg || 'None'}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Background Size:</div>
+                    <div>${bgSize || 'Default'}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Background Position:</div>
+                    <div>${bgPosition || 'Default'}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Background Attachment:</div>
+                    <div>${bgAttachment || 'Default'}</div>
+                </div>
+            `;
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            detectDeviceInfo();
+            updateDebugInfo();
+            
+            // Test first background on load
+            setTimeout(() => {
+                testBackground1();
+            }, 1000);
+        });
+    </script>
+</body>
+</html> 

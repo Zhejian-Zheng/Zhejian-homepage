@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Zhejian - Personal Homepage</title>
+    
+    <!-- Mobile-specific meta tags -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Zhejian">
+    <meta name="application-name" content="Zhejian">
+    <meta name="theme-color" content="#667eea">
+    <meta name="msapplication-TileColor" content="#667eea">
+    <meta name="msapplication-tap-highlight" content="no">
+    
+    <!-- SEO and social media meta tags -->
+    <meta name="description" content="Zhejian Zheng - Software Engineer & Developer. Passionate about programming, focused on frontend development and user experience design.">
+    <meta name="keywords" content="Zhejian Zheng, Software Engineer, Developer, Frontend, JavaScript, React, Vue.js">
+    <meta name="author" content="Zhejian Zheng">
+    
+    <!-- Open Graph meta tags -->
+    <meta property="og:title" content="Zhejian - Personal Homepage">
+    <meta property="og:description" content="Software Engineer & Developer passionate about programming and user experience design">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://zhejian-zheng.github.io">
+    <meta property="og:image" content="assets/images/profile image.jpg">
+    
+    <!-- Twitter Card meta tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Zhejian - Personal Homepage">
+    <meta name="twitter:description" content="Software Engineer & Developer passionate about programming and user experience design">
+    <meta name="twitter:image" content="assets/images/profile image.jpg">
+    
+    <!-- Icons and favicons -->
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="assets/images/icons/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/images/icons/favicon-16x16.png">
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="../assets/css/style.css?v=1.9">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="../assets/images/profile image.jpg" as="image">
+    <link rel="preload" href="../assets/css/style.css?v=1.9" as="style">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style">
+</head>
+<body>
+    <div class="container">
+        <!-- Background Animation -->
+        <div class="background-animation">
+            <div class="particles"></div>
+        </div>
+        
+        <!-- Background Overlay -->
+        <div class="background-overlay"></div>
+
+        <!-- Top Navigation Bar -->
+        <nav class="top-navigation" role="navigation" aria-label="Main navigation">
+            <div class="nav-container">
+                <a href="index.html" class="nav-logo" aria-label="Homepage">
+                    <span>Homepage</span>
+                </a>
+                <div class="nav-menu">
+                    <a href="about.html" class="nav-item" aria-label="About page">About</a>
+                    <a href="#projects" class="nav-item" aria-label="Projects section">Project</a>
+                    <a href="#blog" class="nav-item" aria-label="Blog section">Blog</a>
+                    <a href="#contact" class="nav-item" aria-label="Contact section">Contact</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Profile Image Section -->
+            <div class="avatar-section">
+                <div class="avatar-container">
+                    <div class="avatar">
+                        <img src="../assets/images/profile image.jpg" alt="Zhejian Zheng Profile Image" id="avatar" loading="eager">
+                    </div>
+                    <div class="avatar-border"></div>
+                </div>
+            </div>
+
+            <!-- Profile Information -->
+            <div class="profile-section">
+                <h1 class="name">Zhejian Zheng</h1>
+                <p class="title">Software Engineer & Developer</p>
+                <p class="bio">Passionate about programming, focused on frontend development and user experience design</p>
+                
+                <!-- Daily Quote -->
+                <div class="hitokoto" role="button" tabindex="0" aria-label="Click to refresh daily quote">
+                    <p id="hitokoto-text">Loading daily quote...</p>
+                    <span id="hitokoto-author">— Quote</span>
+                </div>
+            </div>
+
+            <!-- Social Links -->
+            <div class="social-links">
+                <a href="https://github.com/Zhejian-Zheng" target="_blank" rel="noopener noreferrer" class="social-link github" title="GitHub Profile" aria-label="Visit GitHub Profile">
+                    <i class="fab fa-github" aria-hidden="true"></i>
+                </a>
+                <a href="https://www.linkedin.com/in/zhejian-zheng-9a5563312/" target="_blank" rel="noopener noreferrer" class="social-link linkedin" title="LinkedIn Profile" aria-label="Visit LinkedIn Profile">
+                    <i class="fab fa-linkedin" aria-hidden="true"></i>
+                </a>
+            </div>
+
+
+        </main>
+
+        <!-- Fullscreen Toggle Button -->
+        <button id="fullscreen-toggle" class="fullscreen-toggle" title="Toggle Fullscreen" aria-label="Toggle fullscreen mode">
+            Fullscreen
+        </button>
+        
+        <!-- Background Toggle Button -->
+        <button id="background-toggle" class="background-toggle" title="Toggle Background" aria-label="Change background image">
+            Background
+        </button>
+        
+        <!-- Footer -->
+        <footer class="footer" role="contentinfo">
+            <p>&copy; 2024 Zhejian Zheng. Made with ❤️</p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../config.js"></script>
+    <script src="../assets/js/main.js"></script>
+    
+    <!-- Service Worker Registration for PWA -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('../sw.js')
+                    .then(function(registration) {
+                        console.log('ServiceWorker registration successful');
+                    })
+                    .catch(function(err) {
+                        console.log('ServiceWorker registration failed');
+                    });
+            });
+        }
+    </script>
+</body>
+</html> 
