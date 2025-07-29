@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Icon Generator - Zhejian Homepage</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .icon-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .icon-canvas {
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .download-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .download-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 2rem;
+        }
+        
+        .instructions h3 {
+            margin-top: 0;
+        }
+        
+        .instructions ol {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+        
+        .instructions li {
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PWA Icon Generator</h1>
+        
+        <div class="icon-grid" id="iconGrid">
+            <!-- Icons will be generated here -->
+        </div>
+        
+        <div class="instructions">
+            <h3>Instructions:</h3>
+            <ol>
+                <li>Click on each icon to download it</li>
+                <li>Create the following directory structure: <code>assets/images/icons/</code></li>
+                <li>Save each icon with the corresponding filename</li>
+                <li>Also create <code>assets/images/screenshots/</code> directory for PWA screenshots</li>
+                <li>Take screenshots of your homepage on mobile and desktop for PWA</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        const iconSizes = [
+            { size: 72, filename: 'icon-72x72.png' },
+            { size: 96, filename: 'icon-96x96.png' },
+            { size: 128, filename: 'icon-128x128.png' },
+            { size: 144, filename: 'icon-144x144.png' },
+            { size: 152, filename: 'icon-152x152.png' },
+            { size: 192, filename: 'icon-192x192.png' },
+            { size: 384, filename: 'icon-384x384.png' },
+            { size: 512, filename: 'icon-512x512.png' }
+        ];
+
+        function generateIcon(size, filename) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            canvas.className = 'icon-canvas';
+            
+            const ctx = canvas.getContext('2d');
+            
+            // Create gradient background
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#667eea');
+            gradient.addColorStop(1, '#764ba2');
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            // Add rounded corners
+            ctx.globalCompositeOperation = 'destination-in';
+            ctx.beginPath();
+            ctx.roundRect(0, 0, size, size, size * 0.2);
+            ctx.fill();
+            ctx.globalCompositeOperation = 'source-over';
+            
+            // Add "Z" letter
+            ctx.fillStyle = 'white';
+            ctx.font = `bold ${size * 0.4}px Inter, sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('Z', size / 2, size / 2);
+            
+            // Create download button
+            const downloadBtn = document.createElement('button');
+            downloadBtn.textContent = `Download ${filename}`;
+            downloadBtn.className = 'download-btn';
+            downloadBtn.onclick = () => {
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            };
+            
+            const iconItem = document.createElement('div');
+            iconItem.className = 'icon-item';
+            iconItem.appendChild(canvas);
+            iconItem.appendChild(downloadBtn);
+            
+            return iconItem;
+        }
+
+        // Generate all icons
+        const iconGrid = document.getElementById('iconGrid');
+        iconSizes.forEach(({ size, filename }) => {
+            iconGrid.appendChild(generateIcon(size, filename));
+        });
+
+        // Add roundRect polyfill for older browsers
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
+                this.beginPath();
+                this.moveTo(x + radius, y);
+                this.lineTo(x + width - radius, y);
+                this.quadraticCurveTo(x + width, y, x + width, y + radius);
+                this.lineTo(x + width, y + height - radius);
+                this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                this.lineTo(x + radius, y + height);
+                this.quadraticCurveTo(x, y + height, x, y + height - radius);
+                this.lineTo(x, y + radius);
+                this.quadraticCurveTo(x, y, x + radius, y);
+                this.closePath();
+            };
+        }
+    </script>
+</body>
+</html> 

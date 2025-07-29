@@ -20,6 +20,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize background image
     initBackgroundImage();
+    
+    // Initialize mobile-specific features
+    initMobileFeatures();
 });
 
 // Daily quote API initialization
@@ -134,16 +137,18 @@ function initHitokoto() {
 
 // Page animation initialization
 function initAnimations() {
-    // Add mouse movement parallax effect
-    document.addEventListener('mousemove', function(e) {
-        const particles = document.querySelector('.particles');
-        if (particles) {
-            const x = e.clientX / window.innerWidth;
-            const y = e.clientY / window.innerHeight;
-            
-            particles.style.transform = `translate(${x * 30}px, ${y * 30}px)`;
-        }
-    });
+    // Add mouse movement parallax effect (only on desktop)
+    if (!('ontouchstart' in window)) {
+        document.addEventListener('mousemove', function(e) {
+            const particles = document.querySelector('.particles');
+            if (particles) {
+                const x = e.clientX / window.innerWidth;
+                const y = e.clientY / window.innerHeight;
+                
+                particles.style.transform = `translate(${x * 30}px, ${y * 30}px)`;
+            }
+        });
+    }
     
     // Add special effects in fullscreen mode
     document.addEventListener('click', function(e) {
@@ -191,13 +196,16 @@ function initSocialLinks() {
     const socialLinks = document.querySelectorAll('.social-link');
     
     socialLinks.forEach(link => {
-        link.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-3px) scale(1.1)';
-        });
-        
-        link.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0) scale(1)';
-        });
+        // Desktop hover effects
+        if (!('ontouchstart' in window)) {
+            link.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-3px) scale(1.1)';
+            });
+            
+            link.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        }
         
         // Add click ripple effect
         link.addEventListener('click', function(e) {
@@ -242,6 +250,103 @@ function initNavLinks() {
     });
 }
 
+// Mobile-specific features initialization
+function initMobileFeatures() {
+    // Check if device is mobile
+    const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    
+    if (isMobile) {
+        document.body.classList.add('touch-device');
+        
+        // Optimize viewport for mobile
+        const viewport = document.querySelector('meta[name="viewport"]');
+        if (viewport) {
+            viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover');
+        }
+        
+        // Add mobile-specific touch handlers
+        const touchElements = document.querySelectorAll('.social-link, .nav-link, .hitokoto, .skill-tag');
+        touchElements.forEach(element => {
+            // Touch start feedback
+            element.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                this.style.transform = 'scale(0.95)';
+                this.style.transition = 'transform 0.1s ease';
+            }, { passive: false });
+            
+            // Touch end feedback
+            element.addEventListener('touchend', function(e) {
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                    this.style.transition = 'transform 0.2s ease';
+                }, 100);
+            });
+            
+            // Touch cancel feedback
+            element.addEventListener('touchcancel', function(e) {
+                this.style.transform = 'scale(1)';
+                this.style.transition = 'transform 0.2s ease';
+            });
+        });
+        
+        // Add swipe gesture support for quote refresh
+        let touchStartY = 0;
+        let touchEndY = 0;
+        
+        document.addEventListener('touchstart', function(e) {
+            touchStartY = e.changedTouches[0].screenY;
+        });
+        
+        document.addEventListener('touchend', function(e) {
+            touchEndY = e.changedTouches[0].screenY;
+            handleSwipe();
+        });
+        
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const swipeDistance = touchEndY - touchStartY;
+            
+            if (Math.abs(swipeDistance) > swipeThreshold) {
+                if (swipeDistance > 0) {
+                    // Swipe down - refresh quote
+                    const hitokotoContainer = document.querySelector('.hitokoto');
+                    if (hitokotoContainer) {
+                        hitokotoContainer.click();
+                    }
+                }
+            }
+        }
+        
+        // Add vibration feedback for mobile devices
+        if ('vibrate' in navigator) {
+            const interactiveElements = document.querySelectorAll('.social-link, .nav-link, .hitokoto');
+            interactiveElements.forEach(element => {
+                element.addEventListener('click', function() {
+                    navigator.vibrate(10);
+                });
+            });
+        }
+        
+        // Optimize scrolling for mobile
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+            mainContent.style.webkitOverflowScrolling = 'touch';
+        }
+        
+        // Add mobile-specific keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Space bar to refresh quote
+            if (e.code === 'Space' && !e.ctrlKey && !e.metaKey) {
+                e.preventDefault();
+                const hitokotoContainer = document.querySelector('.hitokoto');
+                if (hitokotoContainer) {
+                    hitokotoContainer.click();
+                }
+            }
+        });
+    }
+}
+
 // Add CSS animations
 const style = document.createElement('style');
 style.textContent = `
@@ -260,6 +365,28 @@ style.textContent = `
     .social-link {
         position: relative;
         overflow: hidden;
+    }
+    
+    /* Mobile-specific animations */
+    @media (hover: none) and (pointer: coarse) {
+        .social-link:active,
+        .nav-link:active,
+        .skill-tag:active,
+        .hitokoto:active {
+            transform: scale(0.95) !important;
+            transition: transform 0.1s ease !important;
+        }
+    }
+    
+    /* Touch feedback animation */
+    .touch-feedback {
+        animation: touchFeedback 0.2s ease;
+    }
+    
+    @keyframes touchFeedback {
+        0% { transform: scale(1); }
+        50% { transform: scale(0.95); }
+        100% { transform: scale(1); }
     }
 `;
 document.head.appendChild(style);
@@ -517,4 +644,20 @@ if ('performance' in window) {
             console.log('Page load time:', perfData.loadEventEnd - perfData.loadEventStart, 'ms');
         }, 0);
     });
-} 
+}
+
+// Add mobile-specific viewport handling
+function handleMobileViewport() {
+    // Fix for mobile viewport height issues
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+    
+    // Update on resize
+    window.addEventListener('resize', () => {
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+    });
+}
+
+// Initialize mobile viewport handling
+handleMobileViewport(); 
