@@ -1,24 +1,22 @@
-// 个人主页配置文件
-// 修改以下配置来自定义你的个人主页
+// Personal Homepage Configuration
+// Modify the following configuration to customize your personal homepage
 
 const CONFIG = {
-    // 个人信息
+    // Personal Information
     personal: {
         name: "Zhejian Zheng",
         title: "Software Engineer & Developer",
-        bio: "热爱编程，专注于前端开发和用户体验设计",
-        avatar: "assets/images/avatar.svg"
+        bio: "Passionate about programming, focused on frontend development and user experience design",
+        avatar: "assets/images/profile image.jpg"
     },
 
-    // 社交链接
+    // Social Links
     social: {
-        github: "https://github.com/yourusername",
-        twitter: "https://twitter.com/yourusername",
-        linkedin: "https://www.linkedin.com/in/zhejian-zheng-9a5563312/",
-        email: "mailto:your.email@example.com"
+        github: "https://github.com/Zhejian-Zheng",
+        linkedin: "https://www.linkedin.com/in/zhejian-zheng-9a5563312/"
     },
 
-    // 技能标签
+    // Skills Tags
     skills: [
         "JavaScript",
         "React",
@@ -28,32 +26,32 @@ const CONFIG = {
         "Git"
     ],
 
-    // 导航链接
+    // Navigation Links
     navigation: [
-        { name: "关于我", href: "#about" },
-        { name: "项目", href: "#projects" },
-        { name: "博客", href: "#blog" },
-        { name: "联系", href: "#contact" }
+        { name: "About", href: "#about" },
+        { name: "Projects", href: "#projects" },
+        { name: "Blog", href: "#blog" },
+        { name: "Contact", href: "#contact" }
     ],
 
-    // 主题色彩
+    // Theme Colors
     theme: {
         primary: "#667eea",
         secondary: "#764ba2",
         accent: "#f093fb"
     },
 
-    // 一言API配置
+    // Daily Quote API Configuration
     hitokoto: {
         enabled: true,
-        api: "https://v1.hitokoto.cn/",
+        api: "https://api.quotable.io/random",
         fallback: {
-            text: "生活不止眼前的代码，还有诗和远方",
-            author: "程序员"
+            text: "Life is not just about code, but also poetry and dreams",
+            author: "Developer"
         }
     },
 
-    // 页面设置
+    // Page Settings
     settings: {
         enableAnimations: true,
         enableParallax: true,
@@ -61,17 +59,17 @@ const CONFIG = {
         enableBackgroundImage: true
     },
 
-    // 背景图片设置
+    // Background Image Settings
     background: {
         enabled: true,
         categories: ['nature', 'landscape', 'city', 'architecture', 'technology', 'abstract', 'minimal', 'space'],
         overlayOpacity: 0.7,
         autoChange: false,
-        changeInterval: 30000 // 30秒
+        changeInterval: 30000 // 30 seconds
     }
 };
 
-// 导出配置
+// Export configuration
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = CONFIG;
 } else {

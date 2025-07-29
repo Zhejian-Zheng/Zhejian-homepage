@@ -1,4 +1,4 @@
-/* 全局样式 */
+/* Global Styles */
 * {
     margin: 0;
     padding: 0;
@@ -15,9 +15,36 @@ body {
     height: 100vh;
     overflow: hidden;
     color: #333;
-    transition: background-image 1s ease-in-out;
+    transition: none;
     margin: 0;
     padding: 0;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    -webkit-backface-visibility: hidden;
+    -webkit-transform: translateZ(0);
+    will-change: background-image;
+}
+
+/* Chrome-specific optimizations */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+    body {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+        -webkit-backface-visibility: hidden;
+        -webkit-transform: translateZ(0);
+        will-change: background-image;
+    }
+}
+
+/* High DPI display optimizations */
+@media screen and (-webkit-min-device-pixel-ratio: 2) {
+    body {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+        -webkit-backface-visibility: hidden;
+        -webkit-transform: translateZ(0);
+        will-change: background-image;
+    }
 }
 
 .container {
@@ -31,7 +58,7 @@ body {
     padding: 0;
 }
 
-/* 背景动画 */
+/* Background Animation */
 .background-animation {
     position: fixed;
     top: 0;
@@ -53,14 +80,14 @@ body {
     animation: float 30s ease-in-out infinite;
 }
 
-/* 背景遮罩 */
+/* Background Overlay */
 .background-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.3);
+    background: transparent;
     z-index: -1;
 }
 
@@ -70,10 +97,9 @@ body {
     66% { transform: translateY(10px) rotate(-1deg); }
 }
 
-/* 主要内容 */
+/* Main Content */
 .main-content {
     background: transparent;
-    backdrop-filter: blur(10px);
     border-radius: 0;
     padding: 2rem;
     box-shadow: none;
@@ -100,7 +126,7 @@ body {
     }
 }
 
-/* 头像区域 */
+/* Avatar Section */
 .avatar-section {
     margin-bottom: 2rem;
 }
@@ -149,7 +175,7 @@ body {
     50% { background-position: 100% 50%; }
 }
 
-/* 个人信息 */
+/* Profile Information */
 .profile-section {
     margin-bottom: 2rem;
 }
@@ -159,7 +185,7 @@ body {
     font-weight: 700;
     color: white;
     margin-bottom: 0.5rem;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .title {
@@ -167,7 +193,7 @@ body {
     color: rgba(255, 255, 255, 0.9);
     margin-bottom: 1rem;
     font-weight: 500;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .bio {
@@ -175,10 +201,10 @@ body {
     color: rgba(255, 255, 255, 0.8);
     line-height: 1.6;
     margin-bottom: 2rem;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
-/* 一言 */
+/* Daily Quote */
 .hitokoto {
     background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
     color: white;
@@ -217,7 +243,7 @@ body {
     opacity: 0.8;
 }
 
-/* 社交链接 */
+/* Social Links */
 .social-links {
     display: flex;
     justify-content: center;
@@ -238,6 +264,12 @@ body {
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+}
+
+.social-link i {
+    font-size: 1.5rem;
+    z-index: 2;
+    position: relative;
 }
 
 .social-link::before {
@@ -264,19 +296,11 @@ body {
     background: linear-gradient(135deg, #24292e, #586069);
 }
 
-.twitter {
-    background: linear-gradient(135deg, #1da1f2, #0d8bd9);
-}
-
 .linkedin {
     background: linear-gradient(135deg, #0077b5, #005885);
 }
 
-.email {
-    background: linear-gradient(135deg, #ea4335, #d33f2f);
-}
-
-/* 导航链接 */
+/* Navigation Links */
 .nav-links {
     display: flex;
     justify-content: center;
@@ -316,7 +340,7 @@ body {
     width: 100%;
 }
 
-/* 技能标签 */
+/* Skills Tags */
 .skills {
     display: flex;
     justify-content: center;
@@ -342,7 +366,7 @@ body {
     box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
 }
 
-/* 页脚 */
+/* Footer */
 .footer {
     position: absolute;
     bottom: 1rem;
@@ -354,7 +378,7 @@ body {
     z-index: 10;
 }
 
-/* 响应式设计 */
+/* Responsive Design */
 @media (max-width: 768px) {
     .container {
         padding: 0;
@@ -380,6 +404,10 @@ body {
         width: 45px;
         height: 45px;
         font-size: 1rem;
+    }
+    
+    .social-link i {
+        font-size: 1.3rem;
     }
     
     .nav-links {
@@ -425,19 +453,23 @@ body {
         font-size: 0.9rem;
     }
     
+    .social-link i {
+        font-size: 1.1rem;
+    }
+    
     .nav-links {
         flex-direction: column;
         gap: 0.5rem;
     }
 }
 
-/* 加载动画 */
+/* Loading Animation */
 .loading {
     opacity: 0.6;
     pointer-events: none;
 }
 
-/* 全屏优化 */
+/* Fullscreen Optimization */
 html, body {
     overflow: hidden;
     position: fixed;
@@ -445,18 +477,18 @@ html, body {
     height: 100%;
 }
 
-/* 滚动条样式 */
+/* Scrollbar Styles */
 ::-webkit-scrollbar {
     width: 0px;
     display: none;
 }
 
-/* 全屏时的内容布局优化 */
+/* Fullscreen Content Layout Optimization */
 .main-content {
     overflow: hidden;
 }
 
-/* 全屏模式下的头像优化 */
+/* Avatar Optimization in Fullscreen Mode */
 .avatar {
     width: 140px;
     height: 140px;
@@ -476,25 +508,26 @@ html, body {
     }
 }
 
-/* 全屏切换按钮 */
+/* Fullscreen Toggle Button */
 .fullscreen-toggle {
     position: fixed;
     top: 1rem;
     right: 1rem;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
+    min-width: 80px;
+    height: 40px;
+    border-radius: 20px;
     background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
     border: none;
     color: white;
-    font-size: 1.2rem;
+    font-size: 0.8rem;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
     z-index: 1000;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 0 12px;
 }
 
 .fullscreen-toggle:hover {
@@ -506,25 +539,26 @@ html, body {
     transform: scale(0.95);
 }
 
-/* 背景切换按钮 */
+/* Background Toggle Button */
 .background-toggle {
     position: fixed;
     top: 1rem;
-    right: 5rem;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
+    right: 8rem;
+    min-width: 80px;
+    height: 40px;
+    border-radius: 20px;
     background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(10px);
     border: none;
     color: white;
-    font-size: 1.2rem;
+    font-size: 0.8rem;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
     z-index: 1000;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 0 12px;
 }
 
 .background-toggle:hover {
@@ -543,18 +577,20 @@ html, body {
 
 @media (max-width: 768px) {
     .fullscreen-toggle {
-        width: 45px;
-        height: 45px;
-        font-size: 1rem;
+        min-width: 70px;
+        height: 35px;
+        font-size: 0.7rem;
         top: 0.5rem;
         right: 0.5rem;
+        padding: 0 10px;
     }
     
     .background-toggle {
-        width: 45px;
-        height: 45px;
-        font-size: 1rem;
+        min-width: 70px;
+        height: 35px;
+        font-size: 0.7rem;
         top: 0.5rem;
-        right: 4rem;
+        right: 7rem;
+        padding: 0 10px;
     }
 } 

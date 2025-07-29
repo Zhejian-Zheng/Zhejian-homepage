@@ -1,85 +1,85 @@
-# Zhejian 个人主页
+# Zhejian Personal Homepage
 
-一个现代化的个人主页，参考了 [dmego/home.github.io](https://github.com/dmego/home.github.io) 的设计风格。
+A modern personal homepage inspired by the design style of [dmego/home.github.io](https://github.com/dmego/home.github.io).
 
-## ✨ 特性
+## Features
 
-- 🎨 **现代化设计** - 采用渐变色彩和毛玻璃效果
-- 📱 **响应式布局** - 完美适配各种设备尺寸
-- 🌊 **动态背景** - 流畅的动画效果和视差滚动
-- 🖼️ **随机背景图片** - 使用Unsplash API获取高质量背景图片
-- 💬 **一言集成** - 自动获取并显示每日一言
-- 🎯 **交互体验** - 丰富的悬停效果和点击反馈
-- ⚡ **性能优化** - 快速加载和流畅动画
+- **Modern Design** - Features gradient colors and glassmorphism effects
+- **Responsive Layout** - Perfectly adapts to various device sizes
+- **Dynamic Background** - Smooth animations and parallax scrolling
+- **Random Background Images** - Uses Unsplash API to fetch high-quality background images
+- **Daily Quote Integration** - Automatically fetches and displays daily quotes
+- **Interactive Experience** - Rich hover effects and click feedback
+- **Performance Optimized** - Fast loading and smooth animations
 
-## 🚀 快速开始
+## Quick Start
 
-### 1. 克隆项目
+### 1. Clone the Project
 
 ```bash
 git clone https://github.com/yourusername/Zhejian-homepage.git
 cd Zhejian-homepage
 ```
 
-### 2. 自定义配置
+### 2. Customize Configuration
 
-编辑 `index.html` 文件，修改以下内容：
+Edit the `index.html` file and modify the following content:
 
-#### 个人信息
+#### Personal Information
 ```html
-<h1 class="name">你的名字</h1>
-<p class="title">你的职位</p>
-<p class="bio">你的个人简介</p>
+<h1 class="name">Your Name</h1>
+<p class="title">Your Title</p>
+<p class="bio">Your personal bio</p>
 ```
 
-#### 社交链接
+#### Social Links
 ```html
 <a href="https://github.com/yourusername" target="_blank" class="social-link github">
-    <i class="fab fa-github"></i>
+    GitHub
 </a>
 <a href="https://www.linkedin.com/in/zhejian-zheng-9a5563312/" target="_blank" class="social-link linkedin">
-    <i class="fab fa-linkedin"></i>
+    LinkedIn
 </a>
 ```
 
-#### 技能标签
+#### Skills Tags
 ```html
 <div class="skills">
-    <span class="skill-tag">你的技能1</span>
-    <span class="skill-tag">你的技能2</span>
+    <span class="skill-tag">Your Skill 1</span>
+    <span class="skill-tag">Your Skill 2</span>
 </div>
 ```
 
-### 3. 替换头像
+### 3. Replace Profile Image
 
-将你的头像图片放在 `assets/images/` 目录下，并命名为 `avatar.jpg` 或 `avatar.png`，然后更新 HTML 中的路径：
+Place your profile image in the `assets/images/` directory and name it `profile image.jpg` or `profile image.png`, then update the path in the HTML:
 
 ```html
-<img src="assets/images/your-avatar.jpg" alt="头像" id="avatar">
+<img src="assets/images/profile image.jpg" alt="Profile Image" id="avatar">
 ```
 
-### 4. 部署
+### 4. Deployment
 
-#### GitHub Pages 部署
+#### GitHub Pages Deployment
 
-1. 将代码推送到 GitHub 仓库
-2. 在仓库设置中启用 GitHub Pages
-3. 选择 `main` 分支作为源
+1. Push the code to your GitHub repository
+2. Enable GitHub Pages in repository settings
+3. Select `main` branch as the source
 
-#### 其他平台部署
+#### Other Platform Deployment
 
-- **Netlify**: 直接拖拽项目文件夹到 Netlify
-- **Vercel**: 连接 GitHub 仓库自动部署
-- **传统服务器**: 上传文件到服务器目录
+- **Netlify**: Drag and drop the project folder to Netlify
+- **Vercel**: Connect GitHub repository for automatic deployment
+- **Traditional Server**: Upload files to server directory
 
-## 🎨 自定义样式
+## Custom Styling
 
-### 修改主题色彩
+### Modify Theme Colors
 
-编辑 `assets/css/style.css` 文件中的 CSS 变量：
+Edit the CSS variables in the `assets/css/style.css` file:
 
 ```css
-/* 主色调 */
+/* Main Colors */
 :root {
     --primary-color: #667eea;
     --secondary-color: #764ba2;
@@ -87,9 +87,9 @@ cd Zhejian-homepage
 }
 ```
 
-### 添加自定义动画
+### Add Custom Animations
 
-在 CSS 文件中添加新的动画：
+Add new animations in the CSS file:
 
 ```css
 @keyframes yourAnimation {
@@ -99,83 +99,81 @@ cd Zhejian-homepage
 }
 ```
 
-## 📱 响应式设计
+## Responsive Design
 
-项目已经针对以下设备进行了优化：
+The project has been optimized for the following devices:
 
-- 📱 手机 (320px - 768px)
-- 📱 平板 (768px - 1024px)
-- 💻 桌面 (1024px+)
+- Mobile (320px - 768px)
+- Tablet (768px - 1024px)
+- Desktop (1024px+)
 
-## 🔧 技术栈
+## Tech Stack
 
-- **HTML5** - 语义化标记
-- **CSS3** - 现代样式和动画
-- **JavaScript ES6+** - 交互功能
-- **Font Awesome** - 图标库
-- **Google Fonts** - 字体服务
+- **HTML5** - Semantic markup
+- **CSS3** - Modern styles and animations
+- **JavaScript ES6+** - Interactive functionality
+- **Google Fonts** - Font services
 
-## 🌟 功能特性
+## Feature Highlights
 
-### 一言 API
-- 自动获取每日一言
-- 点击刷新功能
-- 错误处理和备用内容
+### Daily Quote API
+- Automatically fetches daily quotes
+- Click to refresh functionality
+- Error handling and fallback content
 
-### 动画效果
-- 页面加载动画
-- 悬停效果
-- 视差滚动
-- 鼠标跟随效果
+### Animation Effects
+- Page loading animations
+- Hover effects
+- Parallax scrolling
+- Mouse following effects
 
-### 交互功能
-- 键盘快捷键支持
-- 触摸设备优化
-- 性能监控
-- 错误处理
+### Interactive Features
+- Keyboard shortcut support
+- Touch device optimization
+- Performance monitoring
+- Error handling
 
-### 背景图片功能
-- 点击图片按钮切换背景
-- 按B键快速切换背景
-- 支持多种图片类别
-- 自动适配屏幕尺寸
+### Background Image Features
+- Click image button to switch backgrounds
+- Press B key to quickly switch backgrounds
+- Support for multiple image categories
+- Automatic screen size adaptation
 
-## 📝 更新日志
+## Changelog
 
 ### v1.1.0 (2024-01-01)
-- 🖼️ 添加随机背景图片功能
-- 🎨 优化全屏显示效果
-- 📱 改进响应式设计
-- 🎯 增强交互体验
+- Added random background image functionality
+- Optimized fullscreen display effects
+- Improved responsive design
+- Enhanced interactive experience
 
 ### v1.0.0 (2024-01-01)
-- ✨ 初始版本发布
-- 🎨 现代化设计
-- 📱 响应式布局
-- 🌊 动态背景效果
-- 💬 一言 API 集成
+- Initial version release
+- Modern design
+- Responsive layout
+- Dynamic background effects
+- Daily quote API integration
 
-## 🤝 贡献
+## Contributing
 
-欢迎提交 Issue 和 Pull Request！
+Welcome to submit Issues and Pull Requests!
 
-## 📄 许可证
+## License
 
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 致谢
+## Acknowledgments
 
-- 设计灵感来自 [dmego/home.github.io](https://github.com/dmego/home.github.io)
-- 一言 API 服务
-- Font Awesome 图标库
-- Google Fonts 字体服务
+- Design inspiration from [dmego/home.github.io](https://github.com/dmego/home.github.io)
+- Daily quote API service
+- Google Fonts font service
 
-## 📞 联系
+## Contact
 
-- 📧 Email: your.email@example.com
-- 🐦 Twitter: [@yourusername](https://twitter.com/yourusername)
-- 💼 LinkedIn: [Zhejian Zheng](https://www.linkedin.com/in/zhejian-zheng-9a5563312/)
+- Email: zh.zheng1@gmail.com
+- Twitter: [@yourusername](https://twitter.com/yourusername)
+- LinkedIn: [Zhejian Zheng](https://www.linkedin.com/in/zhejian-zheng-9a5563312/)
 
 ---
 
-⭐ 如果这个项目对你有帮助，请给它一个星标！
+If this project helps you, please give it a star!
