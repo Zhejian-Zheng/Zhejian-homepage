@@ -572,6 +572,9 @@ function initBackgroundImage() {
         'assets/images/backgrounds/berlin-6755246.jpg'
     ];
     
+    // Check if device is mobile
+    const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    
     // Toggle background image
     function toggleBackground() {
         try {
@@ -582,35 +585,98 @@ function initBackgroundImage() {
             const randomImage = backgroundImages[Math.floor(Math.random() * backgroundImages.length)];
             
             console.log('Setting background image:', randomImage);
+            console.log('Is mobile device:', isMobile);
             
-            // Set background image immediately
-            document.body.style.backgroundImage = `url('${randomImage}')`;
-            document.body.style.backgroundSize = 'cover';
-            document.body.style.backgroundPosition = 'center';
-            document.body.style.backgroundRepeat = 'no-repeat';
-            document.body.style.imageRendering = 'crisp-edges';
-            document.body.style.imageRendering = '-webkit-optimize-contrast';
-            document.body.style.webkitBackfaceVisibility = 'hidden';
-            document.body.style.webkitTransform = 'translateZ(0)';
-            document.body.style.willChange = 'background-image';
-            document.body.style.webkitFontSmoothing = 'antialiased';
-            document.body.style.mozOsxFontSmoothing = 'grayscale';
-            backgroundToggle.classList.remove('loading');
-            backgroundToggle.textContent = 'Background';
-            
-            console.log('Background image set successfully');
-            
-            // Preload image for next use
+            // Preload image first to ensure it loads properly
             const img = new Image();
+            
             img.onload = function() {
-                // Image is already set, just ensure it's loaded
+                console.log('Background image loaded successfully:', randomImage);
+                
+                // Set background image with mobile-specific optimizations
+                document.body.style.backgroundImage = `url('${randomImage}')`;
+                document.body.style.backgroundSize = 'cover';
+                document.body.style.backgroundPosition = 'center';
+                document.body.style.backgroundRepeat = 'no-repeat';
+                document.body.style.backgroundAttachment = 'fixed';
+                
+                // Mobile-specific optimizations
+                if (isMobile) {
+                    // Use different approach for mobile devices
+                    document.body.style.backgroundAttachment = 'scroll';
+                    document.body.style.backgroundSize = 'cover';
+                    document.body.style.backgroundPosition = 'center center';
+                    
+                    // Force repaint for mobile Chrome
+                    document.body.style.transform = 'translateZ(0)';
+                    document.body.style.webkitTransform = 'translateZ(0)';
+                    document.body.style.willChange = 'background-image';
+                    
+                    // Additional mobile optimizations
+                    document.body.style.webkitBackfaceVisibility = 'hidden';
+                    document.body.style.webkitPerspective = '1000px';
+                    document.body.style.imageRendering = '-webkit-optimize-contrast';
+                    document.body.style.imageRendering = 'crisp-edges';
+                } else {
+                    // Desktop optimizations
+                    document.body.style.backgroundAttachment = 'fixed';
+                    document.body.style.imageRendering = 'crisp-edges';
+                    document.body.style.imageRendering = '-webkit-optimize-contrast';
+                    document.body.style.webkitBackfaceVisibility = 'hidden';
+                    document.body.style.webkitTransform = 'translateZ(0)';
+                    document.body.style.willChange = 'background-image';
+                    document.body.style.webkitFontSmoothing = 'antialiased';
+                    document.body.style.mozOsxFontSmoothing = 'grayscale';
+                }
+                
+                backgroundToggle.classList.remove('loading');
+                backgroundToggle.textContent = 'Background';
+                
+                console.log('Background image set successfully');
             };
+            
             img.onerror = function() {
                 console.error('Failed to load background image:', randomImage);
                 // Use fallback gradient background
                 document.body.style.backgroundImage = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                document.body.style.backgroundSize = 'cover';
+                document.body.style.backgroundPosition = 'center';
+                document.body.style.backgroundRepeat = 'no-repeat';
+                
+                backgroundToggle.classList.remove('loading');
+                backgroundToggle.textContent = 'Background';
+                
+                // Try to load a different image
+                setTimeout(() => {
+                    const fallbackImage = backgroundImages.find(img => img !== randomImage);
+                    if (fallbackImage) {
+                        console.log('Trying fallback image:', fallbackImage);
+                        const fallbackImg = new Image();
+                        fallbackImg.onload = function() {
+                            document.body.style.backgroundImage = `url('${fallbackImage}')`;
+                        };
+                        fallbackImg.onerror = function() {
+                            console.error('All background images failed to load');
+                        };
+                        fallbackImg.src = fallbackImage;
+                    }
+                }, 1000);
             };
+            
+            // Start loading the image
             img.src = randomImage;
+            
+            // Add timeout for mobile devices
+            if (isMobile) {
+                setTimeout(() => {
+                    if (backgroundToggle.classList.contains('loading')) {
+                        console.log('Mobile timeout reached, using fallback');
+                        backgroundToggle.classList.remove('loading');
+                        backgroundToggle.textContent = 'Background';
+                        document.body.style.backgroundImage = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                    }
+                }, 5000); // 5 second timeout for mobile
+            }
             
         } catch (error) {
             console.error('Background toggle error:', error);
@@ -624,8 +690,16 @@ function initBackgroundImage() {
     // Click to toggle background
     backgroundToggle.addEventListener('click', toggleBackground);
     
-    // Load first background image on page load
-    toggleBackground();
+    // Load first background image on page load with delay for mobile
+    if (isMobile) {
+        // Delay background loading on mobile to ensure page is fully loaded
+        setTimeout(() => {
+            toggleBackground();
+        }, 1000);
+    } else {
+        // Load immediately on desktop
+        toggleBackground();
+    }
     
     // Keyboard shortcut: B key to toggle background
     document.addEventListener('keydown', function(e) {
@@ -634,6 +708,39 @@ function initBackgroundImage() {
             toggleBackground();
         }
     });
+    
+    // Add mobile-specific background handling
+    if (isMobile) {
+        // Handle orientation change
+        window.addEventListener('orientationchange', function() {
+            setTimeout(() => {
+                // Force background refresh on orientation change
+                const currentBg = document.body.style.backgroundImage;
+                if (currentBg && currentBg !== 'none') {
+                    document.body.style.backgroundImage = 'none';
+                    setTimeout(() => {
+                        document.body.style.backgroundImage = currentBg;
+                    }, 100);
+                }
+            }, 500);
+        });
+        
+        // Handle visibility change for mobile
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                // Refresh background when page becomes visible
+                setTimeout(() => {
+                    const currentBg = document.body.style.backgroundImage;
+                    if (currentBg && currentBg !== 'none' && !currentBg.includes('gradient')) {
+                        document.body.style.backgroundImage = 'none';
+                        setTimeout(() => {
+                            document.body.style.backgroundImage = currentBg;
+                        }, 50);
+                    }
+                }, 200);
+            }
+        });
+    }
 }
 
 // Add performance monitoring

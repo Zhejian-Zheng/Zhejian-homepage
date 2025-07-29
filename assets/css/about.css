@@ -1,0 +1,590 @@
+g/* About Page Specific Styles */
+
+/* Page Navigation */
+.page-navigation {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1000;
+}
+
+.nav-back {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: white;
+    text-decoration: none;
+    padding: 0.8rem 1.2rem;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 25px;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    font-weight: 500;
+    font-size: 0.9rem;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+.nav-back:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateX(-5px);
+}
+
+.nav-back i {
+    font-size: 1rem;
+}
+
+/* About Content */
+.about-content {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    padding-top: 4rem;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    /* Auto-fit optimization */
+    min-height: 0;
+    flex: 1;
+    max-height: 100vh;
+    /* Ensure content fits in viewport */
+    padding: clamp(1rem, 4vw, 2rem);
+    gap: clamp(0.5rem, 2vw, 1rem);
+}
+
+/* Profile Section */
+.profile-section {
+    text-align: center;
+    margin-bottom: clamp(2rem, 5vw, 3rem);
+    flex-shrink: 0;
+}
+
+.profile-section .avatar-container {
+    margin-bottom: 1rem;
+}
+
+.profile-section .avatar {
+    width: clamp(100px, 20vw, 150px);
+    height: clamp(100px, 20vw, 150px);
+    margin: 0 auto;
+}
+
+.profile-section .name {
+    font-size: clamp(2rem, 6vw, 3rem);
+    margin-bottom: 0.5rem;
+}
+
+.profile-section .title {
+    font-size: clamp(1rem, 3vw, 1.3rem);
+    opacity: 0.9;
+}
+
+/* About Sections */
+.about-sections {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(2rem, 5vw, 3rem);
+}
+
+.about-section {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.about-section:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-size: clamp(1.3rem, 4vw, 1.8rem);
+    color: white;
+    margin-bottom: clamp(1.5rem, 4vw, 2rem);
+    font-weight: 600;
+}
+
+.section-title i {
+    color: #f093fb;
+    font-size: 1.2em;
+}
+
+/* Story Content */
+.story-content {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(1.5rem, 4vw, 2rem);
+}
+
+.story-item {
+    display: flex;
+    align-items: flex-start;
+    gap: clamp(1rem, 3vw, 1.5rem);
+    padding: clamp(1rem, 3vw, 1.5rem);
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    transition: all 0.3s ease;
+}
+
+.story-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(10px);
+}
+
+.story-icon {
+    flex-shrink: 0;
+    width: clamp(50px, 8vw, 60px);
+    height: clamp(50px, 8vw, 60px);
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: clamp(1.2rem, 3vw, 1.5rem);
+}
+
+.story-text h3 {
+    color: white;
+    font-size: clamp(1.1rem, 3vw, 1.3rem);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.story-text p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Skills Grid */
+.skills-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: clamp(1.5rem, 4vw, 2rem);
+}
+
+.skill-category {
+    background: rgba(255, 255, 255, 0.05);
+    padding: clamp(1.2rem, 3vw, 1.8rem);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.skill-category h3 {
+    color: white;
+    font-size: clamp(1rem, 2.8vw, 1.2rem);
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.skill-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.skill-tag {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    color: white;
+    padding: clamp(0.4rem, 1.5vw, 0.6rem) clamp(0.8rem, 2.5vw, 1.2rem);
+    border-radius: 20px;
+    font-size: clamp(0.8rem, 2.2vw, 0.9rem);
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.skill-tag:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Timeline */
+.timeline {
+    position: relative;
+    padding-left: clamp(2rem, 5vw, 3rem);
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: clamp(2rem, 5vw, 3rem);
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -2.5rem;
+    top: 0.5rem;
+    width: 12px;
+    height: 12px;
+    background: #f093fb;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 0 0 3px rgba(240, 147, 251, 0.3);
+}
+
+.timeline-content {
+    background: rgba(255, 255, 255, 0.05);
+    padding: clamp(1.2rem, 3vw, 1.8rem);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.timeline-content:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(10px);
+}
+
+.timeline-content h3 {
+    color: white;
+    font-size: clamp(1.1rem, 3vw, 1.3rem);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.timeline-date {
+    color: #f093fb;
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
+    font-weight: 500;
+    margin-bottom: 0.8rem;
+}
+
+.timeline-content p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
+    line-height: 1.6;
+    margin: 0.3rem 0;
+}
+
+/* Interests Grid */
+.interests-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: clamp(1.5rem, 4vw, 2rem);
+}
+
+.interest-item {
+    background: rgba(255, 255, 255, 0.05);
+    padding: clamp(1.5rem, 4vw, 2rem);
+    border-radius: 15px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.interest-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-5px);
+}
+
+.interest-item i {
+    font-size: clamp(2rem, 6vw, 2.5rem);
+    color: #f093fb;
+    margin-bottom: 1rem;
+}
+
+.interest-item h3 {
+    color: white;
+    font-size: clamp(1rem, 2.8vw, 1.2rem);
+    margin-bottom: 0.8rem;
+    font-weight: 600;
+}
+
+.interest-item p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Contact Info */
+.contact-info {
+    text-align: center;
+}
+
+.contact-info p {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: clamp(1rem, 2.8vw, 1.2rem);
+    line-height: 1.6;
+    margin-bottom: clamp(1.5rem, 4vw, 2rem);
+}
+
+.contact-info .social-links {
+    display: flex;
+    justify-content: center;
+    gap: clamp(1rem, 3vw, 1.5rem);
+    flex-wrap: wrap;
+}
+
+.contact-info .social-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: clamp(0.8rem, 2.5vw, 1.2rem) clamp(1.5rem, 4vw, 2rem);
+    border-radius: 25px;
+    text-decoration: none;
+    color: white;
+    font-weight: 500;
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
+    transition: all 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+.contact-info .social-link:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.contact-info .social-link.github {
+    background: linear-gradient(135deg, #24292e, #586069);
+}
+
+.contact-info .social-link.linkedin {
+    background: linear-gradient(135deg, #0077b5, #005885);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .page-navigation {
+        top: 0.5rem;
+        left: 0.5rem;
+    }
+    
+    .nav-back {
+        padding: 0.6rem 1rem;
+        font-size: 0.8rem;
+    }
+    
+    .nav-back span {
+        display: none;
+    }
+    
+    .about-content {
+        padding: 1rem;
+        padding-top: 3rem;
+    }
+    
+    .story-item {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .story-icon {
+        margin: 0 auto;
+    }
+    
+    .timeline {
+        padding-left: 2rem;
+    }
+    
+    .timeline-marker {
+        left: -1.5rem;
+    }
+    
+    .skills-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .interests-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    .about-content {
+        padding: 0.8rem;
+        padding-top: 2.5rem;
+    }
+    
+    .about-section {
+        padding: 1.2rem;
+    }
+    
+    .story-item {
+        padding: 1rem;
+    }
+    
+    .story-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 1.2rem;
+    }
+    
+    .timeline {
+        padding-left: 1.5rem;
+    }
+    
+    .timeline-marker {
+        left: -1.2rem;
+        width: 10px;
+        height: 10px;
+    }
+    
+    .interests-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .contact-info .social-links {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+/* Landscape orientation for mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    .about-content {
+        padding: 0.8rem;
+        padding-top: 2rem;
+    }
+    
+    .about-sections {
+        gap: 1.5rem;
+    }
+    
+    .about-section {
+        padding: 1.2rem;
+    }
+    
+    .story-content {
+        gap: 1rem;
+    }
+    
+    .story-item {
+        padding: 1rem;
+    }
+    
+    .timeline-item {
+        margin-bottom: 1.5rem;
+    }
+}
+
+/* Very small desktop screens */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .about-content {
+        padding: clamp(1.5rem, 4vw, 2rem);
+    }
+    
+    .about-sections {
+        gap: clamp(1.5rem, 4vw, 2.5rem);
+    }
+    
+    .story-content {
+        gap: clamp(1.2rem, 3vw, 1.8rem);
+    }
+    
+    .skills-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+    
+    .interests-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+}
+
+/* Touch device specific optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .about-section:hover {
+        transform: none;
+    }
+    
+    .story-item:hover {
+        transform: none;
+    }
+    
+    .timeline-content:hover {
+        transform: none;
+    }
+    
+    .interest-item:hover {
+        transform: none;
+    }
+    
+    .contact-info .social-link:hover {
+        transform: none;
+    }
+    
+    /* Add touch feedback */
+    .about-section:active {
+        transform: scale(0.98);
+    }
+    
+    .story-item:active {
+        transform: scale(0.98);
+    }
+    
+    .timeline-content:active {
+        transform: scale(0.98);
+    }
+    
+    .interest-item:active {
+        transform: scale(0.98);
+    }
+    
+    .contact-info .social-link:active {
+        transform: scale(0.95);
+    }
+}
+
+/* Animation for page load */
+.about-section {
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.about-section:nth-child(1) { animation-delay: 0.1s; }
+.about-section:nth-child(2) { animation-delay: 0.2s; }
+.about-section:nth-child(3) { animation-delay: 0.3s; }
+.about-section:nth-child(4) { animation-delay: 0.4s; }
+.about-section:nth-child(5) { animation-delay: 0.5s; }
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Scrollbar styling for about page */
+.about-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.about-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.about-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+}
+
+.about-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+} 
