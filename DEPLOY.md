@@ -86,9 +86,8 @@ personal: {
 ```javascript
 social: {
     github: "https://github.com/yourusername",
-    twitter: "https://twitter.com/yourusername",
     linkedin: "https://www.linkedin.com/in/zhejian-zheng-9a5563312/",
-    email: "mailto:your.email@example.com"
+    email: "mailto:zj.zheng1@gmail.com"
 }
 ```
 
