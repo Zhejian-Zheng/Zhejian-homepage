@@ -4,26 +4,63 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
+const localQuotes: Quote[] = [
+	{ content: "The best way to predict the future is to create it.", author: "Peter Drucker" },
+	{ content: "Simplicity is the soul of efficiency.", author: "Austin Freeman" },
+	{ content: "Ship early, ship often.", author: "Product wisdom" },
+	{ content: "Design is not just what it looks like. Design is how it works.", author: "Steve Jobs" },
+	{ content: "Programs must be written for people to read.", author: "Harold Abelson" },
+	{ content: "Move fast, but don’t break everything.", author: "Pragmatic dev" }
+];
+
 type Quote = { content: string; author: string };
+
+const BG_IMAGES = [
+	"/assets/images/backgrounds/berlin-6755246.jpg",
+	"/assets/images/backgrounds/yosemite-8177850.jpg",
+	"/assets/images/backgrounds/berchtesgaden-2928711.jpg",
+	"/assets/images/backgrounds/ball-63527.jpg",
+	"/assets/images/backgrounds/cityscape-6942013.jpg"
+];
 
 export default function HomePage() {
 	const [quote, setQuote] = useState<Quote | null>(null);
 	const [loading, setLoading] = useState(false);
+	const [bgLoading, setBgLoading] = useState(false);
+	const [currentBg, setCurrentBg] = useState<string>(BG_IMAGES[0]);
 
 	const loadQuote = async () => {
 		try {
 			setLoading(true);
 			const ts = Date.now();
 			const resp = await fetch(`https://api.quotable.io/random?t=${ts}`, { cache: "no-store" });
+			if (!resp.ok) {
+				throw new Error(`status ${resp.status}`);
+			}
 			const data = await resp.json();
 			setQuote({ content: data.content, author: data.author });
 		} catch {
-			setQuote({
-				content: "Life is not just about code, but also poetry and dreams.",
-				author: "Developer"
-			});
+			// Ensure it still changes even if API fails
+			const fallback = localQuotes[Math.floor(Math.random() * localQuotes.length)];
+			setQuote(fallback);
 		} finally {
 			setLoading(false);
+		}
+	};
+
+	const changeBackground = () => {
+		try {
+			setBgLoading(true);
+			const imgUrl = BG_IMAGES[Math.floor(Math.random() * BG_IMAGES.length)];
+			const img = new Image();
+			img.onload = () => {
+				setCurrentBg(imgUrl);
+				setBgLoading(false);
+			};
+			img.onerror = () => setBgLoading(false);
+			img.src = imgUrl;
+		} catch {
+			setBgLoading(false);
 		}
 	};
 
@@ -42,20 +79,31 @@ export default function HomePage() {
 						<Link href="/about" className="text-white/90 hover:text-white transition px-3 py-2 rounded-lg">
 							About
 						</Link>
-						<a href="#projects" className="text-white/90 hover:text-white transition px-3 py-2 rounded-lg">
-							Project
-						</a>
-						<a href="#blog" className="text-white/90 hover:text-white transition px-3 py-2 rounded-lg">
+						<Link href="/blog" className="text-white/90 hover:text-white transition px-3 py-2 rounded-lg">
 							Blog
-						</a>
-						<a href="#contact" className="text-white/90 hover:text-white transition px-3 py-2 rounded-lg">
+						</Link>
+						<Link href="/contact" className="text-white/90 hover:text-white transition px-3 py-2 rounded-lg">
 							Contact
-						</a>
+						</Link>
+						<button
+							onClick={changeBackground}
+							className="btn-secondary text-xs sm:text-sm px-3 py-2 shadow-lg shadow-secondary/30"
+							disabled={bgLoading}
+						>
+							{bgLoading ? "Loading..." : "Change BG"}
+						</button>
 					</div>
 				</div>
 			</nav>
 
-			<main className="content-center pt-24">
+			<main className="content-center pt-24 relative overflow-hidden isolate bg-slate-900">
+				<div className="absolute inset-0 -z-10">
+					<div
+						className="absolute inset-0 bg-cover bg-center transition-all duration-500"
+						style={{ backgroundImage: `url('${currentBg}')` }}
+					/>
+					<div className="absolute inset-0 bg-gradient-to-b from-slate-900/80 via-slate-950/80 to-slate-900/90" />
+				</div>
 				<div className="relative mb-6">
 					<div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-primary via-accent to-secondary animate-[pulse_3s_ease-in-out_infinite] opacity-70" />
 					<div className="relative w-40 h-40 sm:w-44 sm:h-44 rounded-full overflow-hidden ring-2 ring-white/30">
