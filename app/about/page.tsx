@@ -73,9 +73,9 @@ export default function AboutPage() {
 							<div className="relative rounded-[32px] overflow-hidden shadow-2xl border border-white/20 bg-white/10 backdrop-blur">
 								<div className="h-72 sm:h-80 bg-slate-900">
 									<img
-										src="/assets/images/profile image.jpg"
-										alt="Zhejian Zheng"
-										className="h-full w-full object-cover mix-blend-luminosity brightness-75"
+										src="/assets/images/personalPage.jpg"
+										alt="Personal homepage preview"
+										className="h-full w-full object-cover brightness-90"
 									/>
 								</div>
 								<div className="absolute bottom-4 right-4 bg-black/70 text-white rounded-xl px-3 py-2 shadow-lg border border-white/20">
