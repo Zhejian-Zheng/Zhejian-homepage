@@ -2,14 +2,45 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 const highlights = [
 	{ title: "Born in Ningbo, China", desc: "Grew up in a coastal city; love tech and design." },
 	{ title: "Moved to Sydney at 15", desc: "Multicultural life broadened my perspective." },
-	{ title: "Currently at UNSW", desc: "Majoring in CS/Software Engineering." }
+	{ title: "Currently at UNSW", desc: "Majoring in Computer Science." }
+];
+
+const worldShots = [
+	{ src: "/assets/images/world_exploring/fujimt.jpg", title: "Mt. Fuji", caption: "Morning view over the lake." },
+	{ src: "/assets/images/world_exploring/kyoto.jpg", title: "Kyoto", caption: "Temples, alleys, and quiet gardens." },
+	{ src: "/assets/images/world_exploring/tokyo.jpg", title: "Tokyo", caption: "Neon nights and fast trains." },
+	{ src: "/assets/images/world_exploring/nara2.jpg", title: "Nara", caption: "Deer park and calm vibes." },
+	{ src: "/assets/images/world_exploring/brisbane.jpg", title: "Brisbane", caption: "River walks and sunny days." },
+	{ src: "/assets/images/world_exploring/yiwu.jpg", title: "Yiwu", caption: "Markets and bustling streets." },
+	{ src: "/assets/images/world_exploring/yandang.jpg", title: "Yandang", caption: "Ridges and misty cliffs." },
+	{ src: "/assets/images/world_exploring/kyoto2.jpg", title: "Kyoto (Street)", caption: "Evening street lights and quiet corners." },
+	{ src: "/assets/images/world_exploring/nara.jpg", title: "Nara (Park)", caption: "Open fields with deer roaming." },
+	{ src: "/assets/images/world_exploring/suzhou.jpg", title: "Suzhou", caption: "Gardens, canals, and stone bridges." },
+	{ src: "/assets/images/world_exploring/park.jpg", title: "Park", caption: "Green lawns and leisurely strolls." },
+	{ src: "/assets/images/world_exploring/home.jpg", title: "Home", caption: "Cozy corner and familiar view." },
+	{ src: "/assets/images/world_exploring/fairlight.jpg", title: "Fairlight", caption: "Coastal walks with sea breeze." },
+	{ src: "/assets/images/world_exploring/guangzhou.jpg", title: "Guangzhou", caption: "City lights and skyline." }
 ];
 
 export default function AboutPage() {
+	const [shotIndex, setShotIndex] = useState(0);
+
+	useEffect(() => {
+		const timer = setInterval(() => {
+			setShotIndex((i) => (i + 1) % worldShots.length);
+		}, 2000);
+		return () => clearInterval(timer);
+	}, []);
+
+	const nextShot = () => setShotIndex((i) => (i + 1) % worldShots.length);
+	const prevShot = () => setShotIndex((i) => (i - 1 + worldShots.length) % worldShots.length);
+	const current = worldShots[shotIndex];
+
 	return (
 		<div className="container-page">
 			<nav className="fixed top-0 left-0 right-0 z-50 bg-black/70 backdrop-blur-xl border-b border-white/10">
@@ -53,17 +84,9 @@ export default function AboutPage() {
 							<div className="flex flex-wrap gap-3">
 								<a
 									href="mailto:zj.zheng1@gmail.com"
-									className="btn-primary text-sm px-4 py-3 shadow-lg shadow-primary/20"
+									className="btn-primary text-base px-6 py-3.5 shadow-lg shadow-primary/25 rounded-xl"
 								>
 									Email Me
-								</a>
-								<a
-									href="https://github.com/Zhejian-Zheng"
-									target="_blank"
-									rel="noreferrer"
-									className="btn-secondary text-sm px-4 py-3 shadow-lg shadow-secondary/20"
-								>
-									GitHub
 								</a>
 							</div>
 						</div>
@@ -73,7 +96,7 @@ export default function AboutPage() {
 							<div className="relative rounded-[32px] overflow-hidden shadow-2xl border border-white/20 bg-white/10 backdrop-blur">
 								<div className="h-72 sm:h-80 bg-slate-900">
 									<img
-										src="/assets/images/personalPage.jpg"
+										src="/assets/images/aboutme/personalPage.jpg"
 										alt="Personal homepage preview"
 										className="h-full w-full object-cover brightness-90"
 									/>
@@ -87,12 +110,16 @@ export default function AboutPage() {
 					</div>
 				</section>
 
-				{/* Discover section */}
-				<section className="bg-gradient-to-b from-slate-900 to-slate-800 px-4 py-12">
-					<div className="mx-auto max-w-5xl">
-						<div className="relative bg-primary text-white rounded-[28px] p-10 shadow-2xl overflow-hidden">
-							<div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.18),_transparent_40%)]" />
-							<div className="relative space-y-4">
+				{/* Discover section with rotating shots */}
+				<section className="bg-gradient-to-b from-slate-900 to-slate-950 px-4 py-14">
+					<div className="mx-auto max-w-6xl">
+						<div className="relative rounded-[32px] overflow-hidden shadow-2xl border border-white/10 min-h-[360px]">
+							<div
+								className="absolute inset-0 bg-cover bg-center transition-all duration-700 scale-105"
+								style={{ backgroundImage: `url('${current.src}')` }}
+							/>
+							<div className="absolute inset-0 bg-gradient-to-r from-slate-900/85 via-slate-900/70 to-transparent" />
+							<div className="relative p-8 md:p-12 text-white space-y-5 max-w-2xl">
 								<p className="text-xs uppercase tracking-[0.35em] text-white/80">Discover</p>
 								<h2 className="text-3xl sm:text-4xl font-bold leading-tight">
 									Discover the <span className="text-amber-200">World</span>
@@ -100,56 +127,91 @@ export default function AboutPage() {
 								<p className="text-white/90">
 									I love blending product experience with travel inspiration—maps, routes, photos, and stories that feel great to use.
 								</p>
+								<div className="rounded-2xl bg-white/10 backdrop-blur px-5 py-4 inline-flex items-start gap-3 border border-white/15">
+									<div className="h-12 w-12 rounded-full overflow-hidden ring-2 ring-white/30 shadow">
+										<img src={current.src} alt={current.title} className="h-full w-full object-cover" />
+									</div>
+									<div>
+										<p className="text-sm font-semibold text-white">{current.title}</p>
+										<p className="text-xs text-white/80">{current.caption}</p>
+									</div>
+								</div>
+								<div className="flex items-center gap-3 pt-3">
+									<button
+										onClick={prevShot}
+										className="btn bg-white/10 hover:bg-white/20 text-sm px-3 py-2"
+										aria-label="Previous photo"
+									>
+										Prev
+									</button>
+									<button
+										onClick={nextShot}
+										className="btn bg-white/10 hover:bg-white/20 text-sm px-3 py-2"
+										aria-label="Next photo"
+									>
+										Next
+									</button>
+									<div className="flex items-center gap-1">
+										{worldShots.map((_, idx) => (
+											<button
+												key={idx}
+												onClick={() => setShotIndex(idx)}
+												className={`h-2.5 w-2.5 rounded-full transition ${
+													idx === shotIndex ? "bg-amber-300" : "bg-white/30 hover:bg-white/60"
+												}`}
+												aria-label={`Go to slide ${idx + 1}`}
+											/>
+										))}
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
 				</section>
+	
 
-				{/* Story + skills */}
-				<section className="px-4 py-12 bg-white">
-					<div className="mx-auto max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-8">
-						<div className="lg:col-span-2 space-y-5">
-							<h3 className="text-2xl font-bold text-slate-900">My Journey</h3>
-							<div className="grid sm:grid-cols-2 gap-4">
-								{highlights.map((item) => (
-									<div key={item.title} className="p-4 rounded-2xl bg-slate-900 text-slate-100 border border-slate-800 shadow-lg">
-										<h4 className="font-semibold text-lg text-white">{item.title}</h4>
-										<p className="text-sm text-slate-200 mt-1">{item.desc}</p>
-									</div>
-								))}
-							</div>
+				{/* Journey */}
+				<section className="px-4 py-12 text-white" style={{ backgroundColor: "rgb(37, 47, 67)" }}>
+					<div className="mx-auto max-w-6xl space-y-6">
+						<h3 className="text-2xl font-bold text-white">My Journey</h3>
+						<div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+							{highlights.map((item) => (
+								<div key={item.title} className="p-4 rounded-2xl bg-slate-900 text-slate-100 border border-slate-800 shadow-lg">
+									<h4 className="font-semibold text-lg text-white">{item.title}</h4>
+									<p className="text-sm text-slate-200 mt-1">{item.desc}</p>
+								</div>
+							))}
 						</div>
+					</div>
+				</section>
 
-						<div className="space-y-4">
-							<h3 className="text-2xl font-bold text-slate-900">Skills Snapshot</h3>
-							<div className="glass p-4 bg-white/70 text-slate-900">
-								<p className="text-sm uppercase tracking-[0.2em] text-slate-500 mb-2">Languages</p>
-								<div className="flex flex-wrap gap-2">
-									{["C", "C++", "Java", "JavaScript", "TypeScript", "Rust", "Python", "SQL"].map((s) => (
-										<span key={s} className="px-3 py-1 rounded-full bg-slate-900 text-white text-xs font-semibold">
-											{s}
-										</span>
-									))}
+				{/* Skills */}
+				<section className="px-4 py-14 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+					<div className="mx-auto max-w-6xl space-y-6">
+						<h3 className="text-3xl sm:text-4xl font-bold text-white">Skills Snapshot</h3>
+						<div className="grid gap-4 lg:grid-cols-3">
+							{[
+								{ title: "Languages", items: ["C", "C++", "Java", "JavaScript", "TypeScript", "Rust", "Python", "SQL"] },
+								{ title: "Web", items: ["React", "Next.js", "Tailwind", "Node.js", "Flask", "Vue3"] },
+								{ title: "Tools", items: ["Git", "Docker", "AWS", "Vercel", "Linux", "MongoDB", "postgreSQL"] }
+							].map((group) => (
+								<div
+									key={group.title}
+									className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-6 text-white shadow-2xl"
+								>
+									<p className="text-base uppercase tracking-[0.25em] text-slate-200 mb-4">{group.title}</p>
+									<div className="flex flex-wrap gap-3">
+										{group.items.map((s) => (
+											<span
+												key={s}
+												className="px-4 py-2 rounded-full bg-white/15 text-white text-sm font-semibold border border-white/15 shadow-sm"
+											>
+												{s}
+											</span>
+										))}
+									</div>
 								</div>
-
-								<p className="text-sm uppercase tracking-[0.2em] text-slate-500 my-3">Web</p>
-								<div className="flex flex-wrap gap-2">
-									{["React", "Next.js", "Tailwind", "Node.js", "Flask", "Vue3"].map((s) => (
-										<span key={s} className="px-3 py-1 rounded-full bg-primary/15 text-primary text-xs font-semibold">
-											{s}
-										</span>
-									))}
-								</div>
-
-								<p className="text-sm uppercase tracking-[0.2em] text-slate-500 my-3">Tools</p>
-								<div className="flex flex-wrap gap-2">
-									{["Git", "Docker", "AWS", "Vercel", "Linux"].map((s) => (
-										<span key={s} className="px-3 py-1 rounded-full bg-secondary/15 text-secondary text-xs font-semibold">
-											{s}
-										</span>
-									))}
-								</div>
-							</div>
+							))}
 						</div>
 					</div>
 				</section>

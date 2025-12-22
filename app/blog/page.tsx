@@ -16,8 +16,28 @@ const initialEntry: BlogEntry = {
 	updatedAt: new Date().toISOString()
 };
 
+const jobgenEntry: BlogEntry = {
+	title: "Shipping Faster at Jobgen.ai: Python Automation with AWS S3 & MongoDB",
+	body: [
+		"During my internship/project at Jobgen.ai, I focused on speeding up delivery with Python automation, integrating AWS S3 for object storage and MongoDB for fast metadata/state tracking.",
+		"",
+		"Highlights:",
+		"- Data flow: tasks → Python pre-processing → upload to S3 (bucket/path) → MongoDB records task IDs, file keys, stages, retries, timestamps.",
+		"- S3 signed URLs plus batch upload/verify scripts to keep artifacts consistent and safely accessible.",
+		"- MongoDB as the quick lookup layer for task status and indexing processed files.",
+		"- Python CLI/automation: boto3 + pymongo wrappers, concurrent/resumable batch uploads, validation + write-back to MongoDB, scheduled cleanup/archival, and lightweight retry/alert flows.",
+		"- Reliability: logging/metrics, auto-retries with thresholds, flags for manual intervention when needed.",
+		"",
+		"Takeaways:",
+		"- Separate blobs (S3) from metadata (MongoDB) to make debugging and scaling easier.",
+		"- Automating repetitive steps reduces human error and speeds up delivery.",
+		"- Python is a great glue layer for CLI, batch processing, and API integrations."
+	].join("\n"),
+	updatedAt: new Date().toISOString()
+};
+
 export default function BlogPage() {
-	const [entries] = useState<BlogEntry[]>([initialEntry]);
+	const [entries] = useState<BlogEntry[]>([jobgenEntry, initialEntry]);
 	const [viewing, setViewing] = useState<BlogEntry | null>(null);
 
 	const lastUpdated = useMemo(() => {
