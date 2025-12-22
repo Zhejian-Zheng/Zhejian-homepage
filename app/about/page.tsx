@@ -191,9 +191,9 @@ export default function AboutPage() {
 						<h3 className="text-3xl sm:text-4xl font-bold text-white">Skills Snapshot</h3>
 						<div className="grid gap-4 lg:grid-cols-3">
 							{[
-								{ title: "Languages", items: ["C", "C++", "Java", "JavaScript", "TypeScript", "Rust", "Python", "SQL"] },
-								{ title: "Web", items: ["React", "Next.js", "Tailwind", "Node.js", "Flask", "Vue3"] },
-								{ title: "Tools", items: ["Git", "Docker", "AWS", "Vercel", "Linux", "MongoDB", "postgreSQL"] }
+								{ title: "Languages", items: ["C", "C++", "Java", "JavaScript", "TypeScript", "Rust", "Python", "SQL", "ShellScript"] },
+								{ title: "Web", items: ["React", "Next.js", "Tailwind", "Node.js", "Flask", "Vue3", "HTML", "CSS"] },
+								{ title: "Tools", items: ["Git", "Docker", "AWS S3", "Vercel", "Linux", "MongoDB", "postgreSQL"] }
 							].map((group) => (
 								<div
 									key={group.title}
