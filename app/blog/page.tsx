@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 
 type BlogEntry = {
@@ -67,12 +67,6 @@ export default function BlogPage() {
 	const [entries] = useState<BlogEntry[]>([tcpUdpEntry, jobgenEntry, initialEntry]);
 	const [viewing, setViewing] = useState<BlogEntry | null>(null);
 
-	const lastUpdated = useMemo(() => {
-		if (!entries.length) return "";
-		const latest = [...entries].sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1))[0].updatedAt;
-		return new Intl.DateTimeFormat("en", { dateStyle: "medium", timeStyle: "short" }).format(new Date(latest));
-	}, [entries]);
-
 	return (
 		<div className="min-h-screen bg-slate-900 text-white px-4 pb-16 pt-24">
 			<nav className="fixed top-0 left-0 right-0 z-50 bg-black/70 backdrop-blur-xl border-b border-white/10">
@@ -109,7 +103,6 @@ export default function BlogPage() {
 
 				<section className="grid gap-4">
 					{entries.map((entry) => {
-						const formatted = new Intl.DateTimeFormat("en", { dateStyle: "medium", timeStyle: "short" }).format(new Date(entry.updatedAt));
 						return (
 							<article
 								key={`${entry.title}-${entry.updatedAt}`}
