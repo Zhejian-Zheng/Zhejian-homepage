@@ -36,8 +36,35 @@ const jobgenEntry: BlogEntry = {
 	updatedAt: new Date().toISOString()
 };
 
+const tcpUdpEntry: BlogEntry = {
+	title: "TCP/UDP Simulator: Heartbeats, Auth, and P2P File Sharing",
+	body: [
+		"Built a TCP/UDP simulator to explore reliable messaging, heartbeat-driven liveness, and peer-to-peer file sharing.",
+		"",
+		"Highlights",
+		"- Dual-protocol flow: UDP handles auth, commands, heartbeats; TCP streams file payloads from publishers.",
+		"- Heartbeat + pruning: clients send HEARTBEAT every 2s; server prunes inactive peers after timeout.",
+		"- Auth & state: server keeps addr↔username maps, active timestamps, and published file metadata with TCP ports.",
+		"- Commands:",
+		"  • pub <file>: publish if local file exists; server records publisher TCP port.",
+		"  • get <file>: server returns publisher IP/port; client opens TCP to fetch file, streaming in chunks.",
+		"  • lap/lpf: list active peers or published files for the caller.",
+		"  • sch <substr>: search published files across peers (excluding self).",
+		"  • unp <file>: unpublish a file for the current user.",
+		"- Client TCP server: each client binds to an ephemeral port (0), advertises it on publish, and serves files in threads.",
+		"- Robust file transfer: chunked reads (BUFFER_SIZE), error guard for missing files, and clean close semantics.",
+		"",
+		"Notes",
+		"- Uses Python sockets + threads; UDP for control plane, TCP for data plane.",
+		"- Credentials loaded from server/credentials.txt; rejects duplicates, wrong passwords, or unknown users.",
+		"- Logging with timestamps to trace PUB/GET/HBT flows and error paths.",
+		"- Designed for lab/simulator use; can be extended with TLS, chunk checksums, and retry backoff."
+	].join("\n"),
+	updatedAt: new Date().toISOString()
+};
+
 export default function BlogPage() {
-	const [entries] = useState<BlogEntry[]>([jobgenEntry, initialEntry]);
+	const [entries] = useState<BlogEntry[]>([tcpUdpEntry, jobgenEntry, initialEntry]);
 	const [viewing, setViewing] = useState<BlogEntry | null>(null);
 
 	const lastUpdated = useMemo(() => {
