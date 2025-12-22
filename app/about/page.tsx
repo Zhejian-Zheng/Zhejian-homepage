@@ -33,7 +33,7 @@ export default function AboutPage() {
 	useEffect(() => {
 		const timer = setInterval(() => {
 			setShotIndex((i) => (i + 1) % worldShots.length);
-		}, 2000);
+		}, 3500);
 		return () => clearInterval(timer);
 	}, []);
 

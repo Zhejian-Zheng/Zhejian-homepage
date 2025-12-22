@@ -115,8 +115,14 @@ export default function BlogPage() {
 			{/* Modal removed */}
 
 			{viewing && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
-					<div className="w-full max-w-2xl rounded-2xl bg-slate-900 border border-white/10 p-6 space-y-4 shadow-2xl">
+				<div
+					className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4"
+					onClick={() => setViewing(null)}
+				>
+					<div
+						className="w-full max-w-2xl max-h-[600px] rounded-2xl bg-slate-900 border border-white/10 p-6 space-y-4 shadow-2xl overflow-y-auto"
+						onClick={(e) => e.stopPropagation()}
+					>
 						<div className="flex items-start justify-between gap-3">
 							<div>
 								<p className="text-xs uppercase tracking-[0.3em] text-slate-400">Blog Detail</p>

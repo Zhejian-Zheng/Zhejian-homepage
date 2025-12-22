@@ -633,6 +633,9 @@ video {
 .h-12 {
   height: 3rem;
 }
+.max-h-\[600px\] {
+  max-height: 600px;
+}
 .min-h-\[120px\] {
   min-height: 120px;
 }
@@ -774,6 +777,9 @@ video {
 }
 .overflow-hidden {
   overflow: hidden;
+}
+.overflow-y-auto {
+  overflow-y: auto;
 }
 .whitespace-pre-wrap {
   white-space: pre-wrap;
