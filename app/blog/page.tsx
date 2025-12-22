@@ -103,7 +103,6 @@ export default function BlogPage() {
 						</div>
 					</div>
 					<div className="flex items-center gap-4 text-sm text-slate-300">
-						{lastUpdated && <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10">Last update {lastUpdated}</span>}
 						<span className="px-3 py-1 rounded-full bg-white/5 border border-white/10">{entries.length} posts</span>
 					</div>
 				</header>
@@ -119,7 +118,6 @@ export default function BlogPage() {
 								<div className="flex items-start justify-between gap-3">
 									<div>
 										<h2 className="text-2xl font-semibold text-white">{entry.title}</h2>
-										<p className="text-sm text-slate-300 mt-1">Updated: {formatted}</p>
 									</div>
 									<button
 										onClick={() => setViewing(entry)}
@@ -154,9 +152,6 @@ export default function BlogPage() {
 							<div>
 								<p className="text-xs uppercase tracking-[0.3em] text-slate-400">Blog Detail</p>
 								<h3 className="text-2xl font-semibold text-white">{viewing.title}</h3>
-								<p className="text-sm text-slate-300 mt-1">
-									Updated: {new Intl.DateTimeFormat("en", { dateStyle: "medium", timeStyle: "short" }).format(new Date(viewing.updatedAt))}
-								</p>
 							</div>
 							<button onClick={() => setViewing(null)} className="btn bg-white/10 hover:bg-white/20">
 								Close
