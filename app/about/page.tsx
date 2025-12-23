@@ -2,29 +2,48 @@
 "use client";
 
 import Link from "next/link";
+import Image, { type StaticImageData } from "next/image";
 import { useEffect, useState } from "react";
+import personalPage from "@/app/images/aboutme/personalPage.jpg";
+import imgFujimt from "@/app/images/world_exploring/fujimt.jpg";
+import imgKyoto from "@/app/images/world_exploring/kyoto.jpg";
+import imgTokyo from "@/app/images/world_exploring/tokyo.jpg";
+import imgNara2 from "@/app/images/world_exploring/nara2.jpg";
+import imgBrisbane from "@/app/images/world_exploring/brisbane.jpg";
+import imgYiwu from "@/app/images/world_exploring/yiwu.jpg";
+import imgYandang from "@/app/images/world_exploring/yandang.jpg";
+import imgKyoto2 from "@/app/images/world_exploring/kyoto2.jpg";
+import imgNara from "@/app/images/world_exploring/nara.jpg";
+import imgSuzhou from "@/app/images/world_exploring/suzhou.jpg";
+import imgPark from "@/app/images/world_exploring/park.jpg";
+import imgHome from "@/app/images/world_exploring/home.jpg";
+import imgFairlight from "@/app/images/world_exploring/fairlight.jpg";
+import imgGuangzhou from "@/app/images/world_exploring/guangzhou.jpg";
+
+type WorldShot = { image: StaticImageData; title: string; caption: string };
 
 const highlights = [
 	{ title: "Born in Ningbo, China", desc: "Grew up in a coastal city; love tech and design." },
 	{ title: "Moved to Sydney at 15", desc: "Multicultural life broadened my perspective." },
+	{ title: "Finish NSW Higher School Certificate", desc: "Stuided year 10 to 12 and Graduate with Dux award" },
 	{ title: "Currently at UNSW", desc: "Majoring in Computer Science." }
 ];
 
-const worldShots = [
-	{ src: "/assets/images/world_exploring/fujimt.jpg", title: "Mt. Fuji", caption: "Morning view over the lake." },
-	{ src: "/assets/images/world_exploring/kyoto.jpg", title: "Kyoto", caption: "Temples, alleys, and quiet gardens." },
-	{ src: "/assets/images/world_exploring/tokyo.jpg", title: "Tokyo", caption: "Neon nights and fast trains." },
-	{ src: "/assets/images/world_exploring/nara2.jpg", title: "Nara", caption: "Deer park and calm vibes." },
-	{ src: "/assets/images/world_exploring/brisbane.jpg", title: "Brisbane", caption: "River walks and sunny days." },
-	{ src: "/assets/images/world_exploring/yiwu.jpg", title: "Yiwu", caption: "Markets and bustling streets." },
-	{ src: "/assets/images/world_exploring/yandang.jpg", title: "Yandang", caption: "Ridges and misty cliffs." },
-	{ src: "/assets/images/world_exploring/kyoto2.jpg", title: "Kyoto (Street)", caption: "Evening street lights and quiet corners." },
-	{ src: "/assets/images/world_exploring/nara.jpg", title: "Nara (Park)", caption: "Open fields with deer roaming." },
-	{ src: "/assets/images/world_exploring/suzhou.jpg", title: "Suzhou", caption: "Gardens, canals, and stone bridges." },
-	{ src: "/assets/images/world_exploring/park.jpg", title: "Park", caption: "Green lawns and leisurely strolls." },
-	{ src: "/assets/images/world_exploring/home.jpg", title: "Home", caption: "Cozy corner and familiar view." },
-	{ src: "/assets/images/world_exploring/fairlight.jpg", title: "Fairlight", caption: "Coastal walks with sea breeze." },
-	{ src: "/assets/images/world_exploring/guangzhou.jpg", title: "Guangzhou", caption: "City lights and skyline." }
+const worldShots: WorldShot[] = [
+	{ image: imgFujimt, title: "Mt. Fuji", caption: "Morning view over the lake." },
+	{ image: imgKyoto, title: "Kyoto", caption: "Temples, alleys, and quiet gardens." },
+	{ image: imgTokyo, title: "Tokyo", caption: "Neon nights and fast trains." },
+	{ image: imgNara2, title: "Nara", caption: "Deer park and calm vibes." },
+	{ image: imgBrisbane, title: "Brisbane", caption: "River walks and sunny days." },
+	{ image: imgYiwu, title: "Yiwu", caption: "Markets and bustling streets." },
+	{ image: imgYandang, title: "Yandang", caption: "Ridges and misty cliffs." },
+	{ image: imgKyoto2, title: "Kyoto (Street)", caption: "Evening street lights and quiet corners." },
+	{ image: imgNara, title: "Nara (Park)", caption: "Open fields with deer roaming." },
+	{ image: imgSuzhou, title: "Suzhou", caption: "Gardens, canals, and stone bridges." },
+	{ image: imgPark, title: "Park", caption: "Green lawns and leisurely strolls." },
+	{ image: imgHome, title: "Home", caption: "Cozy corner and familiar view." },
+	{ image: imgFairlight, title: "Fairlight", caption: "Coastal walks with sea breeze." },
+	{ image: imgGuangzhou, title: "Guangzhou", caption: "City lights and skyline." }
 ];
 
 export default function AboutPage() {
@@ -94,11 +113,14 @@ export default function AboutPage() {
 						<div className="relative">
 							<div className="absolute -inset-6 bg-gradient-to-tr from-primary/20 via-secondary/30 to-accent/20 blur-3xl" />
 							<div className="relative rounded-[32px] overflow-hidden shadow-2xl border border-white/20 bg-white/10 backdrop-blur">
-								<div className="h-72 sm:h-80 bg-slate-900">
-									<img
-										src="/assets/images/aboutme/personalPage.jpg"
+								<div className="relative h-72 sm:h-80 bg-slate-900">
+									<Image
+										src={personalPage}
 										alt="Personal homepage preview"
-										className="h-full w-full object-cover brightness-90"
+										className="object-cover brightness-90"
+										fill
+										sizes="(max-width: 1024px) 100vw, 50vw"
+										priority
 									/>
 								</div>
 								<div className="absolute bottom-4 right-4 bg-black/70 text-white rounded-xl px-3 py-2 shadow-lg border border-white/20">
@@ -116,7 +138,7 @@ export default function AboutPage() {
 						<div className="relative rounded-[32px] overflow-hidden shadow-2xl border border-white/10 min-h-[360px]">
 							<div
 								className="absolute inset-0 bg-cover bg-center transition-all duration-700 scale-105"
-								style={{ backgroundImage: `url('${current.src}')` }}
+								style={{ backgroundImage: `url('${current.image.src}')` }}
 							/>
 							<div className="absolute inset-0 bg-gradient-to-r from-slate-900/85 via-slate-900/70 to-transparent" />
 							<div className="relative p-8 md:p-12 text-white space-y-5 max-w-2xl">
@@ -128,8 +150,8 @@ export default function AboutPage() {
 									I love blending product experience with travel inspiration—maps, routes, photos, and stories that feel great to use.
 								</p>
 								<div className="rounded-2xl bg-white/10 backdrop-blur px-5 py-4 inline-flex items-start gap-3 border border-white/15">
-									<div className="h-12 w-12 rounded-full overflow-hidden ring-2 ring-white/30 shadow">
-										<img src={current.src} alt={current.title} className="h-full w-full object-cover" />
+									<div className="relative h-12 w-12 rounded-full overflow-hidden ring-2 ring-white/30 shadow">
+										<Image src={current.image} alt={current.title} className="object-cover" fill sizes="48px" />
 									</div>
 									<div>
 										<p className="text-sm font-semibold text-white">{current.title}</p>

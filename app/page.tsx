@@ -2,7 +2,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
+import profileImg from "@/app/images/profile image.jpg";
+import bgBerlin from "@/app/images/backgrounds/berlin-6755246.jpg";
+import bgYosemite from "@/app/images/backgrounds/yosemite-8177850.jpg";
+import bgBerchtesgaden from "@/app/images/backgrounds/berchtesgaden-2928711.jpg";
+import bgBall from "@/app/images/backgrounds/ball-63527.jpg";
+import bgCityscape from "@/app/images/backgrounds/cityscape-6942013.jpg";
 
 const localQuotes: Quote[] = [
 	{ content: "The best way to predict the future is to create it.", author: "Peter Drucker" },
@@ -14,20 +21,15 @@ const localQuotes: Quote[] = [
 ];
 
 type Quote = { content: string; author: string };
+type BgImage = StaticImageData;
 
-const BG_IMAGES = [
-	"/assets/images/backgrounds/berlin-6755246.jpg",
-	"/assets/images/backgrounds/yosemite-8177850.jpg",
-	"/assets/images/backgrounds/berchtesgaden-2928711.jpg",
-	"/assets/images/backgrounds/ball-63527.jpg",
-	"/assets/images/backgrounds/cityscape-6942013.jpg"
-];
+const BG_IMAGES: BgImage[] = [bgBerlin, bgYosemite, bgBerchtesgaden, bgBall, bgCityscape];
 
 export default function HomePage() {
 	const [quote, setQuote] = useState<Quote | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [bgLoading, setBgLoading] = useState(false);
-	const [currentBg, setCurrentBg] = useState<string>(BG_IMAGES[0]);
+	const [currentBg, setCurrentBg] = useState<BgImage>(BG_IMAGES[0]);
 
 	const loadQuote = async () => {
 		try {
@@ -52,13 +54,13 @@ export default function HomePage() {
 		try {
 			setBgLoading(true);
 			const imgUrl = BG_IMAGES[Math.floor(Math.random() * BG_IMAGES.length)];
-			const img = new Image();
-			img.onload = () => {
+			const preload = new window.Image();
+			preload.onload = () => {
 				setCurrentBg(imgUrl);
 				setBgLoading(false);
 			};
-			img.onerror = () => setBgLoading(false);
-			img.src = imgUrl;
+			preload.onerror = () => setBgLoading(false);
+			preload.src = imgUrl.src;
 		} catch {
 			setBgLoading(false);
 		}
@@ -100,14 +102,14 @@ export default function HomePage() {
 				<div className="absolute inset-0 -z-10">
 					<div
 						className="absolute inset-0 bg-cover bg-center transition-all duration-500"
-						style={{ backgroundImage: `url('${currentBg}')` }}
+						style={{ backgroundImage: `url('${currentBg.src}')` }}
 					/>
 					<div className="absolute inset-0 bg-gradient-to-b from-slate-900/80 via-slate-950/80 to-slate-900/90" />
 				</div>
 				<div className="relative mb-6">
 					<div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-primary via-accent to-secondary animate-[pulse_3s_ease-in-out_infinite] opacity-70" />
 					<div className="relative w-40 h-40 sm:w-44 sm:h-44 rounded-full overflow-hidden ring-2 ring-white/30">
-						<img src="/assets/images/profile image.jpg" alt="Zhejian Zheng" className="w-full h-full object-cover" />
+						<Image src={profileImg} alt="Zhejian Zheng" className="object-cover" fill sizes="176px" priority />
 					</div>
 				</div>
 
@@ -122,8 +124,8 @@ export default function HomePage() {
 				<button
 					onClick={loadQuote}
 					className="glass mt-6 px-5 py-4 max-w-2xl w-full text-left hover:bg-white/15 transition disabled:opacity-60"
-					aria-label="点击刷新每日名言"
-					title="点击刷新每日名言"
+					aria-label="click to refresh daily quote"
+					title="click to refresh daily quote"
 					disabled={loading}
 				>
 					<p className="text-base sm:text-lg italic">{quote?.content ?? "Loading daily quote..."}</p>
