@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState } from "react";
@@ -129,8 +128,6 @@ export default function BlogPage() {
 					Thanks for reading. If you want to inspect the code, it lives in the same repo under the `app/` directory.
 				</footer>
 			</div>
-
-			{/* Modal removed */}
 
 			{viewing && (
 				<div

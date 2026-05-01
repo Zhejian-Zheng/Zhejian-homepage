@@ -21,6 +21,7 @@ import imgFairlight from "@/app/images/world_exploring/fairlight.jpg";
 import imgGuangzhou from "@/app/images/world_exploring/guangzhou.jpg";
 
 type WorldShot = { image: StaticImageData; title: string; caption: string };
+type SkillIcon = { label: string; src?: string; text?: string };
 
 const highlights = [
 	{ title: "Born in Ningbo, China", desc: "Grew up in a coastal city; love tech and design." },
@@ -28,6 +29,37 @@ const highlights = [
 	{ title: "Finish NSW Higher School Certificate", desc: "Stuided year 10 to 12 and Graduate with Dux award" },
 	{ title: "Currently at UNSW", desc: "Majoring in Computer Science." }
 ];
+const skillIcons: SkillIcon[] = [
+	{ label: "Docker", src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg" },
+	{ label: "Git", src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-original.svg" },
+	{ label: "GitHub", src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/github/github-original.svg" },
+	{ label: "HTML5", src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/html5/html5-original.svg" },
+	{ label: "IntelliJ IDEA", src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/intellij/intellij-original.svg" },
+	{ label: "Java", src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/java/java-original.svg" },
+	{ label: "JavaScript", src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg" },
+	{ label: "Linux", src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/linux/linux-original.svg" },
+	{ label: "Markdown", src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/markdown/markdown-original.svg" },
+	{ label: "MongoDB", src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mongodb/mongodb-original.svg" },
+	{ label: "MySQL", src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mysql/mysql-original.svg" },
+	{ label: "Next.js", src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nextjs/nextjs-original.svg" },
+	{ label: "Node.js", src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nodejs/nodejs-original.svg" },
+	{ label: "PostgreSQL", src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/postgresql/postgresql-original.svg" },
+	{ label: "Python", src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/python/python-original.svg" },
+	{ label: "PyTorch", src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/pytorch/pytorch-original.svg" },
+	{ label: "React", src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/react/react-original.svg" },
+	{ label: "Rust", src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/rust/rust-original.svg" },
+	{ label: "Tailwind CSS", src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg" },
+	{ label: "TypeScript", src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/typescript/typescript-original.svg" },
+	{ label: "Vercel", src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/vercel/vercel-original.svg" },
+	{ label: "Vite", src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/vitejs/vitejs-original.svg" },
+	{ label: "VS Code", src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/vscode/vscode-original.svg" },
+	{ label: "Vue", src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/vuejs/vuejs-original.svg" },
+	{ label: "Codex", src: "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/openai.svg" },
+	{ label: "Gemini", src: "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/googlegemini.svg" },
+	{ label: "Cursor", src: "https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/cursor.svg" },
+	{ label: "AWS", src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/amazonwebservices/amazonwebservices-original-wordmark.svg" },
+	{ label: "Dash", text: "Dash" }
+]
 
 const worldShots: WorldShot[] = [
 	{ image: imgFujimt, title: "Mt. Fuji", caption: "Morning view over the lake." },
@@ -208,37 +240,33 @@ export default function AboutPage() {
 				</section>
 
 				{/* Skills */}
-				<section className="px-4 py-14 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
-					<div className="mx-auto max-w-6xl space-y-6">
-						<h3 className="text-3xl sm:text-4xl font-bold text-white">Skills Snapshot</h3>
-						<div className="grid gap-4 lg:grid-cols-3">
-							{[
-								{ title: "Languages", items: ["C", "C++", "Java", "JavaScript", "TypeScript", "Rust", "Python", "SQL", "ShellScript"] },
-								{ title: "Web", items: ["React", "Next.js", "Tailwind", "Node.js", "Flask", "Vue3", "HTML", "CSS"] },
-								{ title: "Tools", items: ["Git", "Docker", "AWS S3", "Vercel", "Linux", "MongoDB", "postgreSQL"] }
-							].map((group) => (
+				<section className="px-4 py-14 bg-[#3f526f] text-white">
+					<div className="mx-auto max-w-6xl">
+						<div className="mb-6 flex items-center">
+							<h3 className="text-3xl font-extrabold lowercase tracking-tight text-white">skills</h3>
+						</div>
+						<div className="flex flex-wrap gap-2.5 sm:gap-3">
+							{skillIcons.map((skill) => (
 								<div
-									key={group.title}
-									className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-6 text-white shadow-2xl"
+									key={skill.label}
+									className="group flex h-11 w-11 items-center justify-center rounded-lg bg-white/95 shadow-lg ring-1 ring-slate-900/15 transition hover:-translate-y-1 hover:bg-white hover:ring-sky-300/80 sm:h-12 sm:w-12"
+									title={skill.label}
 								>
-									<p className="text-base uppercase tracking-[0.25em] text-slate-200 mb-4">{group.title}</p>
-									<div className="flex flex-wrap gap-3">
-										{group.items.map((s) => (
-											<span
-												key={s}
-												className="px-4 py-2 rounded-full bg-white/15 text-white text-sm font-semibold border border-white/15 shadow-sm"
-											>
-												{s}
-											</span>
-										))}
-									</div>
+									{skill.src ? (
+										<img src={skill.src} alt={skill.label} className="h-7 w-7 object-contain sm:h-8 sm:w-8" loading="lazy" />
+									) : (
+										<span className="text-xs font-black tracking-tight text-slate-900">{skill.text}</span>
+									)}
 								</div>
 							))}
 						</div>
 					</div>
 				</section>
 
-				<footer className="site-footer mt-6">&copy; 2024 Zhejian Zheng. Made with ❤️</footer>
+				<footer className="site-footer mt-6">
+	<p>&copy; 2024 Zhejian Zheng. Updated 2026</p>
+	<p className="mt-1 text-xs text-white/60">Built with React, Next.js, and Tailwind CSS.</p>
+</footer>
 			</main>
 		</div>
 	);
