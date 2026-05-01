@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -159,7 +158,10 @@ export default function HomePage() {
 					</a>
 				</div>
 
-				<footer className="site-footer mt-10">&copy; 2024 Zhejian Zheng. Made with ❤️</footer>
+				<footer className="site-footer mt-10">
+	<p>&copy; 2024 Zhejian Zheng. Updated 2026</p>
+	<p className="mt-1 text-xs text-white/60">Built with React, Next.js, and Tailwind CSS.</p>
+</footer>
 			</main>
 		</div>
 	);
