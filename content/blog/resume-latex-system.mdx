@@ -1,0 +1,36 @@
+export const metadata = {
+	title: "Resume in LaTeX: Treating a CV as Source-Controlled Design",
+	summary: "A LaTeX resume project that uses reusable commands, typography, spacing, and version control to keep a technical CV maintainable.",
+	publishedAt: "2026-05-16",
+	tags: ["LaTeX", "Resume", "Design", "Documentation"]
+};
+
+The Resume repo keeps a CV as code. Instead of editing a visual document by hand, the resume is written in LaTeX with reusable commands for sections, projects, education, work experience, and layout.
+
+This is a small project, but it reflects a useful engineering habit: documents that change often can benefit from structure and version control.
+
+## Document System
+
+The LaTeX source uses packages for page geometry, fonts, color, section titles, tables, list spacing, icons, and links. Custom commands help keep entries consistent across the document.
+
+That consistency matters. A resume needs to be easy to scan, and small spacing differences can make the whole page feel less professional.
+
+## Information Architecture
+
+The content emphasizes education, experience, projects, technical skills, and achievements. A strong technical resume is not just a list of tools; it shows what was built, what stack was used, and what impact the work had.
+
+Sensitive contact or referee details should be handled carefully when a resume is public, which is one reason source control hygiene matters.
+
+## Knowledge Points
+
+- LaTeX is strong for precise typography and repeatable document generation.
+- Custom commands reduce formatting drift across resume sections.
+- Version control makes it easy to track changes for different job applications.
+- A technical CV should connect skills to concrete projects and outcomes.
+- Layout density should support scanning rather than squeezing in every detail.
+- Public repositories should avoid exposing private referee or contact details unnecessarily.
+- Treating writing as code encourages review, iteration, and reuse.
+
+## Takeaway
+
+This repo shows that engineering thinking applies to personal documents too. A resume becomes easier to maintain when layout, content, and structure are separated.

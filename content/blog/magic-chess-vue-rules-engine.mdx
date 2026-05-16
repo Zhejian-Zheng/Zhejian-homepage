@@ -1,0 +1,42 @@
+export const metadata = {
+	title: "Magic Chess: A Vue Rule Engine for Classic and Custom Chess",
+	summary: "A Vue 3 and TypeScript chess project with move validation, check detection, timers, history, and custom piece rules.",
+	publishedAt: "2026-05-16",
+	tags: ["Vue", "TypeScript", "Game Logic", "Chess"]
+};
+
+Magic Chess is a browser chess project built with Vue 3 and TypeScript. The project implements normal chess rules and also adds custom modes that change how pieces behave.
+
+That makes it a useful rules-engine project. Chess already has many edge cases, and custom variants add another layer of design pressure.
+
+## State Model
+
+The core types model pieces, colors, positions, boards, moves, game status, and game modes. Keeping these types explicit makes later logic easier to reason about because every move function works with the same vocabulary.
+
+The game composable owns the shared state: board, selected square, valid moves, current player, captured pieces, move history, timers, promotion state, and AI move timing.
+
+## Move Validation
+
+The move validator handles standard piece movement, special cases like en passant and castling, and custom modes such as ghost pawns, heavy knights, bishop sniper behavior, and rook charge behavior.
+
+One important pattern is simulation. Candidate moves are checked against a cloned board so illegal moves that expose the king can be filtered out before the UI accepts them.
+
+## Check and Endgame Detection
+
+Check detection is separated from general move generation. The project avoids recursive validation loops by using attacking moves when asking whether a king is threatened.
+
+The detector also checks checkmate, stalemate, and insufficient material. These conditions make the game feel complete because they capture how a real chess game ends.
+
+## Knowledge Points
+
+- Vue composables are a clean way to centralize game state and expose actions to components.
+- TypeScript union types and interfaces make board-game logic safer and easier to inspect.
+- Chess validation often needs simulation because a move can be locally valid but globally illegal.
+- Check detection should avoid calling full legal-move generation in a recursive way.
+- Custom game modes are easier to add when the base rules are modular.
+- UI highlights should be derived from state, not manually synchronized with DOM behavior.
+- Timers, history, captured pieces, and promotion UI are part of the product experience, not optional extras.
+
+## Takeaway
+
+This repo is a strong example of building a game by separating state, rule validation, endgame detection, and rendering. The custom modes work because the standard rule engine has clear boundaries.

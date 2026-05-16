@@ -1,0 +1,40 @@
+export const metadata = {
+	title: "Shell Script Automarking System: Building a File-Backed Autograder",
+	summary: "A dash shell project that models assignment creation, submission storage, test execution, output comparison, and marking.",
+	publishedAt: "2026-05-16",
+	tags: ["Shell", "Testing", "Automation", "CLI"]
+};
+
+This repo implements an automarking workflow with shell scripts. It models the core lifecycle of a university-style assignment system: add an assignment, submit files, summarize submissions, run tests, and calculate marks.
+
+The project is interesting because it uses only shell and the filesystem to model state.
+
+## Assignment and Submission Flow
+
+The add script validates assignment names, solution files, autotest specifications, and automarking specifications before storing them under a hidden project directory.
+
+The submit script validates the assignment, student zID format, and submitted file. It creates per-student submission folders and records metadata such as timestamp and file size.
+
+## Marking Flow
+
+The marking script reads automarking specs, runs the latest student submission against the reference solution, captures stdout, stderr, and exit status, then compares results.
+
+It supports comparison options for blanks, case, digits, and whitespace. These switches are important because real grading often needs flexible output matching rather than byte-for-byte strictness.
+
+## Design Constraints
+
+Writing this in dash keeps the project close to POSIX-style scripting. That means the implementation must be careful with quoting, path validation, process exit codes, and temporary output files.
+
+## Knowledge Points
+
+- Shell scripts can model real systems when the data model maps cleanly to files and folders.
+- Input validation is essential in CLI tools because every argument can become a path or command input.
+- Autograders need to capture stdout, stderr, and exit status separately.
+- Flexible diff options make tests fairer for harmless formatting differences.
+- File-backed state is simple to inspect but needs consistent naming and cleanup rules.
+- POSIX shell encourages small commands and explicit control flow.
+- A robust CLI should fail loudly and consistently when inputs are malformed.
+
+## Takeaway
+
+This project shows how much system behavior can be built with shell alone. It is a practical exercise in automation, validation, and test infrastructure.

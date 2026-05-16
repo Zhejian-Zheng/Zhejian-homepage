@@ -1,0 +1,24 @@
+export const metadata = {
+	title: "Shipping Faster at Jobgen.ai: Python Automation with AWS S3 & MongoDB",
+	summary: "How Python automation, AWS S3, and MongoDB helped speed up delivery and keep task artifacts easier to track.",
+	publishedAt: "2026-05-16",
+	tags: ["Python", "AWS S3", "MongoDB", "Automation"]
+};
+
+During my internship/project at Jobgen.ai, I focused on speeding up delivery with Python automation, integrating AWS S3 for object storage and MongoDB for fast metadata and state tracking.
+
+The useful pattern was separating heavy files from lightweight operational records. S3 handled artifacts, while MongoDB made it easy to look up task status, file keys, retries, timestamps, and processing stages.
+
+## Highlights
+
+- Data flow: tasks to Python preprocessing to S3 upload to MongoDB records.
+- S3 signed URLs plus batch upload and verification scripts kept artifacts consistent and safely accessible.
+- MongoDB acted as the quick lookup layer for task status and processed files.
+- Python CLI tools wrapped boto3 and pymongo for resumable batch uploads, validation, write-back, cleanup, and lightweight alert flows.
+- Logging and retry thresholds made failures easier to notice and debug.
+
+## Takeaways
+
+- Separate blobs from metadata to make debugging and scaling easier.
+- Automating repetitive delivery steps reduces human error.
+- Python is a strong glue layer for CLI workflows, batch processing, and API integrations.
