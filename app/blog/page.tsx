@@ -1,130 +1,179 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
+import { blogPosts } from "./posts";
 
-type BlogEntry = {
-	title: string;
-	body: string;
-	updatedAt: string;
-};
-
-const initialEntry: BlogEntry = {
-	title: "Building My Personal Page",
-	body: "A quick write-up on how I assembled this personal homepage with Next.js, Tailwind CSS, and a few simple interactions.",
-	updatedAt: new Date().toISOString()
-};
-
-const jobgenEntry: BlogEntry = {
-	title: "Shipping Faster at Jobgen.ai: Python Automation with AWS S3 & MongoDB",
-	body: [
-		"During my internship/project at Jobgen.ai, I focused on speeding up delivery with Python automation, integrating AWS S3 for object storage and MongoDB for fast metadata/state tracking.",
-		"",
-		"Highlights:",
-		"- Data flow: tasks → Python pre-processing → upload to S3 (bucket/path) → MongoDB records task IDs, file keys, stages, retries, timestamps.",
-		"- S3 signed URLs plus batch upload/verify scripts to keep artifacts consistent and safely accessible.",
-		"- MongoDB as the quick lookup layer for task status and indexing processed files.",
-		"- Python CLI/automation: boto3 + pymongo wrappers, concurrent/resumable batch uploads, validation + write-back to MongoDB, scheduled cleanup/archival, and lightweight retry/alert flows.",
-		"- Reliability: logging/metrics, auto-retries with thresholds, flags for manual intervention when needed.",
-		"",
-		"Takeaways:",
-		"- Separate blobs (S3) from metadata (MongoDB) to make debugging and scaling easier.",
-		"- Automating repetitive steps reduces human error and speeds up delivery.",
-		"- Python is a great glue layer for CLI, batch processing, and API integrations."
-	].join("\n"),
-	updatedAt: new Date().toISOString()
-};
-
-const tcpUdpEntry: BlogEntry = {
-	title: "TCP/UDP Simulator: Heartbeats, Auth, and P2P File Sharing",
-	body: [
-		"Built a TCP/UDP simulator to explore reliable messaging, heartbeat-driven liveness, and peer-to-peer file sharing.",
-		"",
-		"Highlights",
-		"- Dual-protocol flow: UDP handles auth, commands, heartbeats; TCP streams file payloads from publishers.",
-		"- Heartbeat + pruning: clients send HEARTBEAT every 2s; server prunes inactive peers after timeout.",
-		"- Auth & state: server keeps addr↔username maps, active timestamps, and published file metadata with TCP ports.",
-		"- Commands:",
-		"  • pub <file>: publish if local file exists; server records publisher TCP port.",
-		"  • get <file>: server returns publisher IP/port; client opens TCP to fetch file, streaming in chunks.",
-		"  • lap/lpf: list active peers or published files for the caller.",
-		"  • sch <substr>: search published files across peers (excluding self).",
-		"  • unp <file>: unpublish a file for the current user.",
-		"- Client TCP server: each client binds to an ephemeral port (0), advertises it on publish, and serves files in threads.",
-		"- Robust file transfer: chunked reads (BUFFER_SIZE), error guard for missing files, and clean close semantics.",
-		"",
-		"Notes",
-		"- Uses Python sockets + threads; UDP for control plane, TCP for data plane.",
-		"- Credentials loaded from server/credentials.txt; rejects duplicates, wrong passwords, or unknown users.",
-		"- Logging with timestamps to trace PUB/GET/HBT flows and error paths.",
-		"- Designed for lab/simulator use; can be extended with TLS, chunk checksums, and retry backoff."
-	].join("\n"),
-	updatedAt: new Date().toISOString()
-};
+const dateFormatter = new Intl.DateTimeFormat("en", {
+	month: "short",
+	day: "numeric",
+	year: "numeric"
+});
 
 export default function BlogPage() {
-	const [entries] = useState<BlogEntry[]>([tcpUdpEntry, jobgenEntry, initialEntry]);
-	const [viewing, setViewing] = useState<BlogEntry | null>(null);
+	const featuredPost = blogPosts[0];
+	const remainingPosts = blogPosts.slice(1);
+	const allTags = Array.from(new Set(blogPosts.flatMap((post) => post.tags))).slice(0, 14);
 
 	return (
-		<div className="min-h-screen bg-slate-900 text-white px-4 pb-16 pt-24">
+		<div className="min-h-screen bg-slate-950 text-white px-4 pb-16 pt-24">
 			<nav className="fixed top-0 left-0 right-0 z-50 bg-black/70 backdrop-blur-xl border-b border-white/10">
 				<div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
-					<Link href="/" className="font-bold text-xl hover:text-primary transition">
+					<Link href="/" className="font-bold text-lg hover:text-primary transition sm:text-xl">
 						Homepage
 					</Link>
-					<div className="flex items-center gap-3 sm:gap-4">
-						<Link href="/about" className="text-white/90 hover:text-white transition px-3 py-2 rounded-lg">
+					<div className="flex items-center gap-1 sm:gap-4">
+						<Link href="/about" className="rounded-lg px-2 py-2 text-sm text-white/90 transition hover:text-white sm:px-3 sm:text-base">
 							About
 						</Link>
-						<Link href="/blog" className="text-white hover:text-white transition px-3 py-2 rounded-lg bg-white/10">
+						<Link href="/blog" className="rounded-lg bg-white/10 px-2 py-2 text-sm text-white transition hover:text-white sm:px-3 sm:text-base">
 							Blog
 						</Link>
-						<Link href="/contact" className="text-white/90 hover:text-white transition px-3 py-2 rounded-lg">
+						<Link href="/contact" className="rounded-lg px-2 py-2 text-sm text-white/90 transition hover:text-white sm:px-3 sm:text-base">
 							Contact
 						</Link>
 					</div>
 				</div>
 			</nav>
 
-			<div className="mx-auto max-w-3xl space-y-8">
-				<header className="space-y-3">
-					<div className="flex items-center justify-between">
-						<div>
-							<p className="text-sm uppercase tracking-[0.3em] text-slate-400">Build Log</p>
-							<h1 className="text-4xl font-bold">Blog</h1>
+			<div className="mx-auto max-w-6xl space-y-12">
+				<header className="relative overflow-hidden border-b border-white/10 pb-10">
+					<div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-primary via-secondary to-accent" />
+					<div className="grid gap-8 pt-8 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-end">
+						<div className="space-y-5">
+							<p className="text-sm uppercase tracking-[0.3em] text-primary">Build Log</p>
+							<div className="space-y-4">
+								<h1 className="max-w-3xl text-4xl font-bold leading-tight text-white sm:text-6xl">
+									Blogs
+								</h1>
+								<p className="max-w-2xl text-lg leading-8 text-slate-200">
+									Short technical writeups about full-stack systems, data workflows, web design, human-computer interaction, and the decisions behind my public repositories.
+								</p>
+							</div>
 						</div>
-					</div>
-					<div className="flex items-center gap-4 text-sm text-slate-300">
-						<span className="px-3 py-1 rounded-full bg-white/5 border border-white/10">{entries.length} posts</span>
+
+						<div className="grid grid-cols-3 gap-3 text-center lg:grid-cols-1 lg:text-left">
+							<div className="rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3">
+								<p className="text-2xl font-bold text-white">{blogPosts.length}</p>
+								<p className="text-xs uppercase tracking-[0.2em] text-slate-400">Posts</p>
+							</div>
+							<div className="rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3">
+								<p className="text-2xl font-bold text-white">{allTags.length}</p>
+								<p className="text-xs uppercase tracking-[0.2em] text-slate-400">Topics</p>
+							</div>
+							<div className="rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3">
+								<p className="text-2xl font-bold text-white">MDX</p>
+								<p className="text-xs uppercase tracking-[0.2em] text-slate-400">Format</p>
+							</div>
+						</div>
 					</div>
 				</header>
 
-				<section className="grid gap-4">
-					{entries.map((entry) => {
+				{featuredPost ? (
+					<section className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr] lg:items-stretch">
+						<article className="relative overflow-hidden rounded-lg border border-primary/40 bg-slate-900/90 p-6 shadow-2xl shadow-primary/10">
+							<div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-secondary to-accent" />
+							<div className="space-y-5 pt-2">
+								<div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.22em] text-slate-400">
+									<span className="text-primary">Featured</span>
+									<span>{dateFormatter.format(new Date(featuredPost.publishedAt))}</span>
+								</div>
+								<div className="space-y-3">
+									<h2 className="max-w-3xl text-3xl font-semibold leading-tight text-white sm:text-4xl">
+										{featuredPost.title}
+									</h2>
+									<p className="max-w-3xl text-base leading-8 text-slate-200">{featuredPost.summary}</p>
+								</div>
+								<div className="flex flex-wrap gap-3">
+									{featuredPost.tags.map((tag) => (
+										<span key={tag} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">
+											{tag}
+										</span>
+									))}
+								</div>
+								<Link
+									href={`/blog/${featuredPost.slug}`}
+									className="inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary/85"
+								>
+									Read featured note
+								</Link>
+							</div>
+						</article>
+
+						<div className="rounded-lg border border-white/10 bg-white/[0.04] p-6">
+							<p className="text-sm uppercase tracking-[0.3em] text-slate-400">Writing System</p>
+							<div className="mt-5 space-y-5 text-sm leading-7 text-slate-200">
+								<p>
+									Each article is written from real code: architecture, implementation decisions, and reusable technical lessons.
+								</p>
+								<div className="grid gap-3">
+									<div className="border-l-2 border-primary pl-4">
+										<p className="font-semibold text-white">Code first</p>
+										<p className="text-slate-400">Notes are grounded in repository structure and actual implementation.</p>
+									</div>
+									<div className="border-l-2 border-secondary pl-4">
+										<p className="font-semibold text-white">Knowledge focused</p>
+										<p className="text-slate-400">Every post has practical concepts that can transfer to new projects.</p>
+									</div>
+									<div className="border-l-2 border-accent pl-4">
+										<p className="font-semibold text-white">Portfolio ready</p>
+										<p className="text-slate-400">The blog explains not only what was built, but why it was designed that way.</p>
+									</div>
+								</div>
+							</div>
+						</div>
+					</section>
+				) : null}
+
+				<section className="space-y-5">
+					<div className="flex items-end justify-between gap-4">
+						<div>
+							<p className="text-sm uppercase tracking-[0.3em] text-slate-400">Project Writeups</p>
+							<h2 className="mt-2 text-3xl font-semibold text-white">Technical case notes</h2>
+						</div>
+						<span className="hidden rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-sm text-slate-300 sm:inline-flex">
+							{remainingPosts.length} more
+						</span>
+					</div>
+
+					<div className="grid gap-4 lg:grid-cols-2">
+						{remainingPosts.map((post) => {
 						return (
 							<article
-								key={`${entry.title}-${entry.updatedAt}`}
-								className="rounded-2xl border border-white/10 bg-gradient-to-br from-slate-800/80 via-slate-800/60 to-slate-900/80 p-5 shadow-xl hover:border-primary/50 transition"
+								key={post.slug}
+								className="group rounded-lg border border-white/10 bg-slate-900/80 p-5 shadow-xl shadow-black/20 transition hover:-translate-y-0.5 hover:border-primary/50 hover:bg-slate-900"
 							>
-								<div className="flex items-start justify-between gap-3">
-									<div>
-										<h2 className="text-2xl font-semibold text-white">{entry.title}</h2>
+								<div className="space-y-4">
+									<div className="flex items-start justify-between gap-4">
+										<p className="text-xs uppercase tracking-[0.25em] text-slate-400">
+											{dateFormatter.format(new Date(post.publishedAt))}
+										</p>
+										<span className="h-2 w-2 shrink-0 rounded-full bg-primary shadow-[0_0_20px_rgba(102,126,234,0.8)]" />
 									</div>
-									<button
-										onClick={() => setViewing(entry)}
-										className="btn bg-white/10 hover:bg-white/20 text-sm px-3 py-2"
-									>
-										View
-									</button>
+									<div className="space-y-3">
+										<h3 className="text-2xl font-semibold leading-snug text-white group-hover:text-primary transition">
+											{post.title}
+										</h3>
+										<p className="text-sm leading-7 text-slate-300">{post.summary}</p>
+									</div>
 								</div>
-								<p className="text-slate-100 mt-3 line-clamp-3">{entry.body}</p>
+								<div className="mt-5 flex flex-wrap gap-3">
+									{post.tags.map((tag) => (
+										<span key={tag} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-slate-300">
+											{tag}
+										</span>
+									))}
+								</div>
+								<Link
+									href={`/blog/${post.slug}`}
+									className="mt-5 inline-flex rounded-lg border border-primary/40 bg-primary px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:-translate-y-0.5 hover:border-accent/60 hover:bg-primary/85 hover:shadow-primary/30"
+								>
+									Read note
+								</Link>
 							</article>
 						);
-					})}
+						})}
+					</div>
 				</section>
 
-				<footer className="text-slate-400 text-sm pt-6">
+				<footer className="border-t border-white/10 pt-8 text-sm text-slate-400">
 					Thanks for reading. You can visit my{" "}
 					<a
 						href="https://github.com/Zhejian-Zheng"
@@ -137,29 +186,6 @@ export default function BlogPage() {
 					to explore my code and projects.
 				</footer>
 			</div>
-
-			{viewing && (
-				<div
-					className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4"
-					onClick={() => setViewing(null)}
-				>
-					<div
-						className="w-full max-w-2xl max-h-[600px] rounded-2xl bg-slate-900 border border-white/10 p-6 space-y-4 shadow-2xl overflow-y-auto"
-						onClick={(e) => e.stopPropagation()}
-					>
-						<div className="flex items-start justify-between gap-3">
-							<div>
-								<p className="text-xs uppercase tracking-[0.3em] text-slate-400">Blog Detail</p>
-								<h3 className="text-2xl font-semibold text-white">{viewing.title}</h3>
-							</div>
-							<button onClick={() => setViewing(null)} className="btn bg-white/10 hover:bg-white/20">
-								Close
-							</button>
-						</div>
-						<div className="text-slate-100 whitespace-pre-wrap leading-relaxed">{viewing.body}</div>
-					</div>
-				</div>
-			)}
 		</div>
 	);
 }

@@ -1,0 +1,43 @@
+export const metadata = {
+	title: "Building My Personal Page",
+	summary: "How this portfolio combines Next.js App Router, Tailwind CSS, static MDX writing, Web3Forms, and small UX interactions.",
+	publishedAt: "2026-05-16",
+	tags: ["Next.js", "Tailwind CSS", "MDX", "Portfolio"]
+};
+
+This personal homepage started as a small portfolio surface and gradually became a place to practice product thinking.
+
+The goal was simple: build a site that feels personal, loads quickly, and gives visitors a clear path through my background, projects, writing, and contact details.
+
+## Stack
+
+- Next.js App Router for routing and static generation.
+- Tailwind CSS for fast visual iteration.
+- MDX for blog content that can mix Markdown with React components later.
+- Web3Forms for a lightweight contact workflow.
+
+## Architecture
+
+The site is split into focused routes: the homepage introduces my profile, the about page expands the story, the blog route renders MDX posts, and the contact route sends messages through an external form service.
+
+The MDX layer is intentionally simple. Each post exports metadata, the blog index imports those posts, and the dynamic route uses the slug to render a statically generated article page. This keeps the writing flow close to the codebase while still giving the site real blog behavior.
+
+## Design Notes
+
+I kept the layout direct and readable: a homepage intro, an about page with a visual travel section, a blog area for technical notes, and a contact page that can actually send messages.
+
+Small interactions matter here. The rotating travel section resets its timer after manual navigation, the contact form reports submission state, and the footer text is written to match the site's ongoing nature.
+
+## Knowledge Points
+
+- App Router routes can combine server-rendered pages with client components where interaction is needed.
+- MDX works well for a developer portfolio because articles can stay version controlled beside the application.
+- Environment variables should keep public form access keys out of committed source while still allowing local and Vercel deployments.
+- User experience details such as timer reset, loading text, and disabled submit states make a small site feel much more polished.
+- A personal page benefits from being treated as a product: clear navigation, purposeful copy, and real contact paths matter as much as visuals.
+
+## What I Would Improve Next
+
+- Add richer project case studies with screenshots and design decisions.
+- Add analytics to understand which pages visitors actually read.
+- Add Playwright checks for core routes and the contact form.

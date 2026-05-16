@@ -1,0 +1,42 @@
+export const metadata = {
+	title: "Safe Reinforcement Learning with a Supervised Shield",
+	summary: "A grid-world experiment where Q-learning is combined with a supervised safety classifier to reduce hazard violations.",
+	publishedAt: "2026-05-16",
+	tags: ["Reinforcement Learning", "Supervised Learning", "Python", "Safety"]
+};
+
+This project explores a simple but powerful idea: reinforcement learning agents can learn faster or behave more safely when a supervised model filters risky actions.
+
+The environment is a 10 by 10 grid world with a start state, a goal, and hazards. A baseline Q-learning agent learns from reward feedback. The shielded version uses a classifier to predict the risk level of candidate actions before the action is selected.
+
+## Environment
+
+Each state-action pair can be represented with position, action, and environment-derived features. The reward function is intentionally direct: reaching the goal is positive, normal steps have a small penalty, and hazards carry a large penalty.
+
+This makes the safety problem visible. A policy can eventually learn to reach the goal, but it may still collect many hazard violations during exploration.
+
+## Supervised Shield
+
+The supervised layer is trained from labeled state-action examples. A multi-source BFS distance map from hazards creates risk labels such as immediate hazard, near hazard, farther risk, and safe.
+
+The model then classifies actions before the Q-learning policy commits to one. If an action is predicted as too risky under the selected threshold, the agent chooses from safer candidates.
+
+## Results Pattern
+
+The most useful lesson is not simply "shielding is good." It is that the threshold matters. A permissive threshold can remove hazard violations while preserving good reward. An overly strict threshold can make the agent too conservative and hurt success rate.
+
+That tradeoff is exactly the kind of behavior safe RL systems need to expose.
+
+## Knowledge Points
+
+- Q-learning separates value estimation from the environment model, which makes it approachable for grid-world experiments.
+- Supervised learning can encode domain knowledge into a reusable action filter.
+- BFS labeling is a practical way to generate safety labels when hazards are known.
+- Safety systems should track both violation reduction and task performance.
+- False negatives are especially important: a missed dangerous action can break the safety promise.
+- A shield can be viewed as policy guidance, not a replacement for the RL algorithm.
+- Evaluation should compare baseline reward, success rate, violations, and intervention behavior together.
+
+## Takeaway
+
+This repo shows how classical RL and supervised learning can cooperate. The agent still learns a policy, but the classifier adds a safety boundary around exploration and action selection.

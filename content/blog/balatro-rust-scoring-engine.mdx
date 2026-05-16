@@ -1,0 +1,42 @@
+export const metadata = {
+	title: "Balatro Rust: Building a Deterministic Card Scoring Engine",
+	summary: "A Rust CLI that parses round data, evaluates poker hands, applies card and joker effects, and returns a final score.",
+	publishedAt: "2026-05-16",
+	tags: ["Rust", "CLI", "Game Logic", "Scoring"]
+};
+
+Balatro Rust is a command-line scoring engine. It reads round input, evaluates the played hand, applies card effects and joker modifiers, then outputs the final chip times multiplier score.
+
+The interesting part is deterministic rule composition. A card game like this has many overlapping effects, and the program needs a stable order of operations.
+
+## Scoring Pipeline
+
+The scoring flow is staged. First, the base poker hand is evaluated. Then played cards contribute chips and effects. Held cards can add their own effects. Finally, independent joker and edition effects modify the result.
+
+That staging makes the system easier to test because each effect family has a clear place in the pipeline.
+
+## Hand Evaluation
+
+The poker hand detector checks stronger hands before weaker hands. It also supports special modifiers such as altered straight detection, smeared suits, and shortcut-style rules.
+
+This ordering matters. If a hand qualifies for multiple categories, the engine must choose the highest-priority category consistently.
+
+## Joker Effects
+
+Jokers are organized by when they apply: scored-card effects, held-card effects, independent effects, and edition effects. The project also handles blueprint-like behavior by normalizing copied joker effects before final scoring.
+
+That structure keeps one large scoring problem from turning into a single unreadable function.
+
+## Knowledge Points
+
+- Rust is a good fit for deterministic engines because enums, structs, and pattern matching make state explicit.
+- CLI tools can use structured input such as YAML to make test cases easy to write and replay.
+- Rule ordering is critical in game engines because multiple rules may match the same state.
+- Separating effect timing reduces accidental interactions between card effects.
+- Floating behavior should be avoided when final output needs exact floor-based scoring.
+- Complex game logic benefits from small modules grouped by responsibility.
+- Testable scoring engines are built around pure transformations wherever possible.
+
+## Takeaway
+
+This repo shows how to turn a rule-heavy game into a staged evaluation system. The main engineering lesson is to make timing and priority explicit.

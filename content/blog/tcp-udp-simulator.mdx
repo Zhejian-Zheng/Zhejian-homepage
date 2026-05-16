@@ -1,0 +1,46 @@
+export const metadata = {
+	title: "TCP/UDP Simulator: Heartbeats, Auth, and P2P File Sharing",
+	summary: "A Python networking simulator that separates UDP control messages from TCP peer-to-peer file transfer.",
+	publishedAt: "2026-05-16",
+	tags: ["Networking", "Python", "TCP", "UDP"]
+};
+
+I built a TCP/UDP simulator to explore reliable messaging, heartbeat-driven liveness, authentication, and peer-to-peer file sharing.
+
+The project separates control messages from file transfer. UDP handles authentication, commands, and heartbeats. TCP handles file payloads from publishing peers.
+
+## Highlights
+
+- UDP control plane for auth, commands, heartbeat messages, and peer discovery.
+- TCP data plane for streaming file payloads from publishers.
+- Heartbeat pruning removes inactive peers after timeout.
+- Server state tracks address-to-user mappings, active timestamps, and published file metadata.
+- Each client binds a TCP server to an ephemeral port and advertises that port when publishing files.
+
+## Server State
+
+The server keeps several maps: address to username, username to address, active client timestamps, and published file ownership. This allows the server to authenticate commands, list active peers, and return the peer location for a file request.
+
+The server is not the file host. It is closer to a directory service. After discovery, the client downloads directly from the publishing peer over TCP.
+
+## Commands
+
+- `pub <file>` publishes a local file if it exists.
+- `get <file>` asks the server for the publisher address, then opens TCP to fetch the file.
+- `lap` and `lpf` list active peers and published files.
+- `sch <substr>` searches published files across peers.
+- `unp <file>` unpublishes a file for the current user.
+
+## Notes
+
+This was designed as a lab simulator, but it can be extended with TLS, chunk checksums, retry backoff, and richer observability.
+
+## Knowledge Points
+
+- UDP is useful for lightweight control messages but needs application-level logic for liveness and identity.
+- TCP is better suited for file transfer because it gives ordered, reliable byte streams.
+- Heartbeats turn silence into a detectable failure mode.
+- A directory-server pattern can coordinate peers without proxying every file payload.
+- Threading is needed because clients must accept TCP downloads while still sending UDP commands.
+- Protocol commands should have clear validation and error responses so clients know what happened.
+- Real systems would add authentication hardening, encryption, retries, and checksums.

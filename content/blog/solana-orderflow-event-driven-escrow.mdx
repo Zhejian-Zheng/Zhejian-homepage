@@ -1,0 +1,40 @@
+export const metadata = {
+	title: "Solana OrderFlow: Event-Driven Escrow with Anchor and Kafka",
+	summary: "A Solana escrow project that connects an Anchor smart contract with Kafka consumers, Postgres projections, risk rules, and notifications.",
+	publishedAt: "2026-05-16",
+	tags: ["Solana", "Rust", "Kafka", "Postgres"]
+};
+
+Solana OrderFlow is an event-driven escrow system. The interesting part is not only the on-chain token exchange, but the full path from smart contract event logs to off-chain indexing, risk detection, and notification workers.
+
+The project has two worlds. The Anchor program owns the escrow state and token custody. The off-chain services listen for program logs, normalize them, publish them to Kafka, persist them into Postgres, and run consumer-side workflows.
+
+## On-Chain Layer
+
+The Anchor program supports three core instructions: creating an offer, taking an offer, and canceling an offer. When an offer is created, tokens are moved into a vault associated token account. When it is filled or canceled, the program uses PDA signer seeds to move tokens out safely.
+
+The escrow state keeps the maker, mint accounts, requested amount, offered amount, status, and bump information. Status values such as Created, Filled, and Cancelled make the state transition explicit, which is important in financial flows.
+
+## Off-Chain Pipeline
+
+The listener subscribes to Solana logs over WebSocket, parses JSON-like program messages, normalizes them into event records, and publishes them to Kafka. The storage writer consumes those events and writes an append-only event table plus an offer snapshot table.
+
+That separation is useful: the event table preserves history, while the snapshot table makes dashboards and queries fast. The storage writer also uses idempotent keys and manual Kafka commits so a database failure does not silently lose work.
+
+## Risk and Notification
+
+The risk engine consumes the same event stream and applies rule-based checks. Examples include large offer amounts and frequent cancel behavior. Alerts are emitted to a separate topic so notification logic can be developed independently from detection logic.
+
+## Knowledge Points
+
+- Solana programs should keep token custody and state transitions explicit, especially around escrow flows.
+- PDA signer seeds let a program authorize movements from program-owned accounts without a private key.
+- Logs are a practical bridge between on-chain execution and off-chain indexing.
+- Kafka partition keys, idempotent producers, and manual commits help build reliable event pipelines.
+- Append-only events plus snapshot tables are a common event-sourcing pattern for dashboards.
+- Amounts should be handled carefully across language boundaries because JavaScript number precision can be unsafe for token values.
+- Risk engines can start with simple rules before moving toward more complex scoring models.
+
+## Takeaway
+
+This repo is a good example of full-stack blockchain engineering: the smart contract is only one layer. The production shape also needs ingestion, storage, idempotency, monitoring, and downstream consumers.
