@@ -1,11 +1,11 @@
 export const metadata = {
-	title: "Magic Chess: A Vue Rule Engine for Classic and Custom Chess",
-	summary: "A Vue 3 and TypeScript chess project with move validation, check detection, timers, history, and custom piece rules.",
+	title: "Magic Chess Prototype: Exploring a Vue Rule Engine",
+	summary: "An ongoing Vue 3 and TypeScript prototype for move validation, check detection, timers, history, and custom chess-like rules.",
 	publishedAt: "2026-05-16",
-	tags: ["Vue", "TypeScript", "Game Logic", "Chess"]
+	tags: ["Vue", "TypeScript", "Game Logic", "Prototype"]
 };
 
-Magic Chess is a browser chess project built with Vue 3 and TypeScript. The project implements normal chess rules and also adds custom modes that change how pieces behave.
+Magic Chess is an ongoing browser chess prototype built with Vue 3 and TypeScript. It is not a fully shipped game yet, but it is a useful exploration of rule-engine structure, board state, and custom chess-like mechanics.
 
 That makes it a useful rules-engine project. Chess already has many edge cases, and custom variants add another layer of design pressure.
 
@@ -25,7 +25,7 @@ One important pattern is simulation. Candidate moves are checked against a clone
 
 Check detection is separated from general move generation. The project avoids recursive validation loops by using attacking moves when asking whether a king is threatened.
 
-The detector also checks checkmate, stalemate, and insufficient material. These conditions make the game feel complete because they capture how a real chess game ends.
+The detector also explores checkmate, stalemate, and insufficient material conditions. These pieces point toward a more complete game experience, even though the project still needs finishing work before it should be presented as a polished game.
 
 ## Knowledge Points
 
@@ -39,4 +39,4 @@ The detector also checks checkmate, stalemate, and insufficient material. These 
 
 ## Takeaway
 
-This repo is a strong example of building a game by separating state, rule validation, endgame detection, and rendering. The custom modes work because the standard rule engine has clear boundaries.
+This repo is best understood as a work-in-progress game logic prototype. Its strongest lesson is how to separate state, rule validation, endgame detection, and rendering before polishing the full gameplay experience.

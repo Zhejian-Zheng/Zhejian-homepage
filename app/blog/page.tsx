@@ -8,9 +8,15 @@ const dateFormatter = new Intl.DateTimeFormat("en", {
 });
 
 export default function BlogPage() {
-	const featuredPost = blogPosts[0];
-	const remainingPosts = blogPosts.slice(1);
+	const remainingPosts = blogPosts;
 	const allTags = Array.from(new Set(blogPosts.flatMap((post) => post.tags))).slice(0, 14);
+	const selectedProjectSlugs = new Set([
+		"solana-orderflow-event-driven-escrow",
+		"safe-rl-supervised-shield",
+		"legal-youth-prototype-web",
+		"tcp-udp-simulator"
+	]);
+	const selectedProjectPosts = blogPosts.filter((post) => selectedProjectSlugs.has(post.slug));
 
 	return (
 		<div className="min-h-screen bg-slate-950 text-white px-4 pb-16 pt-24">
@@ -66,61 +72,45 @@ export default function BlogPage() {
 					</div>
 				</header>
 
-				{featuredPost ? (
-					<section className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr] lg:items-stretch">
-						<article className="relative overflow-hidden rounded-lg border border-primary/40 bg-slate-900/90 p-6 shadow-2xl shadow-primary/10">
-							<div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-secondary to-accent" />
-							<div className="space-y-5 pt-2">
-								<div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.22em] text-slate-400">
-									<span className="text-primary">Featured</span>
-									<span>{dateFormatter.format(new Date(featuredPost.publishedAt))}</span>
+				<section className="rounded-lg border border-white/10 bg-white/[0.03] p-5 shadow-2xl shadow-black/20 sm:p-6">
+					<div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+						<div>
+							<p className="text-sm uppercase tracking-[0.3em] text-primary">Selected Work</p>
+							<h2 className="mt-2 text-3xl font-bold text-white">Featured Projects</h2>
+						</div>
+						<p className="max-w-md text-sm leading-6 text-slate-400">
+							Project-focused notes that best represent my work across full-stack systems, data, UX, and engineering architecture.
+						</p>
+					</div>
+
+					<div className="grid gap-4 md:grid-cols-2">
+						{selectedProjectPosts.map((post) => (
+							<article
+								key={post.slug}
+								className="rounded-lg border border-white/10 bg-slate-900/80 p-5 transition hover:-translate-y-0.5 hover:border-primary/50 hover:bg-slate-900"
+							>
+								<div className="flex items-start justify-between gap-4">
+									<h3 className="text-2xl font-semibold leading-snug text-white">{post.title}</h3>
+									<span className="h-2 w-2 shrink-0 rounded-full bg-primary shadow-[0_0_20px_rgba(102,126,234,0.8)]" />
 								</div>
-								<div className="space-y-3">
-									<h2 className="max-w-3xl text-3xl font-semibold leading-tight text-white sm:text-4xl">
-										{featuredPost.title}
-									</h2>
-									<p className="max-w-3xl text-base leading-8 text-slate-200">{featuredPost.summary}</p>
-								</div>
-								<div className="flex flex-wrap gap-3">
-									{featuredPost.tags.map((tag) => (
-										<span key={tag} className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">
+								<p className="mt-3 text-sm leading-7 text-slate-300">{post.summary}</p>
+								<div className="mt-5 flex flex-wrap gap-3">
+									{post.tags.map((tag) => (
+										<span key={tag} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-slate-300">
 											{tag}
 										</span>
 									))}
 								</div>
 								<Link
-									href={`/blog/${featuredPost.slug}`}
-									className="inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary/85"
+									href={`/blog/${post.slug}`}
+									className="mt-5 inline-flex rounded-lg border border-primary/40 bg-primary px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:-translate-y-0.5 hover:bg-primary/85"
 								>
-									Read featured note
+									Read case note
 								</Link>
-							</div>
-						</article>
-
-						<div className="rounded-lg border border-white/10 bg-white/[0.04] p-6">
-							<p className="text-sm uppercase tracking-[0.3em] text-slate-400">Writing System</p>
-							<div className="mt-5 space-y-5 text-sm leading-7 text-slate-200">
-								<p>
-									Each article is written from real code: architecture, implementation decisions, and reusable technical lessons.
-								</p>
-								<div className="grid gap-3">
-									<div className="border-l-2 border-primary pl-4">
-										<p className="font-semibold text-white">Code first</p>
-										<p className="text-slate-400">Notes are grounded in repository structure and actual implementation.</p>
-									</div>
-									<div className="border-l-2 border-secondary pl-4">
-										<p className="font-semibold text-white">Knowledge focused</p>
-										<p className="text-slate-400">Every post has practical concepts that can transfer to new projects.</p>
-									</div>
-									<div className="border-l-2 border-accent pl-4">
-										<p className="font-semibold text-white">Portfolio ready</p>
-										<p className="text-slate-400">The blog explains not only what was built, but why it was designed that way.</p>
-									</div>
-								</div>
-							</div>
-						</div>
-					</section>
-				) : null}
+							</article>
+						))}
+					</div>
+				</section>
 
 				<section className="space-y-5">
 					<div className="flex items-end justify-between gap-4">
@@ -129,7 +119,7 @@ export default function BlogPage() {
 							<h2 className="mt-2 text-3xl font-semibold text-white">Technical case notes</h2>
 						</div>
 						<span className="hidden rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-sm text-slate-300 sm:inline-flex">
-							{remainingPosts.length} more
+							{remainingPosts.length} posts
 						</span>
 					</div>
 
