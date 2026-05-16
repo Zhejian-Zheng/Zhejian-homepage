@@ -116,7 +116,7 @@ export default function HomePage() {
 					<h1 className="text-4xl sm:text-5xl font-bold drop-shadow">Zhejian Zheng</h1>
 					<p className="text-lg sm:text-xl text-white/90">Software Engineer & Developer</p>
 					<p className="max-w-xl text-white/80 mx-auto">
-						Passionate about programming, focused on frontend development and user experience design
+						Passionate about full-stack development, data-driven solutions, web design, and human-computer interaction, with a focus on building intuitive user-centered digital experiences.
 					</p>
 				</div>
 
@@ -159,12 +159,10 @@ export default function HomePage() {
 				</div>
 
 				<footer className="site-footer mt-10">
-	<p>&copy; 2024 Zhejian Zheng. Updated 2026</p>
+	<p>Established in 2024 by Zhejian Zheng. Continuously updated.</p>
 	<p className="mt-1 text-xs text-white/60">Built with React, Next.js, and Tailwind CSS.</p>
 </footer>
 			</main>
 		</div>
 	);
 }
-
-

@@ -27,7 +27,7 @@ const highlights = [
 	{ title: "Born in Ningbo, China", desc: "Grew up in a coastal city; love tech and design." },
 	{ title: "Moved to Sydney at 15", desc: "Multicultural life broadened my perspective." },
 	{ title: "Finish NSW Higher School Certificate", desc: "Stuided year 10 to 12 and Graduate with Dux award" },
-	{ title: "Currently at UNSW", desc: "Majoring in Computer Science." }
+	{ title: "Graduated from UNSW", desc: "Completed a Bachelor of Computer Science with Distinction." }
 ];
 const skillIcons: SkillIcon[] = [
 	{ label: "Docker", src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/docker/docker-original.svg" },
@@ -78,15 +78,17 @@ const worldShots: WorldShot[] = [
 	{ image: imgGuangzhou, title: "Guangzhou", caption: "City lights and skyline." }
 ];
 
+const SLIDE_AUTO_ADVANCE_MS = 3500;
+
 export default function AboutPage() {
 	const [shotIndex, setShotIndex] = useState(0);
 
 	useEffect(() => {
-		const timer = setInterval(() => {
+		const timer = setTimeout(() => {
 			setShotIndex((i) => (i + 1) % worldShots.length);
-		}, 3500);
-		return () => clearInterval(timer);
-	}, []);
+		}, SLIDE_AUTO_ADVANCE_MS);
+		return () => clearTimeout(timer);
+	}, [shotIndex]);
 
 	const nextShot = () => setShotIndex((i) => (i + 1) % worldShots.length);
 	const prevShot = () => setShotIndex((i) => (i - 1 + worldShots.length) % worldShots.length);
@@ -130,16 +132,8 @@ export default function AboutPage() {
 								Hi, I’m <span className="text-primary">Zhejian</span>.
 							</h1>
 							<p className="text-lg text-slate-200">
-								Software Engineer and Full Stack Developer based in Sydney, Australia. Currently pursuing a Bachelor of Computer Science at UNSW. Originally from Ningbo, China, I am passionate about crafting seamless digital experiences that blend technical logic with creative design.
+								Software Engineer and Full Stack Developer based in Sydney, Australia. Graduated from UNSW with a Bachelor of Computer Science, completing the degree with Distinction. Originally from Ningbo, China, I am passionate about crafting seamless digital experiences that blend technical logic with creative design.
 							</p>
-							<div className="flex flex-wrap gap-3">
-								<a
-									href="mailto:zj.zheng1@gmail.com"
-									className="btn-primary text-base px-6 py-3.5 shadow-lg shadow-primary/25 rounded-xl"
-								>
-									Email Me
-								</a>
-							</div>
 						</div>
 
 						<div className="relative">
@@ -264,12 +258,10 @@ export default function AboutPage() {
 				</section>
 
 				<footer className="site-footer mt-6">
-	<p>&copy; 2024 Zhejian Zheng. Updated 2026</p>
+	<p>Established in 2024 by Zhejian Zheng. Continuously updated.</p>
 	<p className="mt-1 text-xs text-white/60">Built with React, Next.js, and Tailwind CSS.</p>
 </footer>
 			</main>
 		</div>
 	);
 }
-
-
