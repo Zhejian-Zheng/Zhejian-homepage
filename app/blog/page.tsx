@@ -125,7 +125,16 @@ export default function BlogPage() {
 				</section>
 
 				<footer className="text-slate-400 text-sm pt-6">
-					Thanks for reading. If you want to inspect the code, it lives in the same repo under the `app/` directory.
+					Thanks for reading. You can visit my{" "}
+					<a
+						href="https://github.com/Zhejian-Zheng"
+						target="_blank"
+						rel="noreferrer"
+						className="text-primary hover:text-primary/80 underline underline-offset-4"
+					>
+						GitHub
+					</a>{" "}
+					to explore my code and projects.
 				</footer>
 			</div>
 
@@ -154,4 +163,3 @@ export default function BlogPage() {
 		</div>
 	);
 }
-

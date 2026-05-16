@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
 	title: "Zhejian - Personal Homepage",
-	description: "Software Engineer & Developer passionate about programming and user experience design."
+	description: "Software Engineer & Developer passionate about full-stack development, data-driven solutions, web design, and human-computer interaction."
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -13,5 +13,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 		</html>
 	);
 }
-
 
