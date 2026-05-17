@@ -8,7 +8,8 @@ const dateFormatter = new Intl.DateTimeFormat("en", {
 });
 
 export default function BlogPage() {
-	const remainingPosts = blogPosts;
+	const aiAgentSlugs = new Set(["code-with-codex"]);
+	const aiAgentPosts = blogPosts.filter((post) => aiAgentSlugs.has(post.slug));
 	const allTags = Array.from(new Set(blogPosts.flatMap((post) => post.tags))).slice(0, 14);
 	const selectedProjectSlugs = new Set([
 		"solana-orderflow-event-driven-escrow",
@@ -17,6 +18,7 @@ export default function BlogPage() {
 		"tcp-udp-simulator"
 	]);
 	const selectedProjectPosts = blogPosts.filter((post) => selectedProjectSlugs.has(post.slug));
+	const remainingPosts = blogPosts.filter((post) => !aiAgentSlugs.has(post.slug) && !selectedProjectSlugs.has(post.slug));
 
 	return (
 		<div className="min-h-screen bg-slate-950 text-white px-4 pb-16 pt-24">
@@ -106,6 +108,58 @@ export default function BlogPage() {
 									className="mt-5 inline-flex rounded-lg border border-primary/40 bg-primary px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:-translate-y-0.5 hover:bg-primary/85"
 								>
 									Read case note
+								</Link>
+							</article>
+						))}
+					</div>
+				</section>
+
+				<section className="space-y-5">
+					<div className="flex items-end justify-between gap-4">
+						<div>
+							<p className="text-sm uppercase tracking-[0.3em] text-primary">Reflection</p>
+							<h2 className="mt-2 text-3xl font-bold text-white">AI Agent Inspiration</h2>
+						</div>
+						<span className="hidden rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-sm text-slate-200 sm:inline-flex">
+							{aiAgentPosts.length} post
+						</span>
+					</div>
+					<p className="max-w-3xl text-sm leading-7 text-slate-400">
+						Notes on building with AI agents, from implementation speed to product judgment, verification habits, and keeping the final work personal.
+					</p>
+
+					<div className="grid gap-4 lg:grid-cols-2">
+						{aiAgentPosts.map((post) => (
+							<article
+								key={post.slug}
+								className="group rounded-lg border border-primary/30 bg-gradient-to-br from-primary/10 via-slate-900/80 to-accent/10 p-5 shadow-xl shadow-primary/10 transition hover:-translate-y-0.5 hover:border-accent/60"
+							>
+								<div className="space-y-4">
+									<div className="flex items-start justify-between gap-4">
+										<p className="text-xs uppercase tracking-[0.25em] text-primary">
+											{dateFormatter.format(new Date(post.publishedAt))}
+										</p>
+										<span className="h-2 w-2 shrink-0 rounded-full bg-accent shadow-[0_0_20px_rgba(240,147,251,0.8)]" />
+									</div>
+									<div className="space-y-3">
+										<h3 className="text-2xl font-semibold leading-snug text-white group-hover:text-accent transition">
+											{post.title}
+										</h3>
+										<p className="text-sm leading-7 text-slate-300">{post.summary}</p>
+									</div>
+								</div>
+								<div className="mt-5 flex flex-wrap gap-3">
+									{post.tags.map((tag) => (
+										<span key={tag} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-slate-300">
+											{tag}
+										</span>
+									))}
+								</div>
+								<Link
+									href={`/blog/${post.slug}`}
+									className="mt-5 inline-flex rounded-lg border border-accent/40 bg-primary px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:-translate-y-0.5 hover:bg-primary/85"
+								>
+									Read note
 								</Link>
 							</article>
 						))}
