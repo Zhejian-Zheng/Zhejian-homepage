@@ -1,0 +1,44 @@
+export const metadata = {
+	title: "MongoDB and PostgreSQL: Practical Takeaways",
+	summary: "A practical reflection on when to choose PostgreSQL for structure and consistency, and when MongoDB is useful for flexible document-style data.",
+	publishedAt: "2026-05-17",
+	tags: ["MongoDB", "PostgreSQL", "Database", "Data"]
+};
+
+Working with MongoDB and PostgreSQL taught me that database choice is less about which one is better and more about how the data wants to live.
+
+PostgreSQL feels like the right choice when the data has clear structure and strong relationships. MongoDB feels more flexible when the data shape changes often or when records naturally contain nested document-style information.
+
+## PostgreSQL
+
+PostgreSQL is a relational database. It organizes data into tables, rows, and columns, and it is strong when the system needs relationships, constraints, joins, and transactions.
+
+I would usually choose PostgreSQL for core application data such as users, orders, payments, permissions, project records, and anything where correctness matters. Its SQL support also makes reporting, aggregation, and debugging very direct.
+
+## MongoDB
+
+MongoDB is a document database. It stores related fields together as documents, which makes it comfortable when the application data already has a nested object shape.
+
+I would choose MongoDB for task records, logs, user preferences, AI workflow metadata, scraped data, and prototypes where fields may evolve quickly. It is especially useful when the schema is still changing and the product needs fast iteration.
+
+## Tradeoffs
+
+The main lesson is that flexibility has a cost. MongoDB is fast to start with, but without discipline, collections can become inconsistent over time.
+
+PostgreSQL requires more upfront schema design, but that structure often saves time later when the project grows.
+
+## Knowledge Points
+
+- PostgreSQL is usually better for structured relational data and strong consistency.
+- MongoDB is useful for flexible document-style data and fast-changing schemas.
+- SQL makes complex querying, joins, and reporting easier to reason about.
+- MongoDB documents are natural when data is nested and does not need many joins.
+- The best database choice depends on the shape of the data and the product requirements.
+
+## Takeaway
+
+My current preference is to use PostgreSQL for important relational data and MongoDB for flexible document-style data.
+
+In a real full-stack system, they can also work together: PostgreSQL can handle the stable core, while MongoDB can store dynamic records, logs, or workflow states.
+
+In short: PostgreSQL gives me confidence; MongoDB gives me flexibility.
