@@ -150,8 +150,8 @@ export default function AboutPage() {
 									/>
 								</div>
 								<div className="absolute bottom-4 right-4 bg-black/70 text-white rounded-xl px-3 py-2 shadow-lg border border-white/20">
-									<p className="text-xs uppercase tracking-widest text-amber-200">Current</p>
-									<p className="text-sm font-semibold">Sydney · UNSW</p>
+									<p className="text-xs uppercase tracking-widest text-amber-200">Living in</p>
+									<p className="text-sm font-semibold">Sydney · NSW</p>
 								</div>
 							</div>
 						</div>
