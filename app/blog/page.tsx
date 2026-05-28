@@ -1,11 +1,8 @@
 import Link from "next/link";
+import SiteNav from "../components/SiteNav";
+import { LocalizedText } from "../components/language";
+import { LocalizedDate, LocalizedPostSummary, LocalizedPostTitle, LocalizedTag } from "./localizedPostText";
 import { blogPosts } from "./posts";
-
-const dateFormatter = new Intl.DateTimeFormat("en", {
-	month: "short",
-	day: "numeric",
-	year: "numeric"
-});
 
 export default function BlogPage() {
 	const aiAgentSlugs = new Set(["code-with-codex"]);
@@ -22,37 +19,25 @@ export default function BlogPage() {
 
 	return (
 		<div className="min-h-screen bg-slate-950 text-white px-4 pb-16 pt-24">
-			<nav className="fixed top-0 left-0 right-0 z-50 bg-black/70 backdrop-blur-xl border-b border-white/10">
-				<div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
-					<Link href="/" className="font-bold text-lg hover:text-primary transition sm:text-xl">
-						Homepage
-					</Link>
-					<div className="flex items-center gap-1 sm:gap-4">
-						<Link href="/about" className="rounded-lg px-2 py-2 text-sm text-white/90 transition hover:text-white sm:px-3 sm:text-base">
-							About
-						</Link>
-						<Link href="/blog" className="rounded-lg bg-white/10 px-2 py-2 text-sm text-white transition hover:text-white sm:px-3 sm:text-base">
-							Blog
-						</Link>
-						<Link href="/contact" className="rounded-lg px-2 py-2 text-sm text-white/90 transition hover:text-white sm:px-3 sm:text-base">
-							Contact
-						</Link>
-					</div>
-				</div>
-			</nav>
+			<SiteNav active="blog" />
 
 			<div className="mx-auto max-w-6xl space-y-12">
 				<header className="relative overflow-hidden border-b border-white/10 pb-10">
 					<div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-primary via-secondary to-accent" />
 					<div className="grid gap-8 pt-8 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-end">
 						<div className="space-y-5">
-							<p className="text-sm uppercase tracking-[0.3em] text-primary">Build Log</p>
+							<p className="text-sm uppercase tracking-[0.3em] text-primary">
+								<LocalizedText en="Build Log" zh="构建日志" />
+							</p>
 							<div className="space-y-4">
 								<h1 className="max-w-3xl text-4xl font-bold leading-tight text-white sm:text-6xl">
-									Blogs
+									<LocalizedText en="Blogs" zh="博客" />
 								</h1>
 								<p className="max-w-2xl text-lg leading-8 text-slate-200">
-									Short technical writeups about full-stack systems, data workflows, web design, human-computer interaction, and the decisions behind my public repositories.
+									<LocalizedText
+										en="Short technical writeups about full-stack systems, data workflows, web design, human-computer interaction, and the decisions behind my public repositories."
+										zh="这里记录我在全栈系统、数据流程、网页设计、人机交互和公开项目中的技术思考与实现决策。"
+									/>
 								</p>
 							</div>
 						</div>
@@ -60,15 +45,21 @@ export default function BlogPage() {
 						<div className="grid grid-cols-3 gap-3 text-center lg:grid-cols-1 lg:text-left">
 							<div className="rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3">
 								<p className="text-2xl font-bold text-white">{blogPosts.length}</p>
-								<p className="text-xs uppercase tracking-[0.2em] text-slate-400">Posts</p>
+								<p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+									<LocalizedText en="Posts" zh="文章" />
+								</p>
 							</div>
 							<div className="rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3">
 								<p className="text-2xl font-bold text-white">{allTags.length}</p>
-								<p className="text-xs uppercase tracking-[0.2em] text-slate-400">Topics</p>
+								<p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+									<LocalizedText en="Topics" zh="主题" />
+								</p>
 							</div>
 							<div className="rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3">
 								<p className="text-2xl font-bold text-white">MDX</p>
-								<p className="text-xs uppercase tracking-[0.2em] text-slate-400">Format</p>
+								<p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+									<LocalizedText en="Format" zh="格式" />
+								</p>
 							</div>
 						</div>
 					</div>
@@ -77,11 +68,18 @@ export default function BlogPage() {
 				<section className="rounded-lg border border-white/10 bg-white/[0.03] p-5 shadow-2xl shadow-black/20 sm:p-6">
 					<div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
 						<div>
-							<p className="text-sm uppercase tracking-[0.3em] text-primary">Selected Work</p>
-							<h2 className="mt-2 text-3xl font-bold text-white">Featured Projects</h2>
+							<p className="text-sm uppercase tracking-[0.3em] text-primary">
+								<LocalizedText en="Selected Work" zh="精选作品" />
+							</p>
+							<h2 className="mt-2 text-3xl font-bold text-white">
+								<LocalizedText en="Featured Projects" zh="代表项目" />
+							</h2>
 						</div>
 						<p className="max-w-md text-sm leading-6 text-slate-400">
-							Project-focused notes that best represent my work across full-stack systems, data, UX, and engineering architecture.
+							<LocalizedText
+								en="Project-focused notes that best represent my work across full-stack systems, data, UX, and engineering architecture."
+								zh="这些项目笔记最能代表我在全栈系统、数据、用户体验和工程架构上的实践。"
+							/>
 						</p>
 					</div>
 
@@ -92,14 +90,18 @@ export default function BlogPage() {
 								className="rounded-lg border border-white/10 bg-slate-900/80 p-5 transition hover:-translate-y-0.5 hover:border-primary/50 hover:bg-slate-900"
 							>
 								<div className="flex items-start justify-between gap-4">
-									<h3 className="text-2xl font-semibold leading-snug text-white">{post.title}</h3>
+									<h3 className="text-2xl font-semibold leading-snug text-white">
+										<LocalizedPostTitle slug={post.slug} title={post.title} />
+									</h3>
 									<span className="h-2 w-2 shrink-0 rounded-full bg-primary shadow-[0_0_20px_rgba(102,126,234,0.8)]" />
 								</div>
-								<p className="mt-3 text-sm leading-7 text-slate-300">{post.summary}</p>
+								<p className="mt-3 text-sm leading-7 text-slate-300">
+									<LocalizedPostSummary slug={post.slug} summary={post.summary} />
+								</p>
 								<div className="mt-5 flex flex-wrap gap-3">
 									{post.tags.map((tag) => (
 										<span key={tag} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-slate-300">
-											{tag}
+											<LocalizedTag tag={tag} />
 										</span>
 									))}
 								</div>
@@ -107,7 +109,7 @@ export default function BlogPage() {
 									href={`/blog/${post.slug}`}
 									className="mt-5 inline-flex rounded-lg border border-primary/40 bg-primary px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:-translate-y-0.5 hover:bg-primary/85"
 								>
-									Read case note
+									<LocalizedText en="Read case note" zh="阅读项目笔记" />
 								</Link>
 							</article>
 						))}
@@ -117,15 +119,22 @@ export default function BlogPage() {
 				<section className="space-y-5">
 					<div className="flex items-end justify-between gap-4">
 						<div>
-							<p className="text-sm uppercase tracking-[0.3em] text-primary">Reflection</p>
-							<h2 className="mt-2 text-3xl font-bold text-white">AI Agent Inspiration</h2>
+							<p className="text-sm uppercase tracking-[0.3em] text-primary">
+								<LocalizedText en="Reflection" zh="思考" />
+							</p>
+							<h2 className="mt-2 text-3xl font-bold text-white">
+								<LocalizedText en="AI Agent Inspiration" zh="AI Agent 灵感" />
+							</h2>
 						</div>
 						<span className="hidden rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-sm text-slate-200 sm:inline-flex">
-							{aiAgentPosts.length} post
+							{aiAgentPosts.length} <LocalizedText en="post" zh="篇" />
 						</span>
 					</div>
 					<p className="max-w-3xl text-sm leading-7 text-slate-400">
-						Notes on building with AI agents, from implementation speed to product judgment, verification habits, and keeping the final work personal.
+						<LocalizedText
+							en="Notes on building with AI agents, from implementation speed to product judgment, verification habits, and keeping the final work personal."
+							zh="记录我如何与 AI agent 一起构建项目：从实现速度、产品判断、验证习惯，到如何保持作品的个人表达。"
+						/>
 					</p>
 
 					<div className="grid gap-4 lg:grid-cols-2">
@@ -137,21 +146,23 @@ export default function BlogPage() {
 								<div className="space-y-4">
 									<div className="flex items-start justify-between gap-4">
 										<p className="text-xs uppercase tracking-[0.25em] text-primary">
-											{dateFormatter.format(new Date(post.publishedAt))}
+											<LocalizedDate date={post.publishedAt} />
 										</p>
 										<span className="h-2 w-2 shrink-0 rounded-full bg-accent shadow-[0_0_20px_rgba(240,147,251,0.8)]" />
 									</div>
 									<div className="space-y-3">
 										<h3 className="text-2xl font-semibold leading-snug text-white group-hover:text-accent transition">
-											{post.title}
+											<LocalizedPostTitle slug={post.slug} title={post.title} />
 										</h3>
-										<p className="text-sm leading-7 text-slate-300">{post.summary}</p>
+										<p className="text-sm leading-7 text-slate-300">
+											<LocalizedPostSummary slug={post.slug} summary={post.summary} />
+										</p>
 									</div>
 								</div>
 								<div className="mt-5 flex flex-wrap gap-3">
 									{post.tags.map((tag) => (
 										<span key={tag} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-slate-300">
-											{tag}
+											<LocalizedTag tag={tag} />
 										</span>
 									))}
 								</div>
@@ -159,7 +170,7 @@ export default function BlogPage() {
 									href={`/blog/${post.slug}`}
 									className="mt-5 inline-flex rounded-lg border border-accent/40 bg-primary px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:-translate-y-0.5 hover:bg-primary/85"
 								>
-									Read note
+									<LocalizedText en="Read note" zh="阅读笔记" />
 								</Link>
 							</article>
 						))}
@@ -169,11 +180,15 @@ export default function BlogPage() {
 				<section className="space-y-5">
 					<div className="flex items-end justify-between gap-4">
 						<div>
-							<p className="text-sm uppercase tracking-[0.3em] text-slate-400">Project Writeups</p>
-							<h2 className="mt-2 text-3xl font-semibold text-white">Technical case notes</h2>
+							<p className="text-sm uppercase tracking-[0.3em] text-slate-400">
+								<LocalizedText en="Project Writeups" zh="项目复盘" />
+							</p>
+							<h2 className="mt-2 text-3xl font-semibold text-white">
+								<LocalizedText en="Technical case notes" zh="技术案例笔记" />
+							</h2>
 						</div>
 						<span className="hidden rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-sm text-slate-300 sm:inline-flex">
-							{remainingPosts.length} posts
+							{remainingPosts.length} <LocalizedText en="posts" zh="篇" />
 						</span>
 					</div>
 
@@ -187,21 +202,23 @@ export default function BlogPage() {
 								<div className="space-y-4">
 									<div className="flex items-start justify-between gap-4">
 										<p className="text-xs uppercase tracking-[0.25em] text-slate-400">
-											{dateFormatter.format(new Date(post.publishedAt))}
+											<LocalizedDate date={post.publishedAt} />
 										</p>
 										<span className="h-2 w-2 shrink-0 rounded-full bg-primary shadow-[0_0_20px_rgba(102,126,234,0.8)]" />
 									</div>
 									<div className="space-y-3">
 										<h3 className="text-2xl font-semibold leading-snug text-white group-hover:text-primary transition">
-											{post.title}
+											<LocalizedPostTitle slug={post.slug} title={post.title} />
 										</h3>
-										<p className="text-sm leading-7 text-slate-300">{post.summary}</p>
+										<p className="text-sm leading-7 text-slate-300">
+											<LocalizedPostSummary slug={post.slug} summary={post.summary} />
+										</p>
 									</div>
 								</div>
 								<div className="mt-5 flex flex-wrap gap-3">
 									{post.tags.map((tag) => (
 										<span key={tag} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-slate-300">
-											{tag}
+											<LocalizedTag tag={tag} />
 										</span>
 									))}
 								</div>
@@ -209,7 +226,7 @@ export default function BlogPage() {
 									href={`/blog/${post.slug}`}
 									className="mt-5 inline-flex rounded-lg border border-primary/40 bg-primary px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:-translate-y-0.5 hover:border-accent/60 hover:bg-primary/85 hover:shadow-primary/30"
 								>
-									Read note
+									<LocalizedText en="Read note" zh="阅读笔记" />
 								</Link>
 							</article>
 						);
@@ -218,7 +235,7 @@ export default function BlogPage() {
 				</section>
 
 				<footer className="border-t border-white/10 pt-8 text-sm text-slate-400">
-					Thanks for reading. You can visit my{" "}
+					<LocalizedText en="Thanks for reading. You can visit my " zh="感谢阅读。你也可以访问我的 " />
 					<a
 						href="https://github.com/Zhejian-Zheng"
 						target="_blank"
@@ -227,7 +244,7 @@ export default function BlogPage() {
 					>
 						GitHub
 					</a>{" "}
-					to explore my code and projects.
+					<LocalizedText en="to explore my code and projects." zh="查看我的代码和项目。" />
 				</footer>
 			</div>
 		</div>

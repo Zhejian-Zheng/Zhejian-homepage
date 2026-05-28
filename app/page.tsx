@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
+import SiteNav from "./components/SiteNav";
+import { useLanguage, type Language } from "./components/language";
 import profileImg from "@/app/images/profile image.jpg";
 import bgBerlin from "@/app/images/backgrounds/berlin-6755246.jpg";
 import bgYosemite from "@/app/images/backgrounds/yosemite-8177850.jpg";
@@ -10,29 +12,75 @@ import bgBerchtesgaden from "@/app/images/backgrounds/berchtesgaden-2928711.jpg"
 import bgBall from "@/app/images/backgrounds/ball-63527.jpg";
 import bgCityscape from "@/app/images/backgrounds/cityscape-6942013.jpg";
 
-const localQuotes: Quote[] = [
-	{ content: "The best way to predict the future is to create it.", author: "Peter Drucker" },
-	{ content: "Simplicity is the soul of efficiency.", author: "Austin Freeman" },
-	{ content: "Ship early, ship often.", author: "Product wisdom" },
-	{ content: "Design is not just what it looks like. Design is how it works.", author: "Steve Jobs" },
-	{ content: "Programs must be written for people to read.", author: "Harold Abelson" },
-	{ content: "Move fast, but don’t break everything.", author: "Pragmatic dev" }
-];
-
 type Quote = { content: string; author: string };
 type BgImage = StaticImageData;
 
 const BG_IMAGES: BgImage[] = [bgBerlin, bgYosemite, bgBerchtesgaden, bgBall, bgCityscape];
 
+const localQuotes: Record<Language, Quote[]> = {
+	en: [
+		{ content: "The best way to predict the future is to create it.", author: "Peter Drucker" },
+		{ content: "Simplicity is the soul of efficiency.", author: "Austin Freeman" },
+		{ content: "Ship early, ship often.", author: "Product wisdom" },
+		{ content: "Design is not just what it looks like. Design is how it works.", author: "Steve Jobs" },
+		{ content: "Programs must be written for people to read.", author: "Harold Abelson" },
+		{ content: "Move fast, but don’t break everything.", author: "Pragmatic dev" }
+	],
+	zh: [
+		{ content: "预测未来最好的方式，就是亲手创造它。", author: "Peter Drucker" },
+		{ content: "好的体验来自清晰的逻辑，也来自对人的理解。", author: "郑哲坚" },
+		{ content: "先把东西做出来，再把它打磨得更好。", author: "Product wisdom" },
+		{ content: "设计不只是看起来如何，更是使用起来如何。", author: "Steve Jobs" },
+		{ content: "代码首先是写给人读的，其次才是给机器执行的。", author: "Harold Abelson" },
+		{ content: "保持速度，也保持判断。", author: "Pragmatic dev" }
+	]
+};
+
+const homeCopy = {
+	en: {
+		displayName: "Zhejian Zheng",
+		role: "Software Engineer & Developer",
+		intro: "Passionate about full-stack development, data-driven solutions, web design, and human-computer interaction, with a focus on building intuitive user-centered digital experiences.",
+		readBlogs: "Read Blogs",
+		contactMe: "Contact Me",
+		loadingQuote: "Loading daily quote...",
+		quoteFallbackAuthor: "Quote",
+		changeBackground: "Change background",
+		refreshQuote: "click to refresh daily quote",
+		footer: "Established in 2024 by Zhejian Zheng. Continuously updated.",
+		builtWith: "Built with React, Next.js, and Tailwind CSS."
+	},
+	zh: {
+		role: "软件工程师与开发者",
+		intro: "专注于全栈开发、数据驱动方案、网页设计与人机交互，喜欢构建直观、以用户体验为中心的数字产品。",
+		readBlogs: "阅读博客",
+		contactMe: "联系我",
+		loadingQuote: "正在加载今日灵感...",
+		quoteFallbackAuthor: "语录",
+		changeBackground: "更换背景",
+		refreshQuote: "点击刷新今日灵感",
+		displayName: "郑哲坚",
+		footer: "由郑哲坚于 2024 年建立，并持续更新。",
+		builtWith: "使用 React、Next.js 与 Tailwind CSS 构建。"
+	}
+} as const;
+
 export default function HomePage() {
+	const { language } = useLanguage();
+	const copy = homeCopy[language];
 	const [quote, setQuote] = useState<Quote | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [bgLoading, setBgLoading] = useState(false);
 	const [currentBg, setCurrentBg] = useState<BgImage>(BG_IMAGES[0]);
 
-	const loadQuote = async () => {
+	const loadQuote = useCallback(async () => {
 		try {
 			setLoading(true);
+			if (language === "zh") {
+				const fallback = localQuotes.zh[Math.floor(Math.random() * localQuotes.zh.length)];
+				setQuote(fallback);
+				return;
+			}
 			const ts = Date.now();
 			const resp = await fetch(`https://api.quotable.io/random?t=${ts}`, { cache: "no-store" });
 			if (!resp.ok) {
@@ -42,12 +90,12 @@ export default function HomePage() {
 			setQuote({ content: data.content, author: data.author });
 		} catch {
 			// Ensure it still changes even if API fails
-			const fallback = localQuotes[Math.floor(Math.random() * localQuotes.length)];
+			const fallback = localQuotes[language][Math.floor(Math.random() * localQuotes[language].length)];
 			setQuote(fallback);
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [language]);
 
 	const changeBackground = () => {
 		try {
@@ -67,51 +115,35 @@ export default function HomePage() {
 
 	useEffect(() => {
 		loadQuote();
-	}, []);
+	}, [loadQuote]);
 
 	return (
 		<div className="min-h-screen w-full bg-slate-950 text-white">
-			<nav className="fixed top-0 left-0 right-0 z-50 bg-black/70 backdrop-blur-xl border-b border-white/10">
-				<div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
-					<Link href="/" className="font-bold text-lg hover:text-primary transition sm:text-xl">
-						Homepage
-					</Link>
-					<div className="flex items-center gap-1 sm:gap-4">
-						<Link href="/about" className="rounded-lg px-2 py-2 text-sm text-white/90 transition hover:text-white sm:px-3 sm:text-base">
-							About
-						</Link>
-						<Link href="/blog" className="rounded-lg px-2 py-2 text-sm text-white/90 transition hover:text-white sm:px-3 sm:text-base">
-							Blog
-						</Link>
-						<Link href="/contact" className="rounded-lg px-2 py-2 text-sm text-white/90 transition hover:text-white sm:px-3 sm:text-base">
-							Contact
-						</Link>
-						<button
-							onClick={changeBackground}
-							className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white shadow-lg shadow-secondary/20 transition hover:border-primary/50 hover:bg-primary/25 disabled:opacity-60"
-							disabled={bgLoading}
-							aria-label="Change background"
-							title="Change background"
-						>
-							<svg
-								viewBox="0 0 24 24"
-								className={`h-5 w-5 ${bgLoading ? "animate-spin" : ""}`}
-								fill="none"
-								stroke="currentColor"
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								strokeWidth="2"
-								aria-hidden="true"
-							>
-								<path d="M21 12a9 9 0 0 1-15.3 6.4" />
-								<path d="M3 12A9 9 0 0 1 18.3 5.6" />
-								<path d="M18 2v4h-4" />
-								<path d="M6 22v-4h4" />
-							</svg>
-						</button>
-					</div>
-				</div>
-			</nav>
+			<SiteNav active="home">
+				<button
+					onClick={changeBackground}
+					className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white shadow-lg shadow-secondary/20 transition hover:border-primary/50 hover:bg-primary/25 disabled:opacity-60"
+					disabled={bgLoading}
+					aria-label={copy.changeBackground}
+					title={copy.changeBackground}
+				>
+					<svg
+						viewBox="0 0 24 24"
+						className={`h-5 w-5 ${bgLoading ? "animate-spin" : ""}`}
+						fill="none"
+						stroke="currentColor"
+						strokeLinecap="round"
+						strokeLinejoin="round"
+						strokeWidth="2"
+						aria-hidden="true"
+					>
+						<path d="M21 12a9 9 0 0 1-15.3 6.4" />
+						<path d="M3 12A9 9 0 0 1 18.3 5.6" />
+						<path d="M18 2v4h-4" />
+						<path d="M6 22v-4h4" />
+					</svg>
+				</button>
+			</SiteNav>
 
 			<main className="relative isolate overflow-hidden bg-slate-950">
 				<div className="absolute inset-0 -z-10">
@@ -127,7 +159,7 @@ export default function HomePage() {
 						<div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-primary via-accent to-secondary animate-[pulse_3s_ease-in-out_infinite] opacity-70" />
 						<Image
 							src={profileImg}
-							alt="Zhejian Zheng"
+							alt={language === "zh" ? "郑哲坚" : "Zhejian Zheng"}
 							className="relative h-40 w-40 rounded-full object-cover ring-2 ring-white/30 sm:h-44 sm:w-44"
 							width={176}
 							height={176}
@@ -136,31 +168,31 @@ export default function HomePage() {
 					</div>
 
 					<div className="space-y-3">
-						<h1 className="text-4xl font-bold drop-shadow sm:text-5xl">Zhejian Zheng</h1>
-						<p className="text-lg text-white/90 sm:text-xl">Software Engineer & Developer</p>
+						<h1 className="text-4xl font-bold drop-shadow sm:text-5xl">{copy.displayName}</h1>
+						<p className="text-lg text-white/90 sm:text-xl">{copy.role}</p>
 						<p className="mx-auto max-w-xl text-white/80">
-							Passionate about full-stack development, data-driven solutions, web design, and human-computer interaction, with a focus on building intuitive user-centered digital experiences.
+							{copy.intro}
 						</p>
 					</div>
 
 					<div className="mt-6 flex flex-wrap items-center justify-center gap-3">
 						<Link href="/blog" className="glass rounded-xl px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15">
-							Read Blogs
+							{copy.readBlogs}
 						</Link>
 						<Link href="/contact" className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:-translate-y-0.5 hover:bg-primary/85">
-							Contact Me
+							{copy.contactMe}
 						</Link>
 					</div>
 
 					<button
 						onClick={loadQuote}
 						className="glass mt-6 w-full max-w-2xl px-5 py-4 text-left transition hover:bg-white/15 disabled:opacity-60"
-						aria-label="click to refresh daily quote"
-						title="click to refresh daily quote"
+						aria-label={copy.refreshQuote}
+						title={copy.refreshQuote}
 						disabled={loading}
 					>
-						<p className="text-base italic sm:text-lg">{quote?.content ?? "Loading daily quote..."}</p>
-						<p className="mt-1 text-sm opacity-80">— {quote?.author ?? "Quote"}</p>
+						<p className="text-base italic sm:text-lg">{quote?.content ?? copy.loadingQuote}</p>
+						<p className="mt-1 text-sm opacity-80">— {quote?.author ?? copy.quoteFallbackAuthor}</p>
 					</button>
 
 					<div className="mt-6 flex items-center justify-center gap-4 sm:gap-6">
@@ -192,8 +224,8 @@ export default function HomePage() {
 				</section>
 
 				<footer className="site-footer relative z-10 border-t border-white/10 bg-slate-950/90">
-					<p>Established in 2024 by Zhejian Zheng. Continuously updated.</p>
-					<p className="mt-1 text-xs text-white/60">Built with React, Next.js, and Tailwind CSS.</p>
+					<p>{copy.footer}</p>
+					<p className="mt-1 text-xs text-white/60">{copy.builtWith}</p>
 				</footer>
 			</main>
 		</div>
