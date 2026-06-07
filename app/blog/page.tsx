@@ -5,7 +5,7 @@ import { LocalizedDate, LocalizedPostSummary, LocalizedPostTitle, LocalizedTag }
 import { blogPosts } from "./posts";
 
 export default function BlogPage() {
-	const aiAgentSlugs = new Set(["code-with-codex", "github-repo-review-agent"]);
+	const aiAgentSlugs = new Set(["code-with-codex"]);
 	const aiAgentPosts = blogPosts.filter((post) => aiAgentSlugs.has(post.slug));
 	const allTags = Array.from(new Set(blogPosts.flatMap((post) => post.tags))).slice(0, 14);
 	const selectedProjectSlugs = new Set([
