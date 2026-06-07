@@ -2,6 +2,7 @@ import type { ComponentType } from "react";
 import BalatroRustScoringEngine, { metadata as balatroRustScoringEngineMetadata } from "@/content/blog/balatro-rust-scoring-engine.mdx";
 import BuildingMyPersonalPage, { metadata as buildingMyPersonalPageMetadata } from "@/content/blog/building-my-personal-page.mdx";
 import CodeWithCodex, { metadata as codeWithCodexMetadata } from "@/content/blog/code-with-codex.mdx";
+import GithubRepoReviewAgent, { metadata as githubRepoReviewAgentMetadata } from "@/content/blog/github-repo-review-agent.mdx";
 import LegalYouthPrototypeWeb, { metadata as legalYouthPrototypeWebMetadata } from "@/content/blog/legal-youth-prototype-web.mdx";
 import MongodbPostgresqlPracticalTakeaways, { metadata as mongodbPostgresqlPracticalTakeawaysMetadata } from "@/content/blog/mongodb-postgresql-practical-takeaways.mdx";
 import SafeRlSupervisedShield, { metadata as safeRlSupervisedShieldMetadata } from "@/content/blog/safe-rl-supervised-shield.mdx";
@@ -23,6 +24,11 @@ export const blogPosts: BlogPost[] = [
 		slug: "code-with-codex",
 		...codeWithCodexMetadata,
 		Component: CodeWithCodex
+	},
+	{
+		slug: "github-repo-review-agent",
+		...githubRepoReviewAgentMetadata,
+		Component: GithubRepoReviewAgent
 	},
 	{
 		slug: "solana-orderflow-event-driven-escrow",

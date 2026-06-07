@@ -1,0 +1,336 @@
+export const metadata = {
+	title: "GitHub Repo Review Agent: Engineering an AI Code Review Workflow",
+	summary: "A bilingual engineering note on building an AI agent that reviews GitHub repositories through indexing, static analysis, verification, and risk-ranked findings.",
+	publishedAt: "2026-06-07",
+	tags: ["AI Agent", "GitHub", "Code Review", "Static Analysis"]
+};
+
+Reviewing a GitHub repository is an engineering investigation. Before making any judgment, a reviewer needs to understand the project boundary, runtime model, dependency graph, testing surface, and the paths where bugs would actually hurt users.
+
+A GitHub repo review agent should be designed around that process. It should not behave like a generic chatbot that comments on isolated snippets. It should behave like a code-aware system that can clone or inspect a repository, build a project map, run local verification, and produce findings tied to concrete files, commands, and failure modes.
+
+中文版本在英文版本之后。
+
+## System Goals
+
+The agent has three main goals:
+
+- Build a structured understanding of the repository.
+- Detect high-signal engineering risks.
+- Produce review findings that a maintainer can act on immediately.
+
+That means the output should prioritize correctness, security, maintainability, and test gaps over style preferences. A good agent should be able to say: this request path accepts user input, passes it into this parser, writes to this storage layer, and currently has no test covering malformed input.
+
+## Architecture
+
+At a high level, the review agent can be implemented as a pipeline:
+
+```text
+GitHub Repository
+      |
+      v
+Repository Loader
+      |
+      v
+Project Indexer
+      |
+      v
+Static Analysis + Semantic Search
+      |
+      v
+Test / Build / Lint Executor
+      |
+      v
+Risk Scoring Engine
+      |
+      v
+Review Report Generator
+```
+
+Each stage owns a specific responsibility. Keeping the stages separate makes the agent easier to debug, measure, and improve.
+
+## Repository Loading
+
+The first step is to load the repository in a reproducible way. The agent should capture:
+
+- GitHub URL, branch, commit SHA, and pull request number if available.
+- Language and framework signals from files like `package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `pom.xml`, or `build.gradle`.
+- CI configuration from `.github/workflows`, `circleci`, `buildkite`, or similar directories.
+- Dependency lockfiles such as `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `poetry.lock`, `uv.lock`, or `Cargo.lock`.
+
+The commit SHA is important because the review must be reproducible. If a finding refers to a moving branch without a commit, the evidence can drift.
+
+## Project Indexing
+
+Once the repository is available locally, the agent builds a project index. This index should contain both structural and semantic data:
+
+- File tree with generated artifacts ignored.
+- Entry points such as API routes, CLI commands, app bootstraps, workers, and scheduled jobs.
+- Exported functions, classes, interfaces, and modules.
+- Dependency edges between files.
+- Test files mapped to implementation files.
+- Configuration files and environment variable usage.
+
+For small repositories, simple filesystem traversal and language-aware parsers may be enough. For larger codebases, a hybrid index works better:
+
+- Fast lexical search with tools like `ripgrep`.
+- AST parsing for languages where parsers are available.
+- Embedding-based retrieval for semantic questions.
+- Call graph or import graph extraction for dependency reasoning.
+
+The agent should avoid reading every file into the model context. Instead, it should retrieve files based on the current review hypothesis.
+
+## Static Analysis Layer
+
+The static analysis layer looks for patterns that deserve human attention. Examples include:
+
+- User input reaching filesystem, SQL, shell, network, or deserialization APIs.
+- Authentication or authorization checks that are missing or inconsistent.
+- Broad `catch` blocks that hide operational failures.
+- Unsafe shell command construction.
+- Missing request size limits.
+- Race-prone update flows.
+- Shared mutable state in concurrent code.
+- Unbounded retries, pagination, recursion, or queue processing.
+- Secrets accidentally committed into source.
+- Error paths without tests.
+
+This layer should combine deterministic rules and LLM-based reasoning. Deterministic checks are better for exact patterns. LLM reasoning is useful for connecting multiple files into a behavioral path.
+
+## Verification Execution
+
+A review agent becomes much more useful when it can run the same commands a maintainer would run:
+
+```bash
+npm test
+npm run lint
+npm run typecheck
+pytest
+go test ./...
+cargo test
+```
+
+The agent should infer commands from package scripts, CI workflows, and README instructions. It should record the command, exit code, runtime, important failure output, and whether the failure appears related to the reviewed change.
+
+This matters because a review finding without verification is weaker. Even when commands fail because of missing services or credentials, that information is valuable and should be included in the report.
+
+## Risk Scoring
+
+Not every issue deserves the same attention. A practical agent should score findings by risk:
+
+```text
+risk = impact * likelihood * reachability * confidence
+```
+
+- Impact measures how bad the failure would be.
+- Likelihood measures how likely the failure is in normal usage.
+- Reachability measures whether the code path is exposed to real users or automation.
+- Confidence measures how much evidence the agent has.
+
+This prevents the review from becoming a long list of low-value comments. The best output starts with issues that could cause data loss, security exposure, production outages, broken releases, or major regressions.
+
+## Review Output
+
+A helpful finding should be short, specific, and tied to evidence:
+
+```text
+Severity: High
+File: src/api/import.ts
+Issue: Uploaded files are parsed before size and content-type validation.
+Why it matters: Large or malformed files can cause excessive memory usage before rejection.
+Suggested fix: Validate request size and MIME type before reading the full body.
+Verification: Add tests for oversized files, unsupported MIME types, and malformed payloads.
+Evidence: The import route calls parseUpload(body) before validateUploadMetadata(req).
+```
+
+This format avoids vague advice like "improve validation" and instead points to the exact failure mode.
+
+## GitHub Integration
+
+There are two common integration modes:
+
+- Pull request review mode: the agent reviews the diff, then expands into surrounding files when needed.
+- Repository audit mode: the agent reviews the whole repository and produces an architecture and risk report.
+
+For pull requests, the agent should be careful with scope. It should focus on changed behavior, regression risk, and missing tests. For full repository audits, it can produce broader findings such as architecture risks, dependency concerns, dead code, and documentation gaps.
+
+A GitHub-native implementation can use GitHub App authentication, `pull_request` webhooks, Checks API status reporting, review comments for line-specific findings, artifacts for full reports, and labels for severity or review state.
+
+The agent should not automatically block merges unless the organization explicitly configures that behavior. Early versions are safer as advisory reviewers.
+
+## Engineering Principles
+
+The most important design principle is evidence-first review. The agent should read, search, run, and verify before making claims.
+
+- Prefer repository conventions over generic conventions.
+- Keep generated fixes small and reviewable.
+- Separate observation from inference.
+- Cite files and commands for every important claim.
+- Degrade gracefully when tests or dependencies cannot run.
+- Avoid overwhelming maintainers with low-confidence findings.
+
+The goal is not to replace human code review. The goal is to make human review faster, more systematic, and more precise.
+
+## 中文版
+
+审查一个 GitHub 仓库，本质上不是简单地“看代码”，而是一次工程调查。真正有价值的 review 需要先弄清楚项目边界、运行方式、依赖关系、测试覆盖，以及哪些代码路径一旦出错会影响真实用户。
+
+因此，一个 GitHub repo review agent 不应该只是对代码片段发表评论的聊天机器人。它更应该像一个懂工程流程的审查系统：能够拉取或读取仓库，建立项目索引，执行本地验证，并输出带有文件位置、命令结果和风险解释的 review 结论。
+
+## 系统目标
+
+这个 agent 主要解决三个问题：
+
+- 建立对仓库结构的系统理解。
+- 发现高信号的工程风险。
+- 输出维护者可以立刻处理的 review findings。
+
+它应该优先关注正确性、安全性、可维护性和测试缺口，而不是泛泛地挑代码风格。一个好的 agent 应该能说清楚：这个接口接收用户输入，把数据传给某个 parser，再写入存储层，但当前没有测试覆盖异常输入。
+
+## 架构设计
+
+一个可落地的 repo review agent 可以被设计成流水线：
+
+```text
+GitHub Repository
+      |
+      v
+Repository Loader
+      |
+      v
+Project Indexer
+      |
+      v
+Static Analysis + Semantic Search
+      |
+      v
+Test / Build / Lint Executor
+      |
+      v
+Risk Scoring Engine
+      |
+      v
+Review Report Generator
+```
+
+每个阶段只负责一类问题。这样 agent 的行为更容易调试、度量和增强。
+
+## 仓库加载
+
+第一步是以可复现的方式加载仓库。agent 需要记录：
+
+- GitHub URL、分支、commit SHA、PR 编号。
+- 从 `package.json`、`pyproject.toml`、`go.mod`、`Cargo.toml`、`pom.xml`、`build.gradle` 等文件识别语言和框架。
+- 从 `.github/workflows`、`circleci`、`buildkite` 等目录识别 CI 配置。
+- 依赖锁文件，例如 `package-lock.json`、`pnpm-lock.yaml`、`yarn.lock`、`poetry.lock`、`uv.lock`、`Cargo.lock`。
+
+commit SHA 很关键，因为 review 必须可复现。如果 finding 只指向一个不断变化的 branch，证据会漂移，后续很难定位。
+
+## 项目索引
+
+仓库加载完成后，agent 应该建立项目索引。这个索引既包含结构化信息，也包含语义信息：
+
+- 文件树，并排除生成物和构建产物。
+- API routes、CLI commands、应用入口、worker、定时任务等入口点。
+- 导出的函数、类、接口和模块。
+- 文件之间的 import / dependency 关系。
+- 测试文件和实现文件之间的映射。
+- 配置文件和环境变量使用情况。
+
+对于小型项目，文件遍历加语言 parser 就足够。对于大型代码库，更适合使用混合索引：
+
+- 用 `ripgrep` 做快速词法搜索。
+- 对支持的语言做 AST 解析。
+- 用 embedding retrieval 处理语义查询。
+- 抽取 import graph 或 call graph 辅助依赖推理。
+
+关键点是：agent 不应该把所有文件一次性塞进模型上下文，而应该围绕当前 review 假设，按需检索相关文件。
+
+## 静态分析层
+
+静态分析层用于发现值得人工关注的风险模式，例如：
+
+- 用户输入流向文件系统、SQL、shell、网络请求或反序列化 API。
+- 认证或授权检查缺失、不一致。
+- 过宽的 `catch` 逻辑吞掉真实错误。
+- 不安全的 shell command 拼接。
+- 缺少请求体大小限制。
+- 存在竞态风险的更新流程。
+- 并发代码中的共享可变状态。
+- 无边界的重试、分页、递归或队列消费。
+- 误提交到源码里的 secret。
+- 错误路径没有测试覆盖。
+
+这一层最好结合确定性规则和 LLM 推理。确定性规则适合识别明确模式，LLM 更适合理解跨文件行为路径。
+
+## 本地验证执行
+
+repo review agent 真正变得有用，是从它能执行维护者会执行的命令开始：
+
+```bash
+npm test
+npm run lint
+npm run typecheck
+pytest
+go test ./...
+cargo test
+```
+
+agent 应该从 package scripts、CI workflow 和 README 中推断验证命令，并记录命令、exit code、运行耗时、关键失败日志，以及失败是否和当前 review 内容相关。
+
+这很重要，因为没有验证的 review finding 说服力较弱。即使命令因为缺少服务、凭证或环境变量而失败，这个信息本身也应该进入报告。
+
+## 风险评分
+
+不是所有问题都值得同等关注。一个实用的 agent 应该对 finding 做风险排序：
+
+```text
+risk = impact * likelihood * reachability * confidence
+```
+
+- Impact 表示问题发生后的损害程度。
+- Likelihood 表示在正常使用中触发的概率。
+- Reachability 表示代码路径是否会被真实用户或自动化流程触达。
+- Confidence 表示 agent 对结论的证据强度。
+
+这个机制可以避免 review 变成长长的低价值意见列表。最应该排在前面的，是可能导致数据丢失、安全暴露、生产事故、发布失败或重大回归的问题。
+
+## Review 输出格式
+
+最终报告应该结构化、具体，并且足够短，方便维护者行动：
+
+```text
+Severity: High
+File: src/api/import.ts
+Issue: 上传文件在校验大小和 content-type 之前就被解析。
+Why it matters: 大文件或畸形文件可能在被拒绝前造成过高内存占用。
+Suggested fix: 在读取完整 body 之前先校验请求大小和 MIME 类型。
+Verification: 增加超大文件、不支持 MIME 类型、畸形 payload 的测试。
+Evidence: import route 在 validateUploadMetadata(req) 之前调用了 parseUpload(body)。
+```
+
+这样的输出让 review 建立在证据上，而不是停留在“加强校验”这种模糊建议。
+
+## GitHub 集成方式
+
+常见的集成模式有两种：
+
+- Pull request review mode：先审查 diff，再在需要时扩展到上下文文件。
+- Repository audit mode：审查整个仓库，输出架构理解和风险报告。
+
+对于 PR，agent 应该控制 scope，重点关注行为变化、回归风险和测试缺口。对于全仓库 audit，则可以输出更宽的内容，例如架构风险、依赖问题、死代码和文档缺口。
+
+一个 GitHub-native 的实现通常会用到 GitHub App authentication、`pull_request` webhook、Checks API、review comments、artifacts 和 labels。早期版本不建议默认阻塞 merge，更稳妥的方式是先作为 advisory reviewer。
+
+## 工程原则
+
+最重要的原则是 evidence-first review：先读取、搜索、执行、验证，再输出结论。
+
+- 优先遵循仓库自己的工程约定。
+- 自动生成的修复要足够小，方便 review。
+- 区分观察结果和推理结论。
+- 重要 claim 必须引用文件、代码路径或命令结果。
+- 测试或依赖无法运行时，要清楚说明限制。
+- 避免用低置信度 finding 打扰维护者。
+
+这个 agent 的目标不是替代人类 code review，而是让人类 review 更快、更系统、更精确。

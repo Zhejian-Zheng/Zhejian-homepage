@@ -12,6 +12,10 @@ const postTranslations: Record<string, PostTranslation> = {
 		title: "Code with Codex",
 		summary: "关于我如何把 Codex 当作编程伙伴：用它加快实现速度，同时保留自己的产品判断、验证习惯和个人表达。"
 	},
+	"github-repo-review-agent": {
+		title: "GitHub Repo Review Agent：工程化 AI 代码审查工作流",
+		summary: "一篇中英双语工程笔记，介绍如何通过仓库索引、静态分析、本地验证和风险排序构建 GitHub repo review agent。"
+	},
 	"solana-orderflow-event-driven-escrow": {
 		title: "Solana OrderFlow：使用 Anchor 与 Kafka 构建事件驱动托管系统",
 		summary: "一个 Solana 托管项目，将 Anchor 智能合约、Kafka 消费者、Postgres 投影、风险规则和通知系统连接起来。"
@@ -51,12 +55,14 @@ const tagTranslations: Record<string, string> = {
 	Algorithms: "算法",
 	Automation: "自动化",
 	Bash: "Bash",
+	"Code Review": "代码审查",
 	Codex: "Codex",
 	Data: "数据",
 	Database: "数据库",
 	Design: "设计",
 	Documentation: "文档",
 	Express: "Express",
+	GitHub: "GitHub",
 	Kafka: "Kafka",
 	LaTeX: "LaTeX",
 	MDX: "MDX",
@@ -75,6 +81,7 @@ const tagTranslations: Record<string, string> = {
 	Safety: "安全",
 	Shell: "Shell",
 	Solana: "Solana",
+	"Static Analysis": "静态分析",
 	"Supervised Learning": "监督学习",
 	TCP: "TCP",
 	Testing: "测试",
