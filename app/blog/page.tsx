@@ -16,6 +16,7 @@ export default function BlogPage() {
 	]);
 	const selectedProjectPosts = blogPosts.filter((post) => selectedProjectSlugs.has(post.slug));
 	const remainingPosts = blogPosts.filter((post) => !aiAgentSlugs.has(post.slug) && !selectedProjectSlugs.has(post.slug));
+	const countedPosts = aiAgentPosts.length + remainingPosts.length;
 
 	return (
 		<div className="min-h-screen bg-slate-950 text-white px-4 pb-16 pt-24">
@@ -44,7 +45,7 @@ export default function BlogPage() {
 
 						<div className="grid grid-cols-3 gap-3 text-center lg:grid-cols-1 lg:text-left">
 							<div className="rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3">
-								<p className="text-2xl font-bold text-white">{blogPosts.length}</p>
+								<p className="text-2xl font-bold text-white">{countedPosts}</p>
 								<p className="text-xs uppercase tracking-[0.2em] text-slate-400">
 									<LocalizedText en="Posts" zh="文章" />
 								</p>
