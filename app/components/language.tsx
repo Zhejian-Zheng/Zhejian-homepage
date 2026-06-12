@@ -117,3 +117,13 @@ export function LocalizedText({ en, zh }: { en: string; zh: string }) {
 	const { language } = useLanguage();
 	return <>{language === "zh" ? zh : en}</>;
 }
+
+export function EnglishOnly({ children }: { children: React.ReactNode }) {
+	const { language } = useLanguage();
+	return language === "en" ? <>{children}</> : null;
+}
+
+export function ChineseOnly({ children }: { children: React.ReactNode }) {
+	const { language } = useLanguage();
+	return language === "zh" ? <>{children}</> : null;
+}

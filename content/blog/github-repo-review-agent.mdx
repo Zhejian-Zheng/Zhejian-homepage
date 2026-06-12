@@ -5,11 +5,11 @@ export const metadata = {
 	tags: ["AI Agent", "GitHub", "Code Review", "Static Analysis"]
 };
 
+<div className="article-language article-language-en">
+
 Reviewing a GitHub repository is an engineering investigation. Before making any judgment, a reviewer needs to understand the project boundary, runtime model, dependency graph, testing surface, and the paths where bugs would actually hurt users.
 
 A GitHub repo review agent should be designed around that process. It should not behave like a generic chatbot that comments on isolated snippets. It should behave like a code-aware system that can clone or inspect a repository, build a project map, run local verification, and produce findings tied to concrete files, commands, and failure modes.
-
-中文版本在英文版本之后。
 
 ## System Goals
 
@@ -171,7 +171,9 @@ The most important design principle is evidence-first review. The agent should r
 
 The goal is not to replace human code review. The goal is to make human review faster, more systematic, and more precise.
 
-## 中文版
+</div>
+
+<div className="article-language article-language-zh">
 
 审查一个 GitHub 仓库，本质上不是简单地“看代码”，而是一次工程调查。真正有价值的 review 需要先弄清楚项目边界、运行方式、依赖关系、测试覆盖，以及哪些代码路径一旦出错会影响真实用户。
 
@@ -334,3 +336,5 @@ Evidence: import route 在 validateUploadMetadata(req) 之前调用了 parseUplo
 - 避免用低置信度 finding 打扰维护者。
 
 这个 agent 的目标不是替代人类 code review，而是让人类 review 更快、更系统、更精确。
+
+</div>

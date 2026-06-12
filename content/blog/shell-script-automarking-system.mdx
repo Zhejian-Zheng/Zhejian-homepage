@@ -5,6 +5,8 @@ export const metadata = {
 	tags: ["Shell", "Testing", "Automation", "CLI"]
 };
 
+<div className="article-language article-language-en">
+
 This repo implements an automarking workflow with shell scripts. It models the core lifecycle of a university-style assignment system: add an assignment, submit files, summarize submissions, run tests, and calculate marks.
 
 The project is interesting because it uses only shell and the filesystem to model state.
@@ -38,3 +40,43 @@ Writing this in dash keeps the project close to POSIX-style scripting. That mean
 ## Takeaway
 
 This project shows how much system behavior can be built with shell alone. It is a practical exercise in automation, validation, and test infrastructure.
+
+</div>
+
+<div className="article-language article-language-zh">
+
+仓库使用 shell 脚本实现了一个自动评分工作流程。它模拟了大学作业系统的核心生命周期：添加作业、提交文件、汇总提交内容、运行测试和计算分数。
+
+该项目的独特之处在于它仅使用 shell 和文件系统来模拟状态。
+
+## 作业和提交流程
+
+添加脚本会在将作业名称、答案文件、自动测试规范和自动评分规范存储到隐藏的项目目录之前对其进行验证。
+
+提交脚本会验证作业、学生 zID 格式和提交的文件。它会为每个学生创建提交文件夹，并记录时间戳和文件大小等元数据。
+
+## 评分流程
+
+评分脚本读取自动评分规范，将学生的最新提交与参考答案进行比较，捕获标准输出 (stdout)、标准错误输出 (stderr) 和退出状态，然后比较结果。
+
+它支持空格、大小写、数字和空白字符的比较选项。这些选项非常重要，因为实际评分通常需要灵活的输出匹配，而不是逐字节的严格匹配。
+
+## 设计约束
+
+使用 Dash 编写此项目可使其接近 POSIX 风格的脚本。这意味着实现必须谨慎处理引用、路径验证、进程退出代码和临时输出文件。
+
+## 知识点
+
+- 当数据模型能够清晰地映射到文件和文件夹时，Shell 脚本可以模拟真实系统。
+- 输入验证在 CLI 工具中至关重要，因为每个参数都可能成为路径或命令输入。
+- 自动评分器需要分别捕获标准输出 (stdout)、标准错误输出 (stderr) 和退出状态。
+- 灵活的差异选项使测试对无害的格式差异更加公平。
+- 基于文件的状态易于检查，但需要一致的命名和清理规则。
+- POSIX shell 鼓励使用简短的命令和显式的控制流。
+- 一个健壮的 CLI 在输入格式错误时应该发出清晰且一致的错误信息。
+
+## 总结
+
+本项目展示了仅使用 shell 可以构建多少系统行为。它是一个自动化、验证和测试基础设施的实践练习。
+
+</div>

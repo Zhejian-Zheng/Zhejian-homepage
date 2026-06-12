@@ -5,9 +5,9 @@ export const metadata = {
 	tags: ["Next.js", "React", "Prisma", "PostgreSQL", "Zod", "Testing"]
 };
 
-Recently, I worked on a small Pilates Health Quiz project. The core goal was to let users fill in health information through a step-by-step questionnaire, save progress on the backend, and eventually generate a basic health assessment result. The project looks like a simple form at first, but the real implementation involved a lot of product and engineering details: step-by-step saving, progress recovery, backend validation, session recognition, and state restoration after users leave halfway through.
+<div className="article-language article-language-en">
 
-中文版本在英文版本之后。
+Recently, I worked on a small Pilates Health Quiz project. The core goal was to let users fill in health information through a step-by-step questionnaire, save progress on the backend, and eventually generate a basic health assessment result. The project looks like a simple form at first, but the real implementation involved a lot of product and engineering details: step-by-step saving, progress recovery, backend validation, session recognition, and state restoration after users leave halfway through.
 
 ## Project Background
 
@@ -129,7 +129,9 @@ This project reminded me that a seemingly simple questionnaire becomes much more
 
 Moving from a local random ID to an HttpOnly cookie session made the application feel much closer to a real online product. It is not just "able to save progress" anymore. It now has the beginning of real user session capability.
 
-## 中文版本
+</div>
+
+<div className="article-language article-language-zh">
 
 最近我做了一个 Pilates Health Quiz 小项目，核心目标是让用户通过分步问卷填写身体信息，并在后端保存进度，最终生成一份基础健康评估结果。这个项目看起来像一个简单表单，但真正做起来后，里面其实包含了不少产品和工程细节：分步保存、进度恢复、后端校验、Session 识别，以及用户中途退出后的状态恢复。
 
@@ -252,3 +254,5 @@ GET /api/sessions/current
 这次开发让我重新意识到，一个看似简单的问卷应用，真正要做成可用产品时，重点不只是 UI 表单，而是状态如何保存、如何恢复、如何校验、如何处理异常路径。
 
 从本地随机 ID 到 HttpOnly cookie session，这一步让整个应用更接近真实线上产品。它不只是“能保存”，而是开始具备了真正的用户会话能力。
+
+</div>

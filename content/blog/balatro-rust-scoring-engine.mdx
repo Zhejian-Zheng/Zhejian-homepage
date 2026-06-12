@@ -5,6 +5,8 @@ export const metadata = {
 	tags: ["Rust", "CLI", "Game Logic", "Scoring"]
 };
 
+<div className="article-language article-language-en">
+
 Balatro Rust is a command-line scoring engine. It reads round input, evaluates the played hand, applies card effects and joker modifiers, then outputs the final chip times multiplier score.
 
 The interesting part is deterministic rule composition. A card game like this has many overlapping effects, and the program needs a stable order of operations.
@@ -40,3 +42,45 @@ That structure keeps one large scoring problem from turning into a single unread
 ## Takeaway
 
 This repo shows how to turn a rule-heavy game into a staged evaluation system. The main engineering lesson is to make timing and priority explicit.
+
+</div>
+
+<div className="article-language article-language-zh">
+
+Balatro Rust 是一个命令行计分引擎。它读取回合输入，评估已打出的牌型，应用牌效果和小丑牌修正，然后输出最终的筹码乘以倍数后的分数。
+
+其亮点在于确定性的规则组合。像这样的纸牌游戏有很多重叠的效果，程序需要一个稳定的操作顺序。
+
+## 计分流程
+
+计分流程是分阶段进行的。首先，评估基础扑克牌型。然后，打出的牌贡献筹码和效果。保留的牌可以添加它们自己的效果。最后，独立的小丑牌和版本效果会修改结果。
+
+这种分阶段的方式使得系统更容易测试，因为每种效果在流程中都有明确的位置。
+
+## 牌型评估
+
+扑克牌型检测器会先检查强牌型，再检查弱牌型。它还支持特殊修正，例如变顺检测、混合花色和快捷规则。
+
+这种顺序至关重要。如果一手牌符合多个类别，引擎必须始终选择优先级最高的类别。
+
+## 小丑牌效果
+
+小丑牌按其生效时机进行分类：已计分牌效果、已持有牌效果、独立效果和版本效果。该项目还通过在最终计分前规范化复制的小丑牌效果来处理类似蓝图的行为。
+
+这种结构避免了大型计分问题演变成一个难以阅读的单一函数。
+
+## 知识点
+
+- Rust 非常适合确定性引擎，因为枚举、结构体和模式匹配使状态显式化。
+- CLI 工具可以使用 YAML 等结构化输入，使测试用例的编写和复现变得简单。
+- 规则顺序在游戏引擎中至关重要，因为多个规则可能匹配相同的状态。
+- 分离效果生效时间可以减少卡牌效果之间的意外交互。
+- 当最终输出需要精确的基于底数的计分时，应避免使用浮动行为。
+- 复杂的游戏逻辑受益于按职责分组的小模块。
+- 可测试的计分引擎尽可能围绕纯转换构建。
+
+## 要点
+
+本仓库展示了如何将规则繁多的游戏转换为分阶段评估系统。主要的工程教训是要明确规定时间和优先级。
+
+</div>

@@ -31,7 +31,7 @@ export default function SiteNav({ active, children }: { active: NavKey; children
 	const copy = navCopy[language];
 
 	return (
-		<nav className="fixed top-0 left-0 right-0 z-50 bg-black/70 backdrop-blur-xl border-b border-white/10">
+		<nav className="fixed inset-x-0 top-0 z-[100] bg-black/80 backdrop-blur-xl border-b border-white/10">
 			<div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between gap-3">
 				<Link href="/" className="font-bold text-lg hover:text-primary transition sm:text-xl">
 					{copy.brand}

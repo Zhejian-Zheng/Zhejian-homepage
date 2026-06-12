@@ -36,11 +36,18 @@
 	@apply text-white/80 text-sm text-center py-4;
 }
 
+.article-language {
+	display: block;
+}
+
+html[lang="en"] .article-language-zh,
+html[lang="zh-CN"] .article-language-en {
+	display: none;
+}
+
 .language-transition-root {
 	min-height: 100vh;
 	opacity: 1;
-	transform: translateY(0);
-	filter: blur(0);
 	transition:
 		opacity 520ms ease,
 		transform 520ms ease,
@@ -55,22 +62,23 @@
 
 .page-transition-root {
 	min-height: 100vh;
+}
+
+.page-transition-root > div > :not(nav) {
 	opacity: 1;
-	transform: translateY(0);
-	filter: blur(0);
 	transition:
 		opacity 520ms ease,
 		transform 520ms ease,
 		filter 520ms ease;
 }
 
-.page-transition-root[data-route-phase="exiting"] {
+.page-transition-root[data-route-phase="exiting"] > div > :not(nav) {
 	opacity: 0;
 	transform: translateY(10px);
 	filter: blur(6px);
 }
 
-.page-transition-root[data-route-phase="entering"] {
+.page-transition-root[data-route-phase="entering"] > div > :not(nav) {
 	opacity: 0;
 	transform: translateY(-8px);
 	filter: blur(6px);
@@ -88,14 +96,14 @@
 		filter: none;
 	}
 
-	.page-transition-root {
+	.page-transition-root > div > :not(nav) {
 		transition: opacity 120ms ease;
 		transform: none;
 		filter: none;
 	}
 
-	.page-transition-root[data-route-phase="exiting"],
-	.page-transition-root[data-route-phase="entering"] {
+	.page-transition-root[data-route-phase="exiting"] > div > :not(nav),
+	.page-transition-root[data-route-phase="entering"] > div > :not(nav) {
 		transform: none;
 		filter: none;
 	}
