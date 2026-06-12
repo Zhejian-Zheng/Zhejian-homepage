@@ -5,6 +5,7 @@ import CodeWithCodex, { metadata as codeWithCodexMetadata } from "@/content/blog
 import GithubRepoReviewAgent, { metadata as githubRepoReviewAgentMetadata } from "@/content/blog/github-repo-review-agent.mdx";
 import LegalYouthPrototypeWeb, { metadata as legalYouthPrototypeWebMetadata } from "@/content/blog/legal-youth-prototype-web.mdx";
 import MongodbPostgresqlPracticalTakeaways, { metadata as mongodbPostgresqlPracticalTakeawaysMetadata } from "@/content/blog/mongodb-postgresql-practical-takeaways.mdx";
+import PilatesHealthQuizProgressRecovery, { metadata as pilatesHealthQuizProgressRecoveryMetadata } from "@/content/blog/pilates-health-quiz-progress-recovery.mdx";
 import SafeRlSupervisedShield, { metadata as safeRlSupervisedShieldMetadata } from "@/content/blog/safe-rl-supervised-shield.mdx";
 import ShellScriptAutomarkingSystem, { metadata as shellScriptAutomarkingSystemMetadata } from "@/content/blog/shell-script-automarking-system.mdx";
 import SolanaOrderFlowEventDrivenEscrow, { metadata as solanaOrderFlowEventDrivenEscrowMetadata } from "@/content/blog/solana-orderflow-event-driven-escrow.mdx";
@@ -29,6 +30,11 @@ export const blogPosts: BlogPost[] = [
 		slug: "github-repo-review-agent",
 		...githubRepoReviewAgentMetadata,
 		Component: GithubRepoReviewAgent
+	},
+	{
+		slug: "pilates-health-quiz-progress-recovery",
+		...pilatesHealthQuizProgressRecoveryMetadata,
+		Component: PilatesHealthQuizProgressRecovery
 	},
 	{
 		slug: "solana-orderflow-event-driven-escrow",

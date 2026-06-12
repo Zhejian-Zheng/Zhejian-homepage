@@ -16,6 +16,10 @@ const postTranslations: Record<string, PostTranslation> = {
 		title: "GitHub Repo Review Agent：工程化 AI 代码审查工作流",
 		summary: "一篇中英双语工程笔记，介绍如何通过仓库索引、静态分析、本地验证和风险排序构建 GitHub repo review agent。"
 	},
+	"pilates-health-quiz-progress-recovery": {
+		title: "从问卷到可恢复进度：我的 Pilates Health Quiz 开发复盘",
+		summary: "一次 Pilates Health Quiz 开发复盘，记录分步保存、进度恢复、HttpOnly cookie session、后端校验和 API 测试覆盖。"
+	},
 	"solana-orderflow-event-driven-escrow": {
 		title: "Solana OrderFlow：使用 Anchor 与 Kafka 构建事件驱动托管系统",
 		summary: "一个 Solana 托管项目，将 Anchor 智能合约、Kafka 消费者、Postgres 投影、风险规则和通知系统连接起来。"
@@ -72,6 +76,7 @@ const tagTranslations: Record<string, string> = {
 	Portfolio: "作品集",
 	Postgres: "Postgres",
 	PostgreSQL: "PostgreSQL",
+	Prisma: "Prisma",
 	Prototype: "原型",
 	Python: "Python",
 	React: "React",
@@ -89,7 +94,8 @@ const tagTranslations: Record<string, string> = {
 	UDP: "UDP",
 	UX: "用户体验",
 	Vue: "Vue",
-	Workflow: "工作流"
+	Workflow: "工作流",
+	Zod: "Zod"
 };
 
 export function getLocalizedPostTitle(slug: string, fallback: string, language: Language) {
