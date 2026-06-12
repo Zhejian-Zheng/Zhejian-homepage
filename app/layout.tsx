@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LanguageProvider } from "./components/language";
+import PageTransition from "./components/PageTransition";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -11,7 +12,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 	return (
 		<html lang="en">
 			<body className="min-h-screen bg-slate-900 text-white antialiased">
-				<LanguageProvider>{children}</LanguageProvider>
+				<LanguageProvider>
+					<PageTransition>{children}</PageTransition>
+				</LanguageProvider>
 			</body>
 		</html>
 	);
