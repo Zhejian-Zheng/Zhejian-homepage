@@ -41,7 +41,7 @@ export default function SiteNav({ active, children }: { active: NavKey; children
 						<Link
 							key={item.key}
 							href={item.href}
-							className={`rounded-lg px-2 py-2 text-sm transition hover:text-white sm:px-3 sm:text-base ${
+							className={`rounded-lg px-2 py-2 text-sm transition hover:text-primary sm:px-3 sm:text-base ${
 								active === item.key ? "bg-white/10 text-white" : "text-white/90"
 							}`}
 						>
