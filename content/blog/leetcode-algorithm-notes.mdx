@@ -5,6 +5,8 @@ export const metadata = {
 	tags: ["Algorithms", "Python", "Data Structures", "Practice"]
 };
 
+<div className="article-language article-language-en">
+
 The Leet-Code repo is an algorithm practice notebook. It contains Python solutions organized by problem number, with a mix of brute-force approaches, optimized attempts, and exploratory notes.
 
 That makes it valuable as a learning record. The code shows not only final answers, but also the path from direct thinking to better patterns.
@@ -34,3 +36,39 @@ That progression matters because interview-style problem solving is mostly patte
 ## Takeaway
 
 This repo is less about one polished product and more about building algorithm fluency. The next step would be adding complexity notes and a short reflection for each solved problem.
+
+</div>
+
+<div className="article-language article-language-zh">
+
+这个 LeetCode 仓库是一本算法练习笔记。它包含按题号组织的 Python 解法，混合了暴力解法、优化尝试和探索性笔记。
+
+这让它作为学习记录很有价值：代码不只展示最终答案，也展示了从直接思路到更好模式的演进过程。
+
+## 仓库中的模式
+
+许多题目落入常见分类：数组、字符串、哈希表、排序、双指针、递归、动态规划和基础数学。
+
+例子包括两数之和、最长无重复字符子串、爬楼梯、最长连续序列、两数之和 II、包含类匹配问题和子数组计数。
+
+## 学习价值
+
+有些解法是有意保持简单的。暴力解法通常是证明思路的第一个版本，之后可以用哈希表、滑动窗口、动态规划表或有序扫描重新解决同一道题。
+
+这种演进很重要，因为面试式解题本质上是在约束条件下的模式识别。
+
+## 知识点
+
+- 哈希表经常把重复查找问题从二次时间复杂度降低到线性时间。
+- 当子串或子数组需要满足移动约束时，滑动窗口很有用。
+- 当输入已排序或可以从两端扫描时，双指针效果很好。
+- 动态规划存储重叠子问题的结果，而不是重复计算。
+- 排序可以简化问题，但通常会把时间复杂度变为 O(n log n)。
+- 递归表达力强，但当状态重复时通常需要记忆化。
+- 在代码旁边维护笔记，更容易回顾错误和改进。
+
+## 总结
+
+这个仓库不是一个精良的产品，更多是关于建立算法熟练度。下一步可以为每道解决的题目添加复杂度注释和简短反思。
+
+</div>

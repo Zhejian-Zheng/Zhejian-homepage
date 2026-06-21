@@ -5,6 +5,8 @@ export const metadata = {
 	tags: ["Reinforcement Learning", "Supervised Learning", "Python", "Safety"]
 };
 
+<div className="article-language article-language-en">
+
 This project explores a simple but powerful idea: reinforcement learning agents can learn faster or behave more safely when a supervised model filters risky actions.
 
 The environment is a 10 by 10 grid world with a start state, a goal, and hazards. A baseline Q-learning agent learns from reward feedback. The shielded version uses a classifier to predict the risk level of candidate actions before the action is selected.
@@ -40,3 +42,45 @@ That tradeoff is exactly the kind of behavior safe RL systems need to expose.
 ## Takeaway
 
 This repo shows how classical RL and supervised learning can cooperate. The agent still learns a policy, but the classifier adds a safety boundary around exploration and action selection.
+
+</div>
+
+<div className="article-language article-language-zh">
+
+这个项目探索了一个简单但有力的想法：当监督学习模型过滤掉危险动作时，强化学习 agent 可以学得更快，也能表现得更安全。
+
+实验环境是一个 10×10 的网格世界，包含起始状态、目标和若干危险区域。基准 Q-learning agent 从奖励反馈中学习；加了"安全盾"的版本会在动作被选择之前，用分类器预测候选动作的风险等级。
+
+## 实验环境
+
+每个状态-动作对可以用位置、动作和环境衍生特征来表示。奖励函数设计得很直接：到达目标为正奖励，普通步骤有小惩罚，进入危险区域有大惩罚。
+
+这让安全问题变得可见——策略最终可以学会到达目标，但在探索过程中可能还是会触碰很多危险区域。
+
+## 监督安全盾
+
+监督层从带标注的状态-动作样本中训练。以危险区域为起点的多源 BFS 距离图生成风险标签，比如"立即危险"、"附近危险"、"较远风险"和"安全"。
+
+模型在 Q-learning 策略选定动作前先对动作分类。如果某个动作在设定阈值下被判定为过于危险，agent 就从更安全的候选动作中选择。
+
+## 实验结论
+
+最有价值的发现不是简单的"加盾好"，而是阈值至关重要。宽松的阈值可以减少危险违规，同时保留好的奖励；过于严格的阈值会让 agent 太保守，影响成功率。
+
+这个权衡正是安全 RL 系统需要暴露和分析的核心行为。
+
+## 知识点
+
+- Q-learning 将价值估计与环境模型分离，适合在网格世界实验中直接使用。
+- 监督学习可以把领域知识编码成可复用的动作过滤器。
+- 当危险区域已知时，BFS 标注是生成安全标签的实用方法。
+- 安全系统应该同时追踪违规减少情况和任务完成率。
+- 假阴性（漏掉危险动作）尤为重要，一次遗漏就可能打破安全承诺。
+- 安全盾可以理解为策略指导，而不是对 RL 算法的替代。
+- 评估应该将基线奖励、成功率、违规次数和干预行为综合比较。
+
+## 总结
+
+这个仓库展示了经典 RL 与监督学习如何协作。agent 仍然在学习策略，但分类器在探索和动作选择周围添加了安全边界。
+
+</div>

@@ -24,8 +24,19 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
 	}
 
 	return {
-		title: `${post.title} - Zhejian Blog`,
-		description: post.summary
+		title: `${post.title} – Zhejian Blog`,
+		description: post.summary,
+		openGraph: {
+			title: post.title,
+			description: post.summary,
+			type: "article",
+			publishedTime: post.publishedAt,
+		},
+		twitter: {
+			card: "summary",
+			title: `${post.title} – Zhejian Blog`,
+			description: post.summary,
+		},
 	};
 }
 

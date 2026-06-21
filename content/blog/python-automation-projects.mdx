@@ -5,6 +5,8 @@ export const metadata = {
 	tags: ["Python", "Automation", "Data", "Workflow"]
 };
 
+<div className="article-language article-language-en">
+
 Several projects in my work use Python as the glue layer between data, storage, scripts, and delivery workflows. The pattern is simple: take repetitive work that humans do manually, encode it as a repeatable process, and keep enough metadata to debug it later.
 
 The Jobgen.ai automation work is one example, using Python with object storage and database records. The networking simulator and learning projects also use Python to make system behavior visible and testable.
@@ -34,3 +36,39 @@ The most important design choice is keeping enough state to resume safely. Witho
 ## Takeaway
 
 The common thread across these projects is not one library. It is the habit of turning repeated operational work into clear, inspectable, and repeatable systems.
+
+</div>
+
+<div className="article-language article-language-zh">
+
+我的多个项目都把 Python 作为数据、存储、脚本和交付工作流之间的胶水层。模式很简单：把人工重复执行的工作编码为可重复的流程，并保留足够的元数据供后续调试。
+
+Jobgen.ai 的自动化工作是一个例子，使用 Python 结合对象存储和数据库记录。网络模拟器和学习类项目也用 Python 让系统行为变得可见和可测试。
+
+## 为什么 Python 适合这里
+
+Python 写起来快，易于检查，在 API 集成方面也很强。它有成熟的库覆盖云存储、数据库、Notebook、CLI 工具、Socket 和机器学习。
+
+当主要挑战是连接系统而不是构建底层运行时时，Python 是个好选择。
+
+## 工作流模式
+
+一个实用的自动化流程通常包括：输入发现、校验、转换、上传或回写、日志记录、重试行为和最终报告。
+
+最重要的设计选择是保留足够的状态以便安全恢复。没有元数据的情况下，批处理任务失败后很难定位问题。
+
+## 知识点
+
+- Python 是在 API、数据库和文件之间移动数据的有效胶水代码。
+- 对象存储最适合大型制品，数据库最适合可搜索的元数据。
+- 批处理任务需要日志记录、重试阈值和幂等行为。
+- 校验应该发生在副作用（如上传或数据库写入）之前。
+- 当参数和错误处理设计得当时，小型 CLI 脚本可以成为可靠的内部工具。
+- 自动化应该减少手动步骤，同时不隐藏失败状态。
+- 当每个制品都有可追踪的 key 或记录时，数据工作流更易维护。
+
+## 总结
+
+这些项目的共同线索不是某一个库，而是把重复的运维工作转化为清晰、可检查、可重复系统的习惯。
+
+</div>

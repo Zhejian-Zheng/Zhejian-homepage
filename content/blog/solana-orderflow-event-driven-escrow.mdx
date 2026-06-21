@@ -5,6 +5,8 @@ export const metadata = {
 	tags: ["Solana", "Rust", "Kafka", "Postgres"]
 };
 
+<div className="article-language article-language-en">
+
 Solana OrderFlow is an event-driven escrow system. The interesting part is not only the on-chain token exchange, but the full path from smart contract event logs to off-chain indexing, risk detection, and notification workers.
 
 The project has two worlds. The Anchor program owns the escrow state and token custody. The off-chain services listen for program logs, normalize them, publish them to Kafka, persist them into Postgres, and run consumer-side workflows.
@@ -38,3 +40,43 @@ The risk engine consumes the same event stream and applies rule-based checks. Ex
 ## Takeaway
 
 This repo is a good example of full-stack blockchain engineering: the smart contract is only one layer. The production shape also needs ingestion, storage, idempotency, monitoring, and downstream consumers.
+
+</div>
+
+<div className="article-language article-language-zh">
+
+Solana OrderFlow 是一个事件驱动的托管系统。有意思的地方不只是链上代币交换本身，而是从智能合约事件日志到链下索引、风险检测和通知服务的完整链路。
+
+这个项目有两个世界。Anchor 程序负责托管状态和代币托管；链下服务监听程序日志、规范化事件、发布到 Kafka、持久化到 Postgres，并运行下游消费者工作流。
+
+## 链上层
+
+Anchor 程序支持三条核心指令：创建 Offer、接受 Offer、取消 Offer。创建 Offer 时，代币被转移到和 Offer 关联的金库账户。当 Offer 被成交或取消时，程序使用 PDA signer seeds 安全地将代币转出。
+
+托管状态记录了 maker 地址、mint 账户、请求数量、提供数量、状态和 bump 信息。Created、Filled、Cancelled 这样的明确状态值让状态转换清晰可见，这在金融流程里非常重要。
+
+## 链下流水线
+
+监听器通过 WebSocket 订阅 Solana 日志，解析程序消息，规范化为事件记录，然后发布到 Kafka。存储写入器消费这些事件，写入仅追加的事件表和 Offer 快照表。
+
+这种分离很有价值：事件表保留完整历史，快照表让仪表盘查询更快。存储写入器还使用幂等键和手动 Kafka 提交，确保数据库故障不会静默丢失数据。
+
+## 风险与通知
+
+风险引擎消费同一个事件流，应用规则检查，比如大额 Offer 和频繁取消行为。告警被推送到独立的 Kafka topic，这样通知逻辑可以独立于检测逻辑单独演进。
+
+## 知识点
+
+- Solana 程序应该让代币托管和状态转换保持显式，尤其是在 escrow 流程中。
+- PDA signer seeds 允许程序在没有私钥的情况下授权从程序拥有的账户进行代币转移。
+- 日志是链上执行和链下索引之间实用的桥梁。
+- Kafka partition key、幂等 producer 和手动提交有助于构建可靠的事件流水线。
+- 仅追加事件表加快照表是仪表盘场景下常见的事件溯源模式。
+- 跨语言边界处理金额时需要格外小心，因为 JavaScript 的数字精度对代币值可能不安全。
+- 风险引擎可以先从简单规则开始，之后再演进到更复杂的评分模型。
+
+## 总结
+
+这个仓库是全栈区块链工程的典型案例：智能合约只是其中一层，生产环境还需要数据摄取、存储、幂等处理、监控和下游消费者。
+
+</div>

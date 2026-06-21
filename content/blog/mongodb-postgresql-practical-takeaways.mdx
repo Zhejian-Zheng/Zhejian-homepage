@@ -5,6 +5,8 @@ export const metadata = {
 	tags: ["MongoDB", "PostgreSQL", "Database", "Data"]
 };
 
+<div className="article-language article-language-en">
+
 Working with MongoDB and PostgreSQL taught me that database choice is less about which one is better and more about how the data wants to live.
 
 PostgreSQL feels like the right choice when the data has clear structure and strong relationships. MongoDB feels more flexible when the data shape changes often or when records naturally contain nested document-style information.
@@ -42,3 +44,47 @@ My current preference is to use PostgreSQL for important relational data and Mon
 In a real full-stack system, they can also work together: PostgreSQL can handle the stable core, while MongoDB can store dynamic records, logs, or workflow states.
 
 In short: PostgreSQL gives me confidence; MongoDB gives me flexibility.
+
+</div>
+
+<div className="article-language article-language-zh">
+
+使用 MongoDB 和 PostgreSQL 的经历让我意识到，数据库选型不是"哪个更好"的问题，而是数据本身更适合以哪种方式存活。
+
+当数据有清晰结构和强关系时，PostgreSQL 是自然的选择；当数据结构频繁变化，或记录天然包含嵌套文档时，MongoDB 更灵活。
+
+## PostgreSQL
+
+PostgreSQL 是关系型数据库，把数据组织成表、行和列。当系统需要关联关系、约束、Join 和事务时，它非常强大。
+
+我通常会为核心应用数据选择 PostgreSQL，比如用户、订单、支付、权限、项目记录，以及任何对正确性有要求的数据。它的 SQL 支持也让报表、聚合和调试非常直接。
+
+## MongoDB
+
+MongoDB 是文档数据库，把相关字段存储在一起作为文档。当应用数据本身就是嵌套对象结构时，MongoDB 更自然。
+
+我会为任务记录、日志、用户偏好、AI 工作流元数据、爬取数据，以及字段可能快速演化的原型选择 MongoDB，它在 schema 仍在变化、产品需要快速迭代时特别有用。
+
+## 权衡
+
+最核心的教训是：灵活性有代价。MongoDB 上手很快，但没有规范约束的话，集合可能随时间变得不一致。
+
+PostgreSQL 需要更多前期 schema 设计，但这种结构在项目增长时往往能节省大量时间。
+
+## 知识点
+
+- PostgreSQL 通常更适合结构化的关系型数据和强一致性场景。
+- MongoDB 适合灵活的文档型数据和快速变化的 schema。
+- SQL 让复杂查询、Join 和报表更容易推理。
+- 当数据是嵌套结构且不需要很多 Join 时，MongoDB 文档很自然。
+- 最好的数据库选择取决于数据形态和产品需求。
+
+## 总结
+
+我目前的偏好是：重要的关系型数据用 PostgreSQL，灵活的文档型数据用 MongoDB。
+
+在真实的全栈系统里，两者也可以一起使用：PostgreSQL 处理稳定的核心数据，MongoDB 存储动态记录、日志或工作流状态。
+
+简单说：PostgreSQL 给我信心，MongoDB 给我灵活性。
+
+</div>

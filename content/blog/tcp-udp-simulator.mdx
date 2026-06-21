@@ -5,6 +5,8 @@ export const metadata = {
 	tags: ["Networking", "Python", "TCP", "UDP"]
 };
 
+<div className="article-language article-language-en">
+
 I built a TCP/UDP simulator to explore reliable messaging, heartbeat-driven liveness, authentication, and peer-to-peer file sharing.
 
 The project separates control messages from file transfer. UDP handles authentication, commands, and heartbeats. TCP handles file payloads from publishing peers.
@@ -44,3 +46,49 @@ This was designed as a lab simulator, but it can be extended with TLS, chunk che
 - Threading is needed because clients must accept TCP downloads while still sending UDP commands.
 - Protocol commands should have clear validation and error responses so clients know what happened.
 - Real systems would add authentication hardening, encryption, retries, and checksums.
+
+</div>
+
+<div className="article-language article-language-zh">
+
+我构建了这个 TCP/UDP 模拟器，用来探索可靠消息传递、心跳驱动的活跃性检测、身份认证和点对点文件共享。
+
+项目的核心设计是将控制消息与文件传输分离：UDP 负责认证、命令和心跳；TCP 负责来自发布者的文件数据传输。
+
+## 亮点
+
+- UDP 控制平面处理认证、命令、心跳消息和节点发现。
+- TCP 数据平面负责从发布者流式传输文件。
+- 心跳清理机制：超时后自动移除不活跃的节点。
+- 服务器状态追踪地址到用户名的映射、活跃时间戳和已发布文件的元数据。
+- 每个客户端绑定一个临时端口的 TCP 服务器，并在发布文件时广播该端口。
+
+## 服务器状态
+
+服务器维护多个映射表：地址到用户名、用户名到地址、客户端活跃时间戳，以及已发布文件的所有权。这让服务器可以验证命令、列出活跃节点，并在文件请求时返回发布者位置。
+
+服务器本身不托管文件，它更像是一个目录服务。节点发现完成后，客户端直接通过 TCP 从发布者处下载文件。
+
+## 命令
+
+- `pub <file>` 发布本地文件（如果文件存在）。
+- `get <file>` 向服务器询问发布者地址，然后通过 TCP 获取文件。
+- `lap` 和 `lpf` 分别列出活跃节点和已发布文件。
+- `sch <substr>` 在所有节点的已发布文件中搜索。
+- `unp <file>` 取消当前用户的文件发布。
+
+## 备注
+
+这个项目最初是作为实验室模拟器设计的，但可以扩展加入 TLS、分块校验和、重试退避和更丰富的可观测性。
+
+## 知识点
+
+- UDP 适合轻量级控制消息，但需要应用层逻辑来处理活跃性检测和身份验证。
+- TCP 更适合文件传输，因为它提供有序、可靠的字节流。
+- 心跳机制把"沉默"变成了可检测的故障模式。
+- 目录服务模式可以协调节点，而不需要代理每个文件传输。
+- 客户端需要多线程，因为它必须同时接受 TCP 下载请求和发送 UDP 命令。
+- 协议命令应该有清晰的校验和错误响应，让客户端知道发生了什么。
+- 真实系统还需要加固认证、加密传输、重试机制和数据校验和。
+
+</div>

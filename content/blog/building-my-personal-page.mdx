@@ -5,6 +5,8 @@ export const metadata = {
 	tags: ["Next.js", "Tailwind CSS", "MDX", "Portfolio"]
 };
 
+<div className="article-language article-language-en">
+
 This personal homepage started as a small portfolio surface and gradually became a place to practice product thinking.
 
 The goal was simple: build a site that feels personal, loads quickly, and gives visitors a clear path through my background, projects, writing, and contact details.
@@ -41,3 +43,46 @@ Small interactions matter here. The rotating travel section resets its timer aft
 - Add richer project case studies with screenshots and design decisions.
 - Add analytics to understand which pages visitors actually read.
 - Add Playwright checks for core routes and the contact form.
+
+</div>
+
+<div className="article-language article-language-zh">
+
+这个个人主页最初只是一个小型作品集展示，逐渐变成了一个练习产品思维的地方。
+
+目标很简单：建一个感觉是个人的、加载很快，并且能让访问者清晰地了解我的背景、项目、写作和联系方式的网站。
+
+## 技术栈
+
+- Next.js App Router，负责路由和静态生成。
+- Tailwind CSS，用于快速视觉迭代。
+- MDX，用于博客内容，后续可以把 Markdown 和 React 组件混用。
+- Web3Forms，提供轻量级的联系表单工作流。
+
+## 架构
+
+网站被分成几个专注的路由：首页介绍个人信息，About 页面展开故事，博客路由渲染 MDX 文章，联系页面通过外部表单服务发送消息。
+
+MDX 层有意保持简单：每篇文章导出 metadata，博客索引引入这些文章，动态路由通过 slug 渲染静态生成的文章页面。这样写作流程和代码库保持紧密关联，同时让网站具备真实的博客功能。
+
+## 设计思路
+
+我保持了布局直接、易读：首页介绍、附带旅行照片展示的 About 页面、用于技术笔记的博客区域，以及真正能发送消息的联系页面。
+
+小的交互细节很重要：旅行照片轮播在手动切换后重置计时器，联系表单汇报提交状态，页脚文字反映了网站持续更新的本质。
+
+## 知识点
+
+- App Router 路由可以将服务端渲染页面与需要交互的客户端组件结合使用。
+- MDX 非常适合开发者作品集，因为文章可以与应用代码一起做版本控制。
+- 环境变量应该让表单 access key 不进入提交的源码，同时支持本地和 Vercel 部署。
+- 计时器重置、加载文字、禁用提交状态等用户体验细节能让小网站感觉打磨得更精良。
+- 个人主页适合被当作产品来对待：清晰的导航、有目的的文案、真实的联系路径，和视觉设计一样重要。
+
+## 下一步想改进的地方
+
+- 添加更丰富的项目案例研究，包含截图和设计决策。
+- 添加分析功能，了解访问者实际在读哪些页面。
+- 为核心路由和联系表单添加 Playwright 测试。
+
+</div>

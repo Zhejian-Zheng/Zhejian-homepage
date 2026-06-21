@@ -5,6 +5,8 @@ export const metadata = {
 	tags: ["Vue", "TypeScript", "Game Logic", "Prototype"]
 };
 
+<div className="article-language article-language-en">
+
 Magic Chess is an ongoing browser chess prototype built with Vue 3 and TypeScript. It is not a fully shipped game yet, but it is a useful exploration of rule-engine structure, board state, and custom chess-like mechanics.
 
 That makes it a useful rules-engine project. Chess already has many edge cases, and custom variants add another layer of design pressure.
@@ -40,3 +42,45 @@ The detector also explores checkmate, stalemate, and insufficient material condi
 ## Takeaway
 
 This repo is best understood as a work-in-progress game logic prototype. Its strongest lesson is how to separate state, rule validation, endgame detection, and rendering before polishing the full gameplay experience.
+
+</div>
+
+<div className="article-language article-language-zh">
+
+Magic Chess 是一个基于 Vue 3 和 TypeScript 的浏览器端国际象棋原型，目前仍在持续开发中。它还不是一个完整交付的游戏，但作为规则引擎结构、棋盘状态管理和自定义棋类规则的探索，价值很高。
+
+这让它成为一个有意思的规则引擎项目。国际象棋本身就有大量边界情况，自定义变体又增加了一层设计压力。
+
+## 状态模型
+
+核心类型对棋子、颜色、位置、棋盘、走法、游戏状态和游戏模式进行了建模。让类型保持显式，使后续逻辑更容易推理，因为每个走法函数都使用同一套语言。
+
+游戏 composable 持有共享状态：棋盘、已选格子、合法走法、当前玩家、被吃棋子、走法历史、计时器、升变状态和 AI 走棋时机。
+
+## 走法验证
+
+走法验证器处理标准棋子移动、过路兵和王车易位等特殊情况，以及幽灵兵、重骑士、主教狙击手行为和车冲锋行为等自定义模式。
+
+一个重要的模式是模拟：候选走法在克隆的棋盘上验证，以便在 UI 接受之前过滤掉会暴露王的非法走法。
+
+## 将军与终局检测
+
+将军检测与一般走法生成分离处理。项目通过在判断王是否受威胁时使用攻击走法，来避免递归验证循环。
+
+检测器还实现了将死、逼和以及材料不足等终局条件。这些功能指向更完整的游戏体验，尽管项目在作为精良游戏展示之前还需要更多打磨。
+
+## 知识点
+
+- Vue composable 是集中管理游戏状态并向组件暴露操作的简洁方式。
+- TypeScript 联合类型和接口让棋盘游戏逻辑更安全、更易于调试。
+- 国际象棋验证通常需要模拟，因为一个局部合法的走法可能在全局不合法。
+- 将军检测应该避免以递归方式调用完整的合法走法生成。
+- 当基础规则模块化时，自定义游戏模式更容易扩展。
+- UI 高亮应该从状态派生，而不是手动与 DOM 行为同步。
+- 计时器、历史记录、被吃棋子和升变 UI 是产品体验的一部分，不是可选项。
+
+## 总结
+
+这个仓库最适合被理解为一个进行中的游戏逻辑原型。它最核心的教训是如何在打磨完整游戏体验之前，先把状态、规则验证、终局检测和渲染分离清楚。
+
+</div>

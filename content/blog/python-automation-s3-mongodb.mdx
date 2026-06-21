@@ -5,6 +5,8 @@ export const metadata = {
 	tags: ["Python", "AWS S3", "MongoDB", "Automation"]
 };
 
+<div className="article-language article-language-en">
+
 During my internship/project at Jobgen.ai, I focused on speeding up delivery with Python automation, integrating AWS S3 for object storage and MongoDB for fast metadata and state tracking.
 
 The useful pattern was separating heavy files from lightweight operational records. S3 handled artifacts, while MongoDB made it easy to look up task status, file keys, retries, timestamps, and processing stages.
@@ -22,3 +24,27 @@ The useful pattern was separating heavy files from lightweight operational recor
 - Separate blobs from metadata to make debugging and scaling easier.
 - Automating repetitive delivery steps reduces human error.
 - Python is a strong glue layer for CLI workflows, batch processing, and API integrations.
+
+</div>
+
+<div className="article-language article-language-zh">
+
+在 Jobgen.ai 的实习项目期间，我重点通过 Python 自动化加快交付速度，将 AWS S3 用于对象存储，MongoDB 用于快速的元数据和状态追踪。
+
+一个实用的模式是将大文件与轻量级操作记录分离：S3 处理制品，MongoDB 负责快速查询任务状态、文件 key、重试次数、时间戳和处理阶段。
+
+## 亮点
+
+- 数据流：任务 → Python 预处理 → S3 上传 → MongoDB 记录。
+- S3 签名 URL 加上批量上传和验证脚本，让制品保持一致且安全可访问。
+- MongoDB 充当任务状态和已处理文件的快速查询层。
+- Python CLI 工具封装了 boto3 和 pymongo，用于可恢复的批量上传、校验、回写、清理和轻量级告警流程。
+- 日志记录和重试阈值让故障更容易被发现和调试。
+
+## 总结
+
+- 将二进制对象与元数据分开存储，让调试和扩展都更简单。
+- 自动化重复的交付步骤可以减少人为错误。
+- Python 是 CLI 工作流、批处理和 API 集成的强力胶水层。
+
+</div>

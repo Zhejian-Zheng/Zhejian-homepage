@@ -1,5 +1,21 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import SiteNav from "../components/SiteNav";
+
+export const metadata: Metadata = {
+	title: "Blog – Zhejian Zheng",
+	description: "Technical writeups about full-stack systems, data workflows, web design, human-computer interaction, and the decisions behind my public repositories.",
+	openGraph: {
+		title: "Blog – Zhejian Zheng",
+		description: "Technical writeups about full-stack systems, data workflows, web design, and engineering decisions.",
+		type: "website",
+	},
+	twitter: {
+		card: "summary",
+		title: "Blog – Zhejian Zheng",
+		description: "Technical writeups about full-stack systems, data workflows, web design, and engineering decisions.",
+	},
+};
 import { LocalizedText } from "../components/language";
 import { LocalizedDate, LocalizedPostSummary, LocalizedPostTitle, LocalizedTag } from "./localizedPostText";
 import { blogPosts } from "./posts";
@@ -16,7 +32,7 @@ export default function BlogPage() {
 	]);
 	const selectedProjectPosts = blogPosts.filter((post) => selectedProjectSlugs.has(post.slug));
 	const remainingPosts = blogPosts.filter((post) => !aiAgentSlugs.has(post.slug) && !selectedProjectSlugs.has(post.slug));
-	const countedPosts = aiAgentPosts.length + remainingPosts.length;
+	const countedPosts = blogPosts.length;
 
 	return (
 		<div className="min-h-screen bg-slate-950 text-white px-4 pb-16 pt-24">

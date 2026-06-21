@@ -5,6 +5,8 @@ export const metadata = {
 	tags: ["React", "Express", "UX", "Prototype"]
 };
 
+<div className="article-language article-language-en">
+
 Legal Youth is a prototype web application for making legal information easier to explore. It combines a React frontend, a Node and Express backend, search-style flows, resource pages, interactive tools, and map-based legal aid discovery.
 
 The technical value of the project is in product structure: it turns a broad, sensitive information domain into navigable routes and user workflows.
@@ -40,3 +42,45 @@ The prototype structure supports that by making categories, search, maps, and to
 ## Takeaway
 
 This repo is a product-thinking exercise as much as a coding exercise. The main challenge is not only building pages, but designing a system that helps users find the next useful step.
+
+</div>
+
+<div className="article-language article-language-zh">
+
+Legal Youth 是一个原型 Web 应用，目标是让法律信息更容易被普通用户查找和使用。它结合了 React 前端、Node/Express 后端、搜索流程、资源页面、交互工具和基于地图的法律援助发现功能。
+
+这个项目的技术价值在于产品结构设计：它把一个宽泛、敏感的信息领域，转化成了可导航的路由和用户工作流。
+
+## 前端结构
+
+React 应用通过路由分离了主要体验，包括搜索、分类、文章、资源、工具、地图、论坛、个人中心、登录和注册。Material UI 提供了一致的组件基础，动效和布局选择让界面更亲切。
+
+首页包含搜索入口和常见法律需求的主题卡片，还有一个轻量级的关键词助手，覆盖租房、就业、学生问题、消费者权益、家庭事务和隐私等主题。
+
+## 后端结构
+
+Express 服务器处理 JSON 解析、CORS、安全请求头、日志、健康检查、示例 API 路由，以及 React 构建产物的生产部署。
+
+即使作为原型，这个后端骨架也很重要，因为它为未来的搜索 API、账户功能、资源存储和内容审核工作流确立了正确的边界。
+
+## 用户体验设计思考
+
+法律信息本身可能让用户感到压力。设计需要减少使用阻力，使用平实的语言，引导用户找到相关资源，同时不假装替代专业法律建议。
+
+原型的结构通过把分类、搜索、地图和工具作为独立路径来实现这一点，而不是把所有内容堆在一个长页面里。
+
+## 知识点
+
+- React Router 适合把产品建模为一组用户旅程，而不仅仅是页面集合。
+- Material UI 可以在保持视觉一致性的同时加快原型开发。
+- Helmet、CORS、Morgan 和 JSON body parsing 等 Express 中间件构成了实用的 API 基线。
+- 法律引导类产品需要精心设计信息架构，因为用户可能带着紧迫且模糊的问题到来。
+- 在完整语义搜索或聊天机器人系统存在之前，关键词助手可以帮助早期原型先跑起来。
+- 地图和资源目录把静态信息转化为行动导向的引导。
+- 原型代码仍应保持清晰的前后端边界，以便后续扩展。
+
+## 总结
+
+这个仓库是产品思维练习，也是编码练习。主要挑战不只是搭建页面，而是设计一个能帮助用户找到下一步的系统。
+
+</div>
