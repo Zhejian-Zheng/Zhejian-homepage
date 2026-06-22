@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
 import SiteNav from "./components/SiteNav";
@@ -16,6 +16,9 @@ type Quote = { content: string; author: string };
 type BgImage = StaticImageData;
 
 const BG_IMAGES: BgImage[] = [bgBerlin, bgYosemite, bgBerchtesgaden, bgBall, bgCityscape];
+
+const QUOTE_API_TIMEOUT_MS = 3500;
+const QUOTE_MIN_FADE_MS = 200;
 
 const localQuotes: Record<Language, Quote[]> = {
 	en: [
@@ -36,6 +39,13 @@ const localQuotes: Record<Language, Quote[]> = {
 	]
 };
 
+// Pick a random quote that differs from the current one so a refresh always feels like a change.
+function pickDifferentQuote(pool: Quote[], current: Quote | null): Quote {
+	const others = current ? pool.filter((q) => q.content !== current.content) : pool;
+	const candidates = others.length > 0 ? others : pool;
+	return candidates[Math.floor(Math.random() * candidates.length)];
+}
+
 const homeCopy = {
 	en: {
 		displayName: "Zhejian Zheng",
@@ -46,7 +56,7 @@ const homeCopy = {
 		loadingQuote: "Loading daily quote...",
 		quoteFallbackAuthor: "Quote",
 		changeBackground: "Change background",
-		refreshQuote: "click to refresh daily quote",
+		refreshQuote: "Click to refresh daily quote",
 		footer: "Established in 2024 by Zhejian Zheng. Continuously updated.",
 		builtWith: "Built with React, Next.js, and Tailwind CSS."
 	},
@@ -72,29 +82,67 @@ export default function HomeClient() {
 	const [loading, setLoading] = useState(false);
 	const [bgLoading, setBgLoading] = useState(false);
 	const [currentBg, setCurrentBg] = useState<BgImage>(BG_IMAGES[0]);
+	// Only background images the user has actually viewed are mounted, so the first paint
+	// downloads a single image instead of all of them.
+	const [loadedBgs, setLoadedBgs] = useState<BgImage[]>([BG_IMAGES[0]]);
+
+	// Mirror the latest quote in a ref so loadQuote can dedupe without depending on `quote`
+	// (depending on it would recreate the callback and retrigger the load effect in a loop).
+	const quoteRef = useRef<Quote | null>(null);
+	const mountedRef = useRef(true);
+
+	useEffect(() => {
+		quoteRef.current = quote;
+	}, [quote]);
+
+	useEffect(() => {
+		mountedRef.current = true;
+		return () => {
+			mountedRef.current = false;
+		};
+	}, []);
 
 	const loadQuote = useCallback(async () => {
+		setLoading(true);
+		const startedAt = Date.now();
+		let next: Quote;
+
 		try {
-			setLoading(true);
 			if (language === "zh") {
-				const fallback = localQuotes.zh[Math.floor(Math.random() * localQuotes.zh.length)];
-				setQuote(fallback);
-				return;
+				next = pickDifferentQuote(localQuotes.zh, quoteRef.current);
+			} else {
+				const controller = new AbortController();
+				const timeout = setTimeout(() => controller.abort(), QUOTE_API_TIMEOUT_MS);
+				try {
+					const resp = await fetch(`https://api.quotable.io/random?t=${Date.now()}`, {
+						cache: "no-store",
+						signal: controller.signal
+					});
+					if (!resp.ok) {
+						throw new Error(`status ${resp.status}`);
+					}
+					const data = await resp.json();
+					next = { content: data.content, author: data.author };
+				} finally {
+					clearTimeout(timeout);
+				}
 			}
-			const ts = Date.now();
-			const resp = await fetch(`https://api.quotable.io/random?t=${ts}`, { cache: "no-store" });
-			if (!resp.ok) {
-				throw new Error(`status ${resp.status}`);
-			}
-			const data = await resp.json();
-			setQuote({ content: data.content, author: data.author });
 		} catch {
-			// Ensure it still changes even if API fails
-			const fallback = localQuotes[language][Math.floor(Math.random() * localQuotes[language].length)];
-			setQuote(fallback);
-		} finally {
-			setLoading(false);
+			// Ensure it still changes even if the API fails or times out.
+			next = pickDifferentQuote(localQuotes[language], quoteRef.current);
 		}
+
+		// Guarantee the fade-out is perceptible even when the source resolves instantly (local quotes).
+		const elapsed = Date.now() - startedAt;
+		if (elapsed < QUOTE_MIN_FADE_MS) {
+			await new Promise((resolve) => setTimeout(resolve, QUOTE_MIN_FADE_MS - elapsed));
+		}
+
+		if (!mountedRef.current) {
+			return;
+		}
+		setQuote(next);
+		setLoading(false);
 	}, [language]);
 
 	const changeBackground = () => {
@@ -105,10 +153,27 @@ export default function HomeClient() {
 			const imgUrl = pool[Math.floor(Math.random() * pool.length)];
 			const preload = new window.Image();
 			preload.onload = () => {
-				setCurrentBg(imgUrl);
-				setBgLoading(false);
+				if (!mountedRef.current) {
+					return;
+				}
+				// Mount the new layer (at opacity-0), then flip it to visible on a later frame so
+				// the opacity transition actually runs instead of hard-cutting.
+				setLoadedBgs((prev) => (prev.includes(imgUrl) ? prev : [...prev, imgUrl]));
+				requestAnimationFrame(() => {
+					requestAnimationFrame(() => {
+						if (!mountedRef.current) {
+							return;
+						}
+						setCurrentBg(imgUrl);
+						setBgLoading(false);
+					});
+				});
 			};
-			preload.onerror = () => setBgLoading(false);
+			preload.onerror = () => {
+				if (mountedRef.current) {
+					setBgLoading(false);
+				}
+			};
 			preload.src = imgUrl.src;
 		} catch {
 			setBgLoading(false);
@@ -124,7 +189,7 @@ export default function HomeClient() {
 			<SiteNav active="home">
 				<button
 					onClick={changeBackground}
-					className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white shadow-lg shadow-secondary/20 transition hover:border-primary/50 hover:bg-primary/25 disabled:opacity-60"
+					className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white shadow-lg shadow-secondary/20 transition hover:border-primary/50 hover:bg-primary/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 active:scale-95 disabled:opacity-60"
 					disabled={bgLoading}
 					aria-label={copy.changeBackground}
 					title={copy.changeBackground}
@@ -149,16 +214,22 @@ export default function HomeClient() {
 
 			<main className="relative isolate overflow-hidden bg-slate-950">
 				<div className="absolute inset-0 -z-10">
-					<div
-						className="absolute inset-0 bg-cover bg-center transition-all duration-500"
-						style={{ backgroundImage: `url('${currentBg.src}')` }}
-					/>
+					{loadedBgs.map((img) => (
+						<div
+							key={img.src}
+							className={`absolute inset-0 bg-cover bg-center transition-opacity duration-700 ease-out motion-reduce:transition-none ${
+								img === currentBg ? "opacity-100" : "opacity-0"
+							}`}
+							style={{ backgroundImage: `url('${img.src}')` }}
+							aria-hidden="true"
+						/>
+					))}
 					<div className="absolute inset-0 bg-gradient-to-b from-slate-900/80 via-slate-950/80 to-slate-900/90" />
 				</div>
 
 				<section className="flex min-h-screen flex-col items-center justify-center px-4 pb-12 pt-24 text-center">
 					<div className="relative mb-6">
-						<div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-primary via-accent to-secondary animate-[pulse_3s_ease-in-out_infinite] opacity-70" />
+						<div className="absolute -inset-1 rounded-full bg-gradient-to-tr from-primary via-accent to-secondary opacity-80" />
 						<Image
 							src={profileImg}
 							alt={language === "zh" ? "郑哲坚" : "Zhejian Zheng"}
@@ -178,28 +249,54 @@ export default function HomeClient() {
 					</div>
 
 					<div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-						<Link href="/blog" className="glass rounded-xl px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15">
+						<Link
+							href="/blog"
+							className="glass rounded-xl px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 active:scale-95"
+						>
 							{copy.readBlogs}
 						</Link>
-						<Link href="/contact" className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:-translate-y-0.5 hover:bg-primary/85">
+						<Link
+							href="/contact"
+							className="rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-primary/25 transition hover:-translate-y-0.5 hover:bg-primary/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 active:translate-y-0 active:scale-95"
+						>
 							{copy.contactMe}
 						</Link>
 					</div>
 
 					<button
 						onClick={loadQuote}
-						className="glass mt-6 w-full max-w-2xl px-5 py-4 text-left transition hover:bg-white/15 disabled:opacity-60"
+						className="glass group mt-6 w-full max-w-2xl px-5 py-4 text-left transition hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 active:scale-[0.99] disabled:opacity-60"
 						aria-label={copy.refreshQuote}
 						title={copy.refreshQuote}
 						disabled={loading}
 					>
-						<p className="text-base italic sm:text-lg">{quote?.content ?? copy.loadingQuote}</p>
-						<p className="mt-1 text-sm opacity-80">— {quote?.author ?? copy.quoteFallbackAuthor}</p>
+						<div className={`transition-opacity duration-300 motion-reduce:transition-none ${loading ? "opacity-40" : "opacity-100"}`}>
+							<p className="text-base italic sm:text-lg">{quote?.content ?? copy.loadingQuote}</p>
+							<p className="mt-1 text-sm opacity-80">— {quote?.author ?? copy.quoteFallbackAuthor}</p>
+						</div>
+						<span className="mt-3 flex items-center gap-1.5 text-xs text-white/55 transition group-hover:text-white/80">
+							<svg
+								viewBox="0 0 24 24"
+								className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`}
+								fill="none"
+								stroke="currentColor"
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								strokeWidth="2"
+								aria-hidden="true"
+							>
+								<path d="M21 12a9 9 0 0 1-15.3 6.4" />
+								<path d="M3 12A9 9 0 0 1 18.3 5.6" />
+								<path d="M18 2v4h-4" />
+								<path d="M6 22v-4h4" />
+							</svg>
+							{copy.refreshQuote}
+						</span>
 					</button>
 
 					<div className="mt-6 flex items-center justify-center gap-4 sm:gap-6">
 						<a
-							className="btn-circle glass transition hover:scale-105"
+							className="btn-circle glass transition hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 active:scale-95"
 							href="https://github.com/Zhejian-Zheng"
 							target="_blank"
 							rel="noreferrer"
@@ -211,7 +308,7 @@ export default function HomeClient() {
 							</svg>
 						</a>
 						<a
-							className="btn-circle glass transition hover:scale-105"
+							className="btn-circle glass transition hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 active:scale-95"
 							href="https://www.linkedin.com/in/zhejian-zheng-9a5563312/"
 							target="_blank"
 							rel="noreferrer"

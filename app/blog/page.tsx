@@ -104,13 +104,13 @@ export default function BlogPage() {
 						{selectedProjectPosts.map((post) => (
 							<article
 								key={post.slug}
-								className="rounded-lg border border-white/10 bg-slate-900/80 p-5 transition hover:-translate-y-0.5 hover:border-primary/50 hover:bg-slate-900"
+								className="rounded-lg border border-white/10 bg-slate-900/80 p-5 transition hover:-translate-y-1 hover:border-primary/60 hover:bg-slate-900 hover:shadow-lg hover:shadow-primary/15"
 							>
 								<div className="flex items-start justify-between gap-4">
 									<h3 className="text-2xl font-semibold leading-snug text-white">
 										<LocalizedPostTitle slug={post.slug} title={post.title} />
 									</h3>
-									<span className="h-2 w-2 shrink-0 rounded-full bg-primary shadow-[0_0_20px_rgba(102,126,234,0.8)]" />
+									<span className="h-2 w-2 shrink-0 rounded-full bg-primary shadow-[0_0_20px_rgba(37,99,235,0.8)]" />
 								</div>
 								<p className="mt-3 text-sm leading-7 text-slate-300">
 									<LocalizedPostSummary slug={post.slug} summary={post.summary} />
@@ -158,14 +158,14 @@ export default function BlogPage() {
 						{aiAgentPosts.map((post) => (
 							<article
 								key={post.slug}
-								className="group rounded-lg border border-primary/30 bg-gradient-to-br from-primary/10 via-slate-900/80 to-accent/10 p-5 shadow-xl shadow-primary/10 transition hover:-translate-y-0.5 hover:border-accent/60"
+								className="group rounded-lg border border-primary/30 bg-gradient-to-br from-primary/10 via-slate-900/80 to-accent/10 p-5 shadow-xl shadow-primary/10 transition hover:-translate-y-1 hover:border-accent/70 hover:shadow-lg hover:shadow-accent/15"
 							>
 								<div className="space-y-4">
 									<div className="flex items-start justify-between gap-4">
 										<p className="text-xs uppercase tracking-[0.25em] text-primary">
 											<LocalizedDate date={post.publishedAt} />
 										</p>
-										<span className="h-2 w-2 shrink-0 rounded-full bg-accent shadow-[0_0_20px_rgba(240,147,251,0.8)]" />
+										<span className="h-2 w-2 shrink-0 rounded-full bg-accent shadow-[0_0_20px_rgba(245,158,11,0.8)]" />
 									</div>
 									<div className="space-y-3">
 										<h3 className="text-2xl font-semibold leading-snug text-white group-hover:text-accent transition">
@@ -214,14 +214,14 @@ export default function BlogPage() {
 						return (
 							<article
 								key={post.slug}
-								className="group rounded-lg border border-white/10 bg-slate-900/80 p-5 shadow-xl shadow-black/20 transition hover:-translate-y-0.5 hover:border-primary/50 hover:bg-slate-900"
+								className="group rounded-lg border border-white/10 bg-slate-900/80 p-5 shadow-xl shadow-black/20 transition hover:-translate-y-1 hover:border-primary/60 hover:bg-slate-900 hover:shadow-lg hover:shadow-primary/15"
 							>
 								<div className="space-y-4">
 									<div className="flex items-start justify-between gap-4">
 										<p className="text-xs uppercase tracking-[0.25em] text-slate-400">
 											<LocalizedDate date={post.publishedAt} />
 										</p>
-										<span className="h-2 w-2 shrink-0 rounded-full bg-primary shadow-[0_0_20px_rgba(102,126,234,0.8)]" />
+										<span className="h-2 w-2 shrink-0 rounded-full bg-primary shadow-[0_0_20px_rgba(37,99,235,0.8)]" />
 									</div>
 									<div className="space-y-3">
 										<h3 className="text-2xl font-semibold leading-snug text-white group-hover:text-primary transition">
