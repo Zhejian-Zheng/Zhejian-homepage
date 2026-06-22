@@ -6,11 +6,11 @@ import Link from "next/link";
 import SiteNav from "./components/SiteNav";
 import { useLanguage, type Language } from "./components/language";
 import profileImg from "@/app/images/profile image.jpg";
-import bgBerlin from "@/app/images/backgrounds/berlin-6755246.jpg";
-import bgYosemite from "@/app/images/backgrounds/yosemite-8177850.jpg";
-import bgBerchtesgaden from "@/app/images/backgrounds/berchtesgaden-2928711.jpg";
-import bgBall from "@/app/images/backgrounds/ball-63527.jpg";
-import bgCityscape from "@/app/images/backgrounds/cityscape-6942013.jpg";
+import bgBerlin from "@/app/images/backgrounds/berlin-6755246.webp";
+import bgYosemite from "@/app/images/backgrounds/yosemite-8177850.webp";
+import bgBerchtesgaden from "@/app/images/backgrounds/berchtesgaden-2928711.webp";
+import bgBall from "@/app/images/backgrounds/ball-63527.webp";
+import bgCityscape from "@/app/images/backgrounds/cityscape-6942013.webp";
 
 type Quote = { content: string; author: string };
 type BgImage = StaticImageData;
