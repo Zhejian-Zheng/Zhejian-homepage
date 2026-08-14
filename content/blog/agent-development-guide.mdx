@@ -1,0 +1,402 @@
+export const metadata = {
+	title: "Agent Development Without the Mystery",
+	summary: "A bilingual beginner's guide to Agent execution loops, tools, state, memory, safety, debugging, and evaluation.",
+	publishedAt: "2026-08-14",
+	tags: ["AI Agent", "LLM", "Agent Development", "Engineering"]
+};
+
+<div className="article-language article-language-en">
+
+An Agent is easier to understand once you stop treating it as a special kind of intelligence. In software terms, it is usually a loop around a language model. The model reads the current state, decides whether to answer or use a tool, receives the tool result, and makes another decision.
+
+That loop can search documents, call an API, write a file, or ask a person for approval. The model chooses the next action, but ordinary code still controls what actions exist and what the system is allowed to do.
+
+This article explains the parts you need for a first Agent and the engineering work that turns a demo into a dependable application.
+
+## Start with the task, not the framework
+
+Before choosing a library, write down one job the Agent should complete. "Help users with research" is too broad. "Find three relevant sources, extract their publication dates, and return a cited summary" is testable.
+
+A useful task definition answers four questions:
+
+- What input does the Agent receive?
+- What result counts as complete?
+- Which actions may it take?
+- Which actions require human approval?
+
+The stop condition matters as much as the prompt. Without one, an Agent can repeat a failed tool call, keep gathering unnecessary context, or spend far more tokens than the task is worth. Set a maximum number of steps, a time limit, and a clear success condition in code.
+
+## The smallest useful execution loop
+
+Most tool-using Agents follow the same basic flow:
+
+```text
+User request
+    |
+    v
+Build model context
+    |
+    v
+Model chooses: answer or tool call
+    |                  |
+    | answer           | tool call
+    v                  v
+Return result      Validate and run tool
+                       |
+                       v
+                 Add observation to state
+                       |
+                       +----> call model again
+```
+
+A framework-neutral version looks like this:
+
+```python
+async def run_agent(request, tools, max_steps=8):
+    state = [{"role": "user", "content": request}]
+
+    for _ in range(max_steps):
+        decision = await model.respond(messages=state, tools=tools.schemas())
+
+        if decision.final_answer:
+            return decision.final_answer
+
+        call = tools.validate(decision.tool_call)
+        result = await tools.execute(call)
+        state.extend([decision.as_message(), result.as_message()])
+
+    raise RuntimeError("Agent reached the step limit")
+```
+
+The language model supplies `decision`. Your application owns everything around it: tool definitions, validation, execution, state, limits, and error handling. Keeping that boundary visible makes the system easier to debug.
+
+## Instructions give the Agent a working contract
+
+A system prompt should tell the Agent what job it has, what information it can trust, how it should use tools, and when it must stop or ask for help. Long prompts are not automatically better. A short contract with specific rules is easier to test than several pages of advice.
+
+For a source research Agent, the contract might say:
+
+```text
+Find sources relevant to the user's question.
+Use search_source before making factual claims.
+Keep the source URL with every extracted fact.
+If sources disagree, report the disagreement.
+Return a cited summary after enough evidence is available.
+Do not invent a citation when a search fails.
+```
+
+Prompt rules cannot enforce security. If a tool must never delete production data without approval, put that rule in application code.
+
+## Tools are APIs for the model
+
+A tool is a function the model can request. Its name, description, and input schema are part of the Agent's interface. Vague tools lead to vague behavior.
+
+Prefer a small tool with an explicit contract:
+
+```python
+async def search_source(query: str, limit: int = 5) -> list[SearchResult]:
+    """Return up to `limit` sources that match a focused search query."""
+```
+
+Avoid a catch-all tool such as `do_research(data: dict)`. The model has to guess what belongs in `data`, and your logs will not explain what action it intended.
+
+Tool code should validate arguments at the boundary. It should also return useful failures. "Search timed out after 10 seconds" gives the Agent a chance to retry with a smaller query. A raw stack trace usually does not.
+
+Tool descriptions deserve tests because the model sees them as instructions. Check common requests, invalid arguments, empty results, timeouts, and permission failures. You do not need a separate Agent for every tool. One Agent with a clear set of tools is often enough.
+
+## State and memory solve different problems
+
+State is the information needed for the current run. It may contain conversation messages, completed steps, tool results, a token budget, and approval status.
+
+Memory carries selected information across runs. A support Agent might remember a user's product preference. A coding Agent might remember repository conventions. Saving the whole conversation forever is rarely a good memory strategy. It increases cost, exposes old sensitive data, and makes irrelevant details compete for attention.
+
+Use three practical buckets:
+
+- Current state for the active task
+- A short summary for long conversations
+- Persistent memory for facts that remain useful later
+
+Define who can write persistent memory and how users can correct or delete it. A wrong memory can quietly affect every later answer.
+
+## Use workflows where order matters
+
+An Agent loop is useful when the next action depends on incomplete information. Ordinary code is better when the order is already known.
+
+Suppose an expense system must parse a receipt, validate the amount, request approval above a limit, and write an accounting record. Those steps have business meaning. Put them in a workflow. The model may help parse the receipt or explain an exception, but it should not decide whether validation happens.
+
+A practical application often mixes both styles:
+
+```text
+Deterministic input checks
+          |
+          v
+Agent gathers missing information
+          |
+          v
+Deterministic policy check
+          |
+          v
+Human approval when required
+          |
+          v
+Deterministic write
+```
+
+This split keeps flexible reasoning where it helps and predictable control where the business requires it.
+
+## Put approval in front of consequences
+
+Reading a public page and sending an email are different kinds of action. Classify tools by risk before giving them to the Agent.
+
+Read-only tools can often run automatically. Actions that publish content, move money, delete data, change permissions, or contact another person should usually pause for approval. The approval screen needs to show the exact action and arguments, not a vague message such as "The Agent wants to continue."
+
+Also protect tools from prompt injection. Text returned by a website, document, or email is data, even when it contains instructions. Do not let retrieved text grant itself permission to call a sensitive tool.
+
+## Failure is part of the loop
+
+Tools time out. APIs rate-limit requests. Models produce invalid arguments. Users change their minds halfway through a task. Plan these cases before deployment.
+
+For each tool, decide:
+
+- Whether a retry is safe
+- How many retries are allowed
+- Whether the same request could create a duplicate side effect
+- What the Agent should tell the user when recovery fails
+
+Use idempotency keys for actions that may be retried, such as creating an order or sending a job to a queue. Keep retry policy in code. The model can choose a different approach after an error, but it should not control an unlimited retry loop.
+
+## Trace decisions, not hidden reasoning
+
+You need a record of what the system did: model requests, tool names, validated arguments, tool results, latency, token usage, state changes, approvals, and the final outcome.
+
+Do not depend on private chain-of-thought text for debugging. Observable actions are more useful and easier to handle safely. A trace should let you answer practical questions:
+
+- Which tool failed?
+- What input reached it?
+- Did the Agent repeat the same action?
+- Where did time and tokens go?
+- Was the final task actually completed?
+
+Redact secrets and personal data before storing traces. Debugging data is still production data.
+
+## Evaluate the task, not the tone
+
+A response can sound confident and still fail the job. Evaluate complete outcomes.
+
+For a research Agent, useful checks include source validity, citation coverage, factual agreement with sources, unnecessary tool calls, cost, and completion time. For an action Agent, also check whether it followed approval and permission rules.
+
+Start with a small set of real examples. Include normal requests, ambiguous requests, missing data, tool failures, and hostile content inside retrieved documents. Save failures as regression cases. This gives you a better signal than asking whether a handful of demo conversations look good.
+
+## A sensible build order
+
+Build one narrow path first:
+
+1. Define one task and its stop condition.
+2. Add the minimum tools needed for that task.
+3. Run the loop with a hard step limit.
+4. Record traces and inspect failures.
+5. Add approval before sensitive actions.
+6. Create an evaluation set from real examples.
+7. Add memory or multiple Agents only when a measured problem calls for them.
+
+The last point saves a lot of work. Multi-agent coordination does not repair an unclear task, a weak tool contract, or missing evaluation. A small Agent with good boundaries is a better first system because you can see why it succeeds and why it fails.
+
+</div>
+
+<div className="article-language article-language-zh">
+
+理解 Agent 不需要先接受一套神秘概念。从软件结构看，它通常就是语言模型外面的一层循环。模型读取当前状态，决定直接回答还是调用工具，拿到工具结果后再做下一次判断。
+
+这个循环可以搜索文档、调用 API、写文件，也可以暂停下来请人确认。下一步做什么由模型判断，但有哪些动作可用、系统允许做什么，仍然由普通代码控制。
+
+下面从一个最小 Agent 开始，逐步讲清楚哪些部分属于模型，哪些部分必须由工程代码负责，以及怎样把 demo 做成可以维护的应用。
+
+## 先定义任务，再选择框架
+
+动手前，先写清楚 Agent 要完成的一件事。"帮助用户做研究"太宽泛，"找到三个相关来源，提取发布日期，并返回带引用的摘要"才方便验证。
+
+一个可用的任务定义至少要回答四个问题：
+
+- Agent 接收什么输入？
+- 什么结果算完成？
+- 它可以执行哪些动作？
+- 哪些动作必须由人确认？
+
+停止条件和 prompt 一样重要。没有停止条件，Agent 可能反复调用失败的工具，继续收集没有必要的信息，或者消耗远超任务价值的 token。最大步数、超时时间和成功条件都应该写在代码里。
+
+## 最小可用的执行循环
+
+大多数会调用工具的 Agent 都遵循同一条主线：
+
+```text
+用户请求
+    |
+    v
+构建模型上下文
+    |
+    v
+模型选择：回答或调用工具
+    |                  |
+    | 回答             | 调用工具
+    v                  v
+返回结果          校验参数并执行工具
+                       |
+                       v
+                 把观察结果写入状态
+                       |
+                       +----> 再次调用模型
+```
+
+用不绑定框架的伪代码表示，大致是这样：
+
+```python
+async def run_agent(request, tools, max_steps=8):
+    state = [{"role": "user", "content": request}]
+
+    for _ in range(max_steps):
+        decision = await model.respond(messages=state, tools=tools.schemas())
+
+        if decision.final_answer:
+            return decision.final_answer
+
+        call = tools.validate(decision.tool_call)
+        result = await tools.execute(call)
+        state.extend([decision.as_message(), result.as_message()])
+
+    raise RuntimeError("Agent reached the step limit")
+```
+
+`decision` 来自语言模型，周围的部分都属于应用代码，包括工具定义、参数校验、执行、状态、限制和错误处理。把这条边界留在代码里，后面才容易定位问题。
+
+## Instructions 是 Agent 的工作约定
+
+system prompt 应该说明 Agent 负责什么、哪些信息可以相信、怎样使用工具，以及什么时候必须停止或求助。prompt 不是越长越好。一份短而具体的工作约定，比几页泛泛的建议更容易测试。
+
+例如，资料研究 Agent 的约定可以写成：
+
+```text
+查找与用户问题有关的资料。
+在提出事实性结论前调用 search_source。
+每条摘录都保留来源 URL。
+如果来源互相冲突，明确写出分歧。
+证据足够后，返回带引用的摘要。
+搜索失败时，不得编造引用。
+```
+
+prompt 不能代替安全控制。如果某个工具未经确认绝对不能删除生产数据，这条限制必须写进应用代码。
+
+## 工具是提供给模型使用的 API
+
+工具就是模型可以请求执行的函数。名称、描述和输入 schema 共同构成 Agent 的接口。工具写得含糊，模型的行为也会含糊。
+
+优先使用职责小、输入清楚的工具：
+
+```python
+async def search_source(query: str, limit: int = 5) -> list[SearchResult]:
+    """Return up to `limit` sources that match a focused search query."""
+```
+
+尽量不要提供 `do_research(data: dict)` 这类万能工具。模型需要猜测 `data` 里应该放什么，日志也很难说明它原本想做哪一步。
+
+工具要在边界处校验参数，也要返回对恢复有帮助的错误。"搜索在 10 秒后超时"能让 Agent 尝试缩小查询范围，直接返回一段 stack trace 通常没有这个作用。
+
+工具描述也值得测试，因为模型会把描述当成使用说明。常见请求、非法参数、空结果、超时和权限错误都要覆盖。不要因为有多个工具，就急着给每个工具配一个 Agent。很多任务用一个 Agent 和一组清楚的工具就够了。
+
+## State 和 memory 不是同一个东西
+
+State 保存当前这次运行需要的信息，例如对话消息、已完成步骤、工具结果、token 预算和审批状态。
+
+Memory 把经过选择的信息带到后续运行。客服 Agent 可以记住用户的产品偏好，编程 Agent 可以记住仓库约定。把所有历史对话永久保存，并不是好的 memory 方案。这样会提高成本，保留过期的敏感信息，也会让无关细节占用模型注意力。
+
+可以先分成三个实用层次：
+
+- 当前任务使用的 state
+- 长对话压缩后的短摘要
+- 以后仍然有用的持久 memory
+
+还要定义谁可以写持久 memory，以及用户怎样纠正或删除它。一条错误记忆可能在很长时间里影响后续答案，而且不容易被发现。
+
+## 顺序明确的地方使用 workflow
+
+当下一步取决于尚未获得的信息时，Agent loop 很合适。当执行顺序早已确定时，普通代码更可靠。
+
+假设报销系统需要解析票据、校验金额、超过额度时请求审批，最后写入会计记录。这些步骤有明确的业务含义，应该放在 workflow 里。模型可以帮助解析票据或解释异常，但不应该决定是否跳过校验。
+
+实际应用通常会混合两种方式：
+
+```text
+确定性的输入校验
+          |
+          v
+Agent 补充缺失信息
+          |
+          v
+确定性的策略检查
+          |
+          v
+需要时由人审批
+          |
+          v
+确定性写入
+```
+
+这样安排后，需要灵活判断的部分仍然灵活，业务上必须稳定的部分也不会交给模型临场决定。
+
+## 在产生后果之前请求确认
+
+读取公开网页和发送邮件不是同一类动作。把工具交给 Agent 前，应先按风险分类。
+
+只读工具通常可以自动执行。发布内容、转账、删除数据、修改权限或联系他人的动作，一般应该暂停并等待确认。审批界面需要展示具体动作和参数，而不是只写一句 "Agent 希望继续"。
+
+工具还要防 prompt injection。网页、文档或邮件返回的文字都属于数据，即使其中写着操作指令，也不能让它自行获得敏感工具的调用权限。
+
+## 失败也是执行循环的一部分
+
+工具会超时，API 会限流，模型可能生成无效参数，用户也可能在任务中途改变要求。这些情况应该在上线前就有处理方式。
+
+每个工具都要明确：
+
+- 失败后重试是否安全
+- 最多允许重试几次
+- 重复请求会不会造成重复副作用
+- 无法恢复时怎样向用户说明
+
+创建订单、提交队列任务等可能重试的操作，应该使用 idempotency key。重试策略放在代码里。模型可以在失败后换一种做法，但不应该控制一个没有上限的重试循环。
+
+## 记录可观察的决策和动作
+
+系统应该留下这些记录：模型请求、工具名称、校验后的参数、工具结果、耗时、token 用量、状态变化、审批结果和最终任务状态。
+
+调试不应该依赖模型隐藏的思维过程。可观察的动作更有用，也更容易安全保存。一条完整 trace 应该能够回答：
+
+- 哪个工具失败了？
+- 它收到了什么输入？
+- Agent 是否重复执行了同一个动作？
+- 时间和 token 消耗在哪里？
+- 最终任务到底有没有完成？
+
+存储 trace 前要移除 secret 和个人数据。调试数据同样属于生产数据。
+
+## 评估任务结果，不评估语气
+
+回答听起来很自信，不代表任务已经完成。评估应该围绕完整结果展开。
+
+对资料研究 Agent，可以检查来源是否有效、引用是否覆盖结论、内容是否与来源一致、是否调用了多余工具，以及成本和完成时间。对会执行动作的 Agent，还要检查它是否遵守审批和权限规则。
+
+先准备一小组真实样例，其中包括普通请求、含糊请求、数据缺失、工具失败，以及检索文档中的恶意指令。把实际失败案例保存为 regression case。这个办法比挑几段顺利的 demo 对话更能说明系统质量。
+
+## 一个稳妥的开发顺序
+
+第一版只打通一条窄路径：
+
+1. 定义一个任务和停止条件。
+2. 只添加完成该任务需要的工具。
+3. 给执行循环设置严格的步数上限。
+4. 记录 trace，并检查失败过程。
+5. 在敏感动作前加入审批。
+6. 从真实样例建立 evaluation set。
+7. 只有测量结果证明有需要时，再加入 memory 或多个 Agent。
+
+最后一点能省下很多无效工作。多个 Agent 解决不了模糊的任务定义、含糊的工具接口和缺失的评估。边界清楚的小 Agent 更适合作为第一版，因为你能看见它为什么成功，也能看见它为什么失败。
+
+</div>

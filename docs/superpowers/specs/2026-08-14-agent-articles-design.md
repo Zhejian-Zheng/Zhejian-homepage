@@ -13,6 +13,7 @@ Each post follows the current repository convention: shared metadata, English fi
 
 - `content/blog/agent-development-guide.mdx`
 - `content/blog/agentscope-2-vs-langchain.mdx`
+- `app/blog/posts.ts` registers both posts with the existing blog list and dynamic route.
 
 No new components, packages, routes, or styling are needed.
 
@@ -61,4 +62,3 @@ The Humanizer editing pass removes promotional language, vague authority claims,
 - Scan prose for em and en dashes outside code where applicable.
 - Run the repository's existing lint and build checks.
 - Review both language versions for matching meaning and usable headings.
-

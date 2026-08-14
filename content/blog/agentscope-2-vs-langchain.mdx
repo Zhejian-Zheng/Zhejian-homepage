@@ -1,0 +1,420 @@
+export const metadata = {
+	title: "AgentScope 2.0 vs LangChain: An Engineering Comparison",
+	summary: "A bilingual framework selection guide comparing AgentScope 2.0 with the current LangChain and LangGraph stack.",
+	publishedAt: "2026-08-14",
+	tags: ["AI Agent", "AgentScope", "LangChain", "LangGraph", "Framework Comparison"]
+};
+
+<div className="article-language article-language-en">
+
+AgentScope 2.0 and LangChain can both build a tool-using Agent. That fact does not help much with framework selection. The useful questions are how each framework represents state, where workflow control lives, what happens when a run is interrupted, and how much of the production stack your team wants from one ecosystem.
+
+This comparison is for engineers who already know the basics of LLM calls, tool schemas, retrieval, and streaming. It compares AgentScope 2.0 with the current LangChain Agent API and the LangGraph runtime beneath it. Comparing AgentScope only with the `langchain` package would miss much of LangChain's execution model.
+
+AgentScope's official release page lists the 2.0 release line, while its documentation covers `ReActAgent`, state and session management, pipelines, planning, tracing, and evaluation. LangChain's documentation describes `create_agent` as a higher-level Agent API built on LangGraph. LangGraph provides persistence, durable execution, streaming, and interrupts. APIs in both projects continue to change, so check the linked documentation before copying an example into production. [AgentScope releases](https://github.com/agentscope-ai/agentscope/releases), [AgentScope documentation](https://doc.agentscope.io/), [LangGraph overview](https://docs.langchain.com/oss/python/langgraph/overview)
+
+## The short answer
+
+AgentScope 2.0 is a good candidate when a Python team wants Agent concepts presented as one coherent toolkit. Its main path uses explicit objects such as `ReActAgent`, `Toolkit`, memory, formatter, pipeline, and plan modules. State management, AgentScope Studio, OpenTelemetry tracing, and a native evaluation package sit close to those abstractions.
+
+LangChain is a good candidate when a team wants a wide integration surface or expects to model production control flow explicitly with LangGraph. `create_agent` offers a short entry point, middleware customizes the loop, and the returned Agent already runs on LangGraph. Teams can move down to `StateGraph` when the workflow needs visible nodes, edges, checkpoints, and interrupts. LangSmith adds a connected platform for tracing, evaluation, and deployment.
+
+Neither choice removes the need to design tool boundaries, approval rules, evaluation data, or failure recovery.
+
+## A shared reference problem
+
+Consider a research assistant with this job:
+
+1. Search for sources related to a question.
+2. Extract claims and keep the source URL with each claim.
+3. Store current task progress so the run can resume.
+4. Ask for approval before publishing the report.
+5. Return a structured report with findings and citations.
+
+The model and search API can be identical in both implementations. The difference is how the application organizes the loop and everything around it.
+
+## Core development model
+
+### AgentScope 2.0
+
+AgentScope begins with an Agent object. Its built-in `ReActAgent` receives a model, formatter, toolkit, and memory. A `Msg` carries the sender name, role, content, and metadata. The framework treats Agent, memory, toolkit, and related modules as stateful objects that can participate in nested state save and restore. [AgentScope key concepts](https://doc.agentscope.io/tutorial/quickstart_key_concept.html), [AgentScope ReActAgent](https://doc.agentscope.io/tutorial/quickstart_agent.html)
+
+The code tends to read like object composition:
+
+```python
+agent = ReActAgent(
+    name="Researcher",
+    sys_prompt=research_prompt,
+    model=model,
+    formatter=formatter,
+    toolkit=toolkit,
+    memory=memory,
+)
+
+result = await agent(user_message, structured_model=ResearchReport)
+```
+
+This approach is direct when your design revolves around named Agents that exchange messages and own their working state.
+
+### LangChain and LangGraph
+
+LangChain begins with models, tools, middleware, and `create_agent`. The Agent loop is compiled onto LangGraph, so it can be invoked as a runnable or inserted as a node in a larger graph. Short-term memory lives in Agent state, and middleware can inspect or change model calls, tool calls, state, prompts, and output handling. [LangChain Agents](https://docs.langchain.com/oss/python/langchain/agents), [LangChain middleware](https://docs.langchain.com/oss/python/langchain/middleware/overview)
+
+The higher-level path is compact:
+
+```python
+agent = create_agent(
+    model=model,
+    tools=[search_sources, publish_report],
+    middleware=[approval_middleware],
+    response_format=ResearchReport,
+)
+
+result = agent.invoke({"messages": [user_message]}, config=thread_config)
+```
+
+When the flow becomes more specific, the same Agent can sit inside a `StateGraph` beside deterministic nodes. That gradual move from a prebuilt loop to an explicit graph is one of the stack's main design choices.
+
+## Models, formatters, and provider differences
+
+AgentScope separates the chat model from the formatter that turns AgentScope messages into provider input. That makes prompt formatting visible, which is useful for multimodal messages and multi-agent conversations where sender identity matters. It also means model and formatter compatibility is something the developer must understand. [AgentScope model documentation](https://doc.agentscope.io/tutorial/task_model.html), [AgentScope messages](https://doc.agentscope.io/tutorial/quickstart_message.html)
+
+LangChain normalizes model access through chat model integrations and standard message types. `init_chat_model` and provider packages reduce the amount of application code needed to switch providers. Provider-specific behavior still leaks through in structured output, tool calling, streaming, and token accounting, so changing a model is never completely free.
+
+Choose based on the models you actually plan to run. A framework's total integration count matters less than whether your providers, authentication method, streaming mode, and deployment environment are well supported.
+
+## Tool design and execution
+
+AgentScope's `Toolkit` registers Python functions, builds schemas from signatures and docstrings, groups tools, and executes tool calls. It also supports MCP tools and built-in functions. Tool execution middleware can inspect input, change output, enforce authorization, retry, cache, or skip execution. In the current documentation, this middleware wraps Toolkit execution rather than every part of the Agent loop. [AgentScope tools](https://doc.agentscope.io/tutorial/task_tool.html), [AgentScope middleware](https://doc.agentscope.io/tutorial/task_middleware.html)
+
+LangChain tools can also be defined from Python functions or coroutines. The Agent runtime supports sequential and parallel calls, retry handling, and dynamic tool selection. Middleware can filter registered tools from state or runtime context, and it can register and execute tools discovered at runtime. This is useful when tool availability depends on a user's permissions or an MCP server. [LangChain Agents](https://docs.langchain.com/oss/python/langchain/agents)
+
+For ordinary static tools, both frameworks are sufficient. LangChain currently exposes broader loop-level middleware, while AgentScope's Toolkit makes tool grouping and Agent-owned tool state easy to see.
+
+## State, sessions, and persistence
+
+AgentScope uses `StateModule` as a shared state mechanism. Agent, memory, long-term memory, and Toolkit can register state that is saved and restored together. Session objects can persist an application's state, including nested modules. This model suits applications where a session maps naturally to a group of stateful Agent objects. [AgentScope state and session management](https://doc.agentscope.io/tutorial/task_state.html)
+
+LangGraph persists graph state as checkpoints grouped into threads. A checkpoint can support conversational memory, resuming after failure, human review, replay, and forking from an earlier state. The graph must use a checkpointer, unless Agent Server manages persistence for the deployment. [LangGraph persistence](https://docs.langchain.com/oss/python/langgraph/persistence)
+
+The practical difference is the unit you think about:
+
+- AgentScope asks which objects own state and how a session saves them.
+- LangGraph asks what the graph state contains and when execution checkpoints it.
+
+The object model is comfortable for an Agent-centered application. Checkpointed graph state gives more explicit control over long-running workflows and recovery paths.
+
+## Short-term and long-term memory
+
+AgentScope provides in-memory conversation memory and a long-term memory interface. Its documented long-term memory modes let application code manage retrieval and recording, let the Agent call memory tools, or allow both. A mem0-backed implementation is available. [AgentScope long-term memory](https://doc.agentscope.io/tutorial/task_long_term_memory.html)
+
+LangChain Agents keep conversation history in state. LangGraph checkpointers carry thread-scoped state across turns, while stores are used for data that must live across threads. LangChain middleware can summarize or trim messages when context grows.
+
+Both approaches still require a memory policy. The framework can store and retrieve data, but your application must decide what deserves to be remembered, how it expires, and how a user can remove it.
+
+## Structured output
+
+AgentScope's `ReActAgent` accepts a Pydantic model through `structured_model`; the parsed result is available in the returned message metadata. This fits naturally with its message abstraction. [AgentScope structured output](https://doc.agentscope.io/tutorial/task_agent.html)
+
+LangChain's `create_agent` accepts a response schema through `response_format`. It can use provider-native structured output when the selected model supports it and fall back to a tool strategy otherwise. The result is placed in the Agent's structured response state. [LangChain structured output](https://docs.langchain.com/oss/python/langchain/structured-output)
+
+For the research assistant, both can return a validated `ResearchReport`. Provider support and failure behavior matter more than the surface syntax. Test missing fields, invalid citations, and retry limits with the model you will deploy.
+
+## Workflow control and planning
+
+AgentScope provides small workflow building blocks rather than requiring one graph abstraction. Its pipeline module includes sequential and fan-out execution, while `MsgHub` broadcasts messages among Agents. Routing and handoffs can be built with structured output or tool calls. Its plan module gives a ReAct Agent tools for creating, revising, pausing, and restoring a task plan. The documented plan executor currently runs subtasks sequentially. [AgentScope pipelines](https://doc.agentscope.io/tutorial/task_pipeline.html), [AgentScope planning](https://doc.agentscope.io/tutorial/task_plan.html)
+
+LangGraph makes control flow a first-class graph. Nodes perform work, edges choose what runs next, state reducers merge updates, and checkpointing records progress. LangChain middleware covers many changes inside the standard Agent loop. A custom graph is appropriate when the workflow mixes deterministic steps, branching, parallel work, subgraphs, and resumable interrupts.
+
+This leads to a useful distinction:
+
+- AgentScope is concise when orchestration can be expressed as Agents, message exchange, routing, pipelines, or a plan notebook.
+- LangGraph is clearer when the topology itself is a major part of the application and needs to be inspected as code.
+
+Do not build a graph merely because the library supports one. A normal Agent loop is easier to maintain when the task does not need custom routing.
+
+## Multi-agent systems
+
+AgentScope has multi-agent concepts near the center of its message model. Sender names, multi-agent formatters, `MsgHub`, concurrent Agents, routing, handoffs, and debate examples support systems where several named Agents communicate. [AgentScope workflow documentation](https://doc.agentscope.io/)
+
+LangChain documents several multi-agent patterns: subagents exposed as tools, handoffs through state changes, skills loaded on demand, routers, and custom LangGraph workflows. Its own guidance also notes that one Agent with the right tools may solve a task without multi-agent coordination. [LangChain multi-agent documentation](https://docs.langchain.com/oss/python/langchain/multi-agent)
+
+AgentScope offers a more direct vocabulary for conversational groups of Agents. LangGraph offers more control when coordination is a state machine or a graph with parallel branches. In either framework, multiple Agents add latency, token use, and more failure paths. Use them when context isolation, parallel work, or separate ownership gives a measurable benefit.
+
+## Human approval and safety controls
+
+AgentScope can implement approval through human-in-the-loop steering, hooks, tool middleware, and application workflow code. Toolkit middleware is a clear place to block or rewrite a sensitive tool call. Agent hooks provide additional extension points around Agent behavior. [AgentScope middleware](https://doc.agentscope.io/tutorial/task_middleware.html), [AgentScope hooks](https://doc.agentscope.io/tutorial/task_hook.html)
+
+LangChain provides `HumanInTheLoopMiddleware` for tool calls. It can interrupt selected actions and allow a reviewer to approve, edit, or reject them. The graph state is checkpointed so the run can resume after the decision. Production use requires persistent checkpoint storage. [LangChain human-in-the-loop](https://docs.langchain.com/oss/python/langchain/human-in-the-loop)
+
+LangChain has a more standardized documented path for resumable tool approval. AgentScope gives the developer flexible hook and middleware points, but the application may need to define more of the approval lifecycle itself. For regulated or high-consequence actions, prototype the pause, persistence, reviewer UI, timeout, and audit record before selecting a framework.
+
+## Extensibility
+
+AgentScope can be extended through base classes for Agents, models, formatters, memory, and storage. Hooks customize Agent behavior. Toolkit middleware wraps tool execution. The explicit formatter layer is helpful when a provider or multi-agent prompt requires custom message conversion.
+
+LangChain uses integration packages, runnables, tools, state schemas, and middleware. Middleware hooks can run before or after model calls and wrap model or tool execution. LangGraph offers a lower-level extension point because any runnable or normal function can become a graph node.
+
+LangChain gives more places to intervene in the default loop. AgentScope has fewer layers to learn for its standard ReAct path, although a heavily customized formatter or Agent subclass can still become framework-specific code.
+
+## Tracing and evaluation
+
+AgentScope tracing uses OpenTelemetry. It includes tracing for models, tools, Agents, and formatters, can display traces in AgentScope Studio, and can export to OTLP-compatible backends. Its evaluation package includes sequential and Ray-based evaluators, persistent result storage, benchmark abstractions, and integration with OpenJudge graders. [AgentScope tracing](https://doc.agentscope.io/tutorial/task_tracing.html), [AgentScope evaluation](https://doc.agentscope.io/tutorial/task_eval.html)
+
+LangSmith provides tracing, datasets, offline experiments, online evaluation, and deployment services. LangGraph Studio supports graph development and inspection. LangSmith evaluation can score curated examples before deployment and production traces after deployment. It is a separate platform rather than a requirement for running the open-source LangChain and LangGraph libraries. [LangSmith evaluation](https://docs.langchain.com/langsmith/evaluation), [LangGraph overview](https://docs.langchain.com/oss/python/langgraph/overview)
+
+AgentScope's OpenTelemetry foundation is attractive when your organization already has an OTLP backend or wants to keep tracing portable. LangSmith is a more connected experience when the team wants traces, datasets, experiments, and deployments in one product. Check hosting and licensing requirements before treating either operational path as free infrastructure.
+
+## Serving and deployment
+
+AgentScope 2.0 presents local, serverless, and Kubernetes deployment as part of its production story, with Agent-as-a-Service APIs, sandboxing, and observability integrated into the 2.0 line. The exact deployment choice depends on the runtime components and infrastructure your application uses. [AgentScope repository](https://github.com/agentscope-ai/agentscope), [AgentScope Runtime archive notice](https://github.com/agentscope-ai/agentscope-runtime)
+
+LangGraph applications can run inside a normal Python service. The LangSmith deployment stack also provides Agent Server, which manages assistants, threads, runs, persistence, and a task queue. Cloud and self-hosted options exist, while self-hosted platform features have their own infrastructure and licensing requirements. [LangSmith Agent Server](https://docs.langchain.com/langsmith/agent-server), [self-hosted LangSmith](https://docs.langchain.com/langsmith/self-hosted)
+
+Framework selection should not depend on deployment diagrams alone. Build a small service and test cancellation, restart recovery, concurrent runs, secret handling, trace export, and horizontal scaling in your own environment.
+
+## Ecosystem and team fit
+
+LangChain has Python and JavaScript or TypeScript libraries, a large catalog of model, vector store, retriever, and tool integrations, and a stack that spans LangChain, LangGraph, Deep Agents, and LangSmith. That range helps teams that already use its integrations. It also creates a naming and package boundary that new maintainers must learn.
+
+AgentScope is Python-centered and presents a more concentrated Agent development model. It includes MCP and A2A support, Agent skills, multi-agent utilities, planning, RAG, tracing, evaluation, and tuning-related features in its ecosystem. A team that prefers explicit Agent objects may find the code easier to follow.
+
+Do not turn ecosystem size into a score. Review the ten integrations your project needs, then build one end-to-end path. Maintenance cost comes from the parts you use, not the parts listed on a website.
+
+## Selection guide
+
+Choose AgentScope 2.0 for a serious prototype when most of these statements are true:
+
+- The team writes Python and thinks in terms of named, stateful Agents.
+- Message identity and multi-agent conversations are central to the product.
+- Built-in planning, pipelines, AgentScope Studio, and OpenTelemetry tracing match the desired workflow.
+- The team prefers an integrated Agent toolkit over assembling several LangChain ecosystem packages.
+
+Choose LangChain with LangGraph when most of these statements are true:
+
+- The project depends on integrations already maintained in the LangChain ecosystem.
+- The workflow needs explicit branching, checkpointed state, durable resume, or graph composition.
+- Resumable human approval is a core requirement.
+- The team wants Python and JavaScript or TypeScript options, or plans to use LangSmith for tracing, evaluation, and deployment.
+
+Run a short proof of concept before committing. Implement the same research assistant in both frameworks and measure task success, code needed for recovery, trace quality, cold-start and steady-state latency, token use, and the effort required to change one workflow rule. That comparison will be more useful than a generic feature checklist.
+
+## Sources
+
+- [AgentScope documentation](https://doc.agentscope.io/)
+- [AgentScope releases](https://github.com/agentscope-ai/agentscope/releases)
+- [LangChain Agents](https://docs.langchain.com/oss/python/langchain/agents)
+- [LangChain middleware](https://docs.langchain.com/oss/python/langchain/middleware/overview)
+- [LangChain multi-agent systems](https://docs.langchain.com/oss/python/langchain/multi-agent)
+- [LangGraph overview](https://docs.langchain.com/oss/python/langgraph/overview)
+- [LangGraph persistence](https://docs.langchain.com/oss/python/langgraph/persistence)
+- [LangSmith evaluation](https://docs.langchain.com/langsmith/evaluation)
+
+</div>
+
+<div className="article-language article-language-zh">
+
+AgentScope 2.0 和 LangChain 都能实现会调用工具的 Agent，但这句话对选型帮助不大。真正影响工程成本的是它们怎样表示状态、工作流控制放在哪里、任务中断后怎样恢复，以及团队希望从同一套生态中获得多少生产能力。
+
+这篇对比面向已经了解 LLM 调用、tool schema、retrieval 和 streaming 的工程师。LangChain 一侧包含当前的 Agent API 以及底层 LangGraph runtime。只拿 AgentScope 和 `langchain` 这个 package 做比较，会漏掉 LangChain Agent 的执行基础。
+
+AgentScope 的官方 release 页面已经列出 2.0 系列，文档覆盖 `ReActAgent`、state/session、pipeline、plan、tracing 和 evaluation。LangChain 文档把 `create_agent` 定义为建立在 LangGraph 上的高层 Agent API，LangGraph 则负责 persistence、durable execution、streaming 和 interrupt。两个项目的 API 都还在更新，生产项目复制示例前应重新核对官方文档。[AgentScope releases](https://github.com/agentscope-ai/agentscope/releases)，[AgentScope 文档](https://doc.agentscope.io/zh_CN/)，[LangGraph overview](https://docs.langchain.com/oss/python/langgraph/overview)
+
+## 先说选择倾向
+
+如果 Python 团队希望用一套连贯的 Agent 工具组织项目，AgentScope 2.0 值得优先验证。它的主路径围绕 `ReActAgent`、`Toolkit`、memory、formatter、pipeline 和 plan 等明确对象展开。state management、AgentScope Studio、OpenTelemetry tracing 和原生 evaluation package 与这些抽象放得比较近。
+
+如果团队看重更宽的 integration 范围，或者计划用 LangGraph 显式描述生产工作流，LangChain 更适合进入候选名单。`create_agent` 提供简短入口，middleware 用于调整循环，返回的 Agent 本身已经运行在 LangGraph 上。需要明确的 node、edge、checkpoint 和 interrupt 时，可以继续下沉到 `StateGraph`。LangSmith 则补充 tracing、evaluation 和 deployment 平台。
+
+无论选哪一个，工具边界、审批规则、评估数据和失败恢复仍然要由团队自己设计。
+
+## 用同一个问题比较
+
+假设要开发一个资料研究助手，它需要：
+
+1. 搜索与问题有关的来源。
+2. 提取结论，并为每条结论保留来源 URL。
+3. 保存当前任务进度，允许任务恢复。
+4. 发布报告前请求确认。
+5. 返回包含 findings 和 citations 的结构化报告。
+
+两套实现可以使用完全相同的模型和搜索 API。差别主要出现在 Agent loop 周围的组织方式。
+
+## 核心开发模型
+
+### AgentScope 2.0
+
+AgentScope 从 Agent 对象开始。内置的 `ReActAgent` 接收 model、formatter、toolkit 和 memory。`Msg` 保存发送者名称、role、content 和 metadata。Agent、memory、toolkit 等模块都可以作为 stateful object 参与嵌套的状态保存与恢复。[AgentScope 核心概念](https://doc.agentscope.io/zh_CN/tutorial/quickstart_key_concept.html)，[AgentScope ReActAgent](https://doc.agentscope.io/zh_CN/tutorial/quickstart_agent.html)
+
+代码通常表现为对象组合：
+
+```python
+agent = ReActAgent(
+    name="Researcher",
+    sys_prompt=research_prompt,
+    model=model,
+    formatter=formatter,
+    toolkit=toolkit,
+    memory=memory,
+)
+
+result = await agent(user_message, structured_model=ResearchReport)
+```
+
+如果系统本来就是由多个有名字、会交换消息并维护自身工作状态的 Agent 组成，这种结构很直观。
+
+### LangChain 和 LangGraph
+
+LangChain 从 model、tool、middleware 和 `create_agent` 开始。Agent loop 会编译到 LangGraph，因此它既可以直接 invoke，也可以作为 node 放进更大的 graph。短期 memory 位于 Agent state 中，middleware 可以检查或修改 model call、tool call、state、prompt 和输出处理。[LangChain Agents](https://docs.langchain.com/oss/python/langchain/agents)，[LangChain middleware](https://docs.langchain.com/oss/python/langchain/middleware/overview)
+
+高层入口比较短：
+
+```python
+agent = create_agent(
+    model=model,
+    tools=[search_sources, publish_report],
+    middleware=[approval_middleware],
+    response_format=ResearchReport,
+)
+
+result = agent.invoke({"messages": [user_message]}, config=thread_config)
+```
+
+流程变得更具体后，同一个 Agent 可以放到 `StateGraph` 里，与确定性 node 组合。从预置循环逐步下沉到显式 graph，是这套技术栈很重要的设计选择。
+
+## Model、formatter 和供应商差异
+
+AgentScope 把 chat model 与 formatter 分开。formatter 负责把 AgentScope message 转成模型供应商的输入。这个过程是可见的，对多模态消息和需要区分发送者身份的多 Agent 对话很有用。相应地，开发者也需要理解 model 和 formatter 是否匹配。[AgentScope model 文档](https://doc.agentscope.io/zh_CN/tutorial/task_model.html)，[AgentScope message](https://doc.agentscope.io/zh_CN/tutorial/quickstart_message.html)
+
+LangChain 通过 chat model integration 和标准 message type 统一模型访问。`init_chat_model` 与供应商 package 能减少切换模型时的应用代码。不过 structured output、tool calling、streaming 和 token 统计仍然存在供应商差异，换模型不会完全没有成本。
+
+选型时应先看项目实际使用的模型。integration 总数没有那么重要，真正需要确认的是目标供应商、认证方式、streaming 模式和部署环境是否得到良好支持。
+
+## 工具定义与执行
+
+AgentScope 的 `Toolkit` 可以注册 Python 函数，根据 signature 和 docstring 生成 schema，对工具分组并执行 tool call。它也支持 MCP 和内置工具。tool execution middleware 可以检查输入、修改输出、执行权限判断、重试、缓存，或者直接跳过调用。按照当前文档，这层 middleware 主要包装 Toolkit 的工具执行，并不覆盖 Agent loop 的所有阶段。[AgentScope tool](https://doc.agentscope.io/zh_CN/tutorial/task_tool.html)，[AgentScope middleware](https://doc.agentscope.io/zh_CN/tutorial/task_middleware.html)
+
+LangChain tool 同样可以由 Python function 或 coroutine 定义。Agent runtime 支持顺序或并行调用、retry handling 和 dynamic tool selection。middleware 可以根据 state 或 runtime context 过滤已注册工具，也能注册并执行运行时才发现的工具。工具可用性取决于用户权限或 MCP server 时，这个能力很实用。[LangChain Agents](https://docs.langchain.com/oss/python/langchain/agents)
+
+普通静态工具在两边都能实现。LangChain 当前提供的 loop-level middleware 范围更广，AgentScope 的 Toolkit 则让工具分组和 Agent 持有的工具状态更直观。
+
+## State、session 和 persistence
+
+AgentScope 使用 `StateModule` 作为统一状态机制。Agent、memory、long-term memory 和 Toolkit 都可以注册自己的 state，并被一起保存和恢复。Session 对象可以持久化整个应用状态，包括嵌套模块。这种模式适合 session 与一组 stateful Agent object 自然对应的应用。[AgentScope state/session](https://doc.agentscope.io/zh_CN/tutorial/task_state.html)
+
+LangGraph 把 graph state 保存成 checkpoint，并用 thread 组织。checkpoint 可以支持对话 memory、故障后恢复、人工检查、replay，以及从早期状态创建分支。Graph 需要配置 checkpointer，使用 Agent Server 时则可以由部署服务管理 persistence。[LangGraph persistence](https://docs.langchain.com/oss/python/langgraph/persistence)
+
+两者思考状态的单位不同：
+
+- AgentScope 关注哪些对象持有 state，以及 session 怎样保存这些对象。
+- LangGraph 关注 graph state 包含什么，以及执行到哪里创建 checkpoint。
+
+以 Agent 为中心的应用通常更容易接受对象模型。对于运行时间长、恢复路径复杂的 workflow，checkpointed graph state 提供的控制更明确。
+
+## 短期 memory 与长期 memory
+
+AgentScope 提供对话 memory 和 long-term memory interface。文档中的 long-term memory mode 允许应用代码管理写入和检索，也可以把 memory 操作注册为工具交给 Agent，还能同时启用两种方式。框架提供基于 mem0 的实现。[AgentScope long-term memory](https://doc.agentscope.io/zh_CN/tutorial/task_long_term_memory.html)
+
+LangChain Agent 把对话历史保存在 state 中。LangGraph checkpointer 让 thread 内状态跨多轮存在，store 则处理需要跨 thread 保存的数据。上下文增长时，LangChain middleware 可以对消息做 summary 或 trimming。
+
+两边都不能替应用决定 memory policy。框架负责存取，团队仍要定义什么值得记住、何时过期，以及用户如何删除。
+
+## Structured output
+
+AgentScope 的 `ReActAgent` 通过 `structured_model` 接收 Pydantic model，解析后的结果放在返回消息的 metadata 中。这与它的 message abstraction 配合得很自然。[AgentScope structured output](https://doc.agentscope.io/zh_CN/tutorial/task_agent.html)
+
+LangChain 的 `create_agent` 通过 `response_format` 接收 schema。模型支持原生 structured output 时，可以使用 provider strategy，否则可以回退到 tool strategy。结果会放进 Agent 的 structured response state。[LangChain structured output](https://docs.langchain.com/oss/python/langchain/structured-output)
+
+研究助手在两边都能返回经过校验的 `ResearchReport`。比表面 API 更重要的是目标模型的支持情况和失败行为。缺失字段、错误引用和超过重试上限等情况，都要用将来部署的模型实际测试。
+
+## Workflow 控制与 planning
+
+AgentScope 提供多种小型 workflow building block，而不是要求所有流程都使用一种 graph abstraction。pipeline module 支持 sequential 和 fan-out execution，`MsgHub` 负责在多个 Agent 之间广播消息。routing 与 handoff 可以通过 structured output 或 tool call 实现。plan module 则给 ReAct Agent 一组管理计划的工具，用于创建、修改、暂停和恢复任务计划。当前文档中的 plan executor 按顺序执行 subtask。[AgentScope pipeline](https://doc.agentscope.io/zh_CN/tutorial/task_pipeline.html)，[AgentScope plan](https://doc.agentscope.io/zh_CN/tutorial/task_plan.html)
+
+LangGraph 把 control flow 直接表示为 graph。node 执行工作，edge 决定下一步，state reducer 合并更新，checkpoint 记录进度。标准 Agent loop 内部的大量调整可以通过 LangChain middleware 完成。当流程同时包含确定性步骤、branch、parallel work、subgraph 和可恢复 interrupt 时，custom graph 更合适。
+
+这里可以得到一个实用区别：
+
+- AgentScope 适合用 Agent、消息交换、routing、pipeline 或 plan notebook 表达的编排。
+- 当 topology 本身就是应用核心，并且需要在代码中清楚呈现时，LangGraph 更直接。
+
+不要因为框架支持 graph 就一定画 graph。任务不需要自定义 routing 时，普通 Agent loop 更容易维护。
+
+## 多 Agent 系统
+
+AgentScope 的 message model 很早就考虑了多 Agent。sender name、multi-agent formatter、`MsgHub`、concurrent Agent、routing、handoff 和 debate 示例，都服务于多个具名 Agent 互相通信的系统。[AgentScope workflow 文档](https://doc.agentscope.io/zh_CN/)
+
+LangChain 文档列出了多种模式，包括把 subagent 暴露为 tool、通过 state change 进行 handoff、按需加载 skill、router，以及自定义 LangGraph workflow。官方文档也明确提醒，很多任务用一个 Agent 配合合适的工具就能完成。[LangChain multi-agent 文档](https://docs.langchain.com/oss/python/langchain/multi-agent)
+
+AgentScope 为多个 Agent 的对话协作提供了更直接的词汇。协调逻辑更像 state machine 或带并行分支的 graph 时，LangGraph 的控制更强。无论使用哪一边，多 Agent 都会增加 latency、token 消耗和失败路径。只有 context isolation、parallel work 或独立团队所有权带来可测量收益时，才值得采用。
+
+## 人工审批与安全控制
+
+AgentScope 可以通过 human-in-the-loop steering、hook、tool middleware 和应用 workflow 实现审批。Toolkit middleware 很适合拦截或改写敏感 tool call，Agent hook 则提供更多行为扩展点。[AgentScope middleware](https://doc.agentscope.io/zh_CN/tutorial/task_middleware.html)，[AgentScope hook](https://doc.agentscope.io/zh_CN/tutorial/task_hook.html)
+
+LangChain 提供用于 tool call 的 `HumanInTheLoopMiddleware`。它可以中断指定动作，让审批者选择 approve、edit 或 reject。graph state 会写入 checkpoint，决定完成后可以恢复运行。生产环境需要持久化 checkpoint storage。[LangChain human-in-the-loop](https://docs.langchain.com/oss/python/langchain/human-in-the-loop)
+
+LangChain 对可恢复工具审批给出了更标准化的文档路径。AgentScope 提供灵活的 hook 和 middleware，但应用可能需要自行定义更多审批生命周期。涉及监管或高风险操作时，应先验证暂停、持久化、审批 UI、超时和审计记录，再决定使用哪一个框架。
+
+## 扩展方式
+
+AgentScope 可以通过 Agent、model、formatter、memory 和 storage 的 base class 扩展。hook 用于修改 Agent 行为，Toolkit middleware 包装工具执行。需要定制供应商消息或多 Agent prompt 时，显式 formatter 层很有用。
+
+LangChain 的扩展点包括 integration package、runnable、tool、state schema 和 middleware。middleware hook 可以在 model call 前后运行，也能包装 model 或 tool execution。LangGraph 的层级更低，普通 function 或 runnable 都可以成为 graph node。
+
+LangChain 允许开发者从更多位置介入默认循环。AgentScope 的标准 ReAct 路径需要理解的层次较少，不过大量自定义 formatter 或 Agent subclass 同样会形成框架绑定。
+
+## Tracing 与 evaluation
+
+AgentScope tracing 建立在 OpenTelemetry 上。它可以记录 model、tool、Agent 和 formatter，在 AgentScope Studio 展示 trace，也可以通过 OTLP 输出到兼容的第三方后端。evaluation package 提供顺序和基于 Ray 的 evaluator、持久化结果 storage、benchmark abstraction，以及 OpenJudge grader integration。[AgentScope tracing](https://doc.agentscope.io/zh_CN/tutorial/task_tracing.html)，[AgentScope evaluation](https://doc.agentscope.io/zh_CN/tutorial/task_eval.html)
+
+LangSmith 提供 tracing、dataset、offline experiment、online evaluation 和 deployment service。LangGraph Studio 用于 graph 开发和检查。LangSmith evaluation 既能在部署前评估整理好的 dataset，也能在部署后评估生产 trace。运行开源 LangChain 和 LangGraph library 并不强制使用 LangSmith。[LangSmith evaluation](https://docs.langchain.com/langsmith/evaluation)，[LangGraph overview](https://docs.langchain.com/oss/python/langgraph/overview)
+
+如果组织已经有 OTLP backend，或者希望 tracing 保持可迁移，AgentScope 的 OpenTelemetry 基础很合适。团队希望把 trace、dataset、experiment 和 deployment 放进一个产品时，LangSmith 的体验更连贯。不要默认这些运维方案没有成本，选型前要核对 hosting 和 license 要求。
+
+## Serving 与 deployment
+
+AgentScope 2.0 把 local、serverless 和 Kubernetes deployment 放进生产方案，并把 Agent-as-a-Service API、sandboxing 与 observability 合并到 2.0 系列。具体部署仍然取决于应用使用的 runtime component 和基础设施。[AgentScope repository](https://github.com/agentscope-ai/agentscope)，[AgentScope Runtime archive notice](https://github.com/agentscope-ai/agentscope-runtime)
+
+LangGraph 应用可以运行在普通 Python service 中。LangSmith deployment stack 还提供 Agent Server，用于管理 assistant、thread、run、persistence 和 task queue。它有 cloud 与 self-hosted 方案，自托管平台功能也有对应的基础设施和 license 要求。[LangSmith Agent Server](https://docs.langchain.com/langsmith/agent-server)，[self-hosted LangSmith](https://docs.langchain.com/langsmith/self-hosted)
+
+不要只看 deployment diagram 做选择。先搭一个小服务，在自己的环境里测试 cancellation、重启恢复、并发运行、secret handling、trace export 和水平扩展。
+
+## 生态与团队匹配
+
+LangChain 同时提供 Python 与 JavaScript 或 TypeScript library，也有大量 model、vector store、retriever 和 tool integration。整套生态包含 LangChain、LangGraph、Deep Agents 和 LangSmith。已经依赖这些 integration 的团队会比较省事，但新维护者也需要理解几个产品与 package 的边界。
+
+AgentScope 以 Python 为主，Agent 开发模型更集中。它的生态包括 MCP、A2A、Agent skill、多 Agent utility、planning、RAG、tracing、evaluation 和 tuning 相关能力。喜欢显式 Agent object 的团队可能会觉得代码更容易追踪。
+
+生态规模不应该直接换算成分数。先列出项目真正需要的十个 integration，再打通一条 end-to-end path。维护成本来自实际使用的部分，不来自官网列出的功能总数。
+
+## 选型建议
+
+下面多数条件成立时，可以先用 AgentScope 2.0 做严肃的 proof of concept：
+
+- 团队使用 Python，并习惯用具名的 stateful Agent 思考系统。
+- message identity 与多 Agent 对话是产品核心。
+- 内置 planning、pipeline、AgentScope Studio 和 OpenTelemetry tracing 符合团队预期。
+- 团队更喜欢集中的 Agent toolkit，不希望组合多个 LangChain 生态 package。
+
+下面多数条件成立时，可以先验证 LangChain 与 LangGraph：
+
+- 项目依赖 LangChain 生态中已经维护的 integration。
+- workflow 需要明确 branch、checkpointed state、durable resume 或 graph composition。
+- 可恢复的人工审批属于核心需求。
+- 团队需要 Python 与 JavaScript 或 TypeScript 选择，或者准备使用 LangSmith 的 tracing、evaluation 和 deployment。
+
+最终决定前，用两套框架实现同一个研究助手。测量任务成功率、恢复逻辑需要的代码、trace 质量、冷启动与稳定运行 latency、token 用量，以及修改一条 workflow 规则的工作量。这个结果会比通用 feature checklist 更接近团队未来真正承担的成本。
+
+## 资料来源
+
+- [AgentScope 文档](https://doc.agentscope.io/zh_CN/)
+- [AgentScope releases](https://github.com/agentscope-ai/agentscope/releases)
+- [LangChain Agents](https://docs.langchain.com/oss/python/langchain/agents)
+- [LangChain middleware](https://docs.langchain.com/oss/python/langchain/middleware/overview)
+- [LangChain multi-agent systems](https://docs.langchain.com/oss/python/langchain/multi-agent)
+- [LangGraph overview](https://docs.langchain.com/oss/python/langgraph/overview)
+- [LangGraph persistence](https://docs.langchain.com/oss/python/langgraph/persistence)
+- [LangSmith evaluation](https://docs.langchain.com/langsmith/evaluation)
+
+</div>
