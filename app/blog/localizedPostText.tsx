@@ -8,6 +8,14 @@ type PostTranslation = {
 };
 
 const postTranslations: Record<string, PostTranslation> = {
+	"agent-development-guide": {
+		title: "Agent 开发入门：从执行循环到可靠应用",
+		summary: "面向 Agent 开发初学者，介绍执行循环、工具、状态、记忆、安全控制、调试和评估。"
+	},
+	"agentscope-2-vs-langchain": {
+		title: "AgentScope 2.0 与 LangChain：工程选型对比",
+		summary: "面向已有 LLM 应用经验的工程师，对比 AgentScope 2.0 与当前 LangChain、LangGraph 技术栈。"
+	},
 	"code-with-codex": {
 		title: "Code with Codex",
 		summary: "关于我如何把 Codex 当作编程伙伴：用它加快实现速度，同时保留自己的产品判断、验证习惯和个人表达。"
