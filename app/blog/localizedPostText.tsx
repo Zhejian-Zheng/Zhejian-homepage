@@ -8,6 +8,10 @@ type PostTranslation = {
 };
 
 const postTranslations: Record<string, PostTranslation> = {
+	"reme-long-term-memory": {
+		title: "ReMe 长期记忆：记录、检索、压缩与遗忘",
+		summary: "从源码出发，说明 ReMe 如何用 Step、FileStore、BM25 和 Auto Dream 记录、检索、整合与删除 Agent 记忆。"
+	},
 	"agent-development-guide": {
 		title: "Agent 开发入门：从执行循环到可靠应用",
 		summary: "面向 Agent 开发初学者，介绍执行循环、工具、状态、记忆、安全控制、调试和评估。"
@@ -113,6 +117,7 @@ const tagTranslations: Record<string, string> = {
 	Licensing: "许可证",
 	MDX: "MDX",
 	MongoDB: "MongoDB",
+	Memory: "记忆",
 	Networking: "网络",
 	"Next.js": "Next.js",
 	"Open Source": "开源",

@@ -14,6 +14,7 @@ import PilatesHealthQuizProgressRecovery, { metadata as pilatesHealthQuizProgres
 import PythonAutomationProjects, { metadata as pythonAutomationProjectsMetadata } from "@/content/blog/python-automation-projects.mdx";
 import PythonAutomationS3Mongodb, { metadata as pythonAutomationS3MongodbMetadata } from "@/content/blog/python-automation-s3-mongodb.mdx";
 import RepoLicenseInfoNotes, { metadata as repoLicenseInfoNotesMetadata } from "@/content/blog/repo-license-info-notes.mdx";
+import ReMeLongTermMemory, { metadata as reMeLongTermMemoryMetadata } from "@/content/blog/reme-long-term-memory.mdx";
 import ResumeLatexSystem, { metadata as resumeLatexSystemMetadata } from "@/content/blog/resume-latex-system.mdx";
 import SafeRlSupervisedShield, { metadata as safeRlSupervisedShieldMetadata } from "@/content/blog/safe-rl-supervised-shield.mdx";
 import ShellScriptAutomarkingSystem, { metadata as shellScriptAutomarkingSystemMetadata } from "@/content/blog/shell-script-automarking-system.mdx";
@@ -30,6 +31,11 @@ export type BlogPost = {
 };
 
 export const blogPosts: BlogPost[] = [
+	{
+		slug: "reme-long-term-memory",
+		...reMeLongTermMemoryMetadata,
+		Component: ReMeLongTermMemory
+	},
 	{
 		slug: "agent-development-guide",
 		...agentDevelopmentGuideMetadata,

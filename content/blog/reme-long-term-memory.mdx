@@ -1,0 +1,312 @@
+export const metadata = {
+	title: "ReMe Long-Term Memory: Recording, Retrieval, Consolidation, and Forgetting",
+	summary: "A bilingual source code walkthrough of how ReMe uses Step, FileStore, BM25, and Auto Dream to manage agent memory.",
+	publishedAt: "2026-08-17",
+	tags: ["AI Agent", "ReMe", "Memory", "BM25", "Python"]
+};
+
+<div className="article-language article-language-en">
+
+Long-term memory sounds simple until an Agent has to correct an old fact, explain where a memory came from, or rebuild its index after a crash. ReMe handles these problems with files, small workflow steps, and derived indexes that can be rebuilt.
+
+This article follows one memory through the source code. Suppose a user says, "Keep my release notes short and include migration risks." ReMe can record the conversation, turn it into a daily note, index that note, retrieve it later, and consolidate the useful preference into a digest file. If the file is deleted, the related search entries and graph node are removed too.
+
+The four useful entry points are [`BaseStep`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/steps/base_step.py), [`LocalFileStore`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/components/file_store/local_file_store.py), [`BM25Index`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/components/keyword_index/bm25_index.py), and the [Auto Dream steps](https://github.com/agentscope-ai/ReMe/tree/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/steps/evolve/dream).
+
+## The path of one memory
+
+ReMe separates source files from data built for search:
+
+```text
+conversation
+    -> session/*.jsonl
+    -> daily/YYYY-MM-DD/*.md
+    -> FileNode + FileChunk
+    -> BM25 index, optional vectors, and file graph
+    -> search results with file paths and line numbers
+    -> digest/personal, digest/procedure, or digest/wiki
+```
+
+The files under `session`, `daily`, `resource`, and `digest` hold the memory a person can read and edit. The index, chunk cache, catalog, and graph live under metadata. ReMe treats that second group as derived data. If it becomes inconsistent, the system can clear it and scan the files again.
+
+That choice explains most of the implementation. Search speed matters, but an opaque index is not the only copy of a memory.
+
+## Step is the unit of work
+
+`BaseStep` is the common execution unit. Search, extraction, integration, and final catalog updates are all steps. A step receives a `RuntimeContext`, runs `execute()`, and returns a response.
+
+The call path is short:
+
+```python
+async def __call__(self, context=None, **kwargs):
+    self.context = RuntimeContext.from_context(context, **kwargs)
+    if self.input_mapping:
+        self.context.apply_mapping(self.input_mapping)
+    result = await self.execute()
+    if self.output_mapping:
+        self.context.apply_mapping(self.output_mapping)
+    return result
+```
+
+The real detail sits in `Ref`. A step can ask for `file_store`, `file_catalog`, a model, or an Agent wrapper without constructing it. `Ref` resolves the component from step arguments, then the runtime context, then the application component registry. It caches the result for that call and clears the cache before the next call so a context override can take effect.
+
+This keeps workflow code focused. `SearchStep` asks `self.file_store` for results. `DreamExtractStep` asks `self.file_catalog` which daily files changed. The step does not need to know how those components were created.
+
+The separation also prevents a subtle state bug. A step instance should not carry changing task data from one run into another. Current task data belongs in `RuntimeContext`. Shared application data belongs in `ApplicationContext.metadata`. Durable memory belongs in files and storage components.
+
+## FileStore turns files into searchable units
+
+`BaseFileStore` defines a small contract: upsert files, delete files, query graph links, run keyword or vector search, and optimize an index. `LocalFileStore` supplies the local implementation.
+
+Each indexed file has two representations:
+
+- `FileNode` describes the file path, modification time, links, and chunk IDs.
+- `FileChunk` contains a piece of text, its source path, line range, optional embedding, and search scores.
+
+Chunks are the search unit. Files remain the ownership unit. That difference matters when a file changes.
+
+During `upsert`, `LocalFileStore` first looks up the old node. It removes the old chunks from the in-memory map, stages the new node and chunks, and reuses an embedding when both the chunk ID and text are unchanged. It then updates the file graph, creates any missing embeddings, marks old keyword documents as deleted, and adds the new chunk text to the keyword index.
+
+The order gives each subsystem the same view of the file:
+
+```text
+old FileNode
+    -> remove old chunks
+    -> store new FileNode and links
+    -> embed changed chunks when embeddings are enabled
+    -> retire old BM25 documents
+    -> add new BM25 documents
+```
+
+Embedding failure does not make local keyword search unusable. `LocalFileStore` disables the failing embedding path and can continue with BM25. This is a useful failure mode for a local memory system because an unavailable model should not hide every saved file.
+
+Deleting a file follows the same boundary. The store resolves its `FileNode`, removes every chunk ID, deletes the graph node, and tells the keyword index to delete those document IDs. The source file and the derived search data do not silently drift apart.
+
+## BM25 searches chunks without an embedding model
+
+`BM25Index` is an inverted index. ReMe tokenizes each chunk, assigns integer IDs to new terms, and stores posting lists that connect a term to the chunks containing it. The BM25 document ID is the `FileChunk.id`, so the result can be mapped directly back to chunk text and its file location.
+
+For each query term, the score uses term frequency, document length, average document length, and inverse document frequency. The defaults in this implementation are `k1 = 1.5` and `b = 0.75`:
+
+```text
+score = IDF * TF * (k1 + 1)
+        / (TF + k1 * (1 - b + b * document_length / average_length))
+```
+
+A rare query term receives more weight than a term found in nearly every chunk. Repeating a term can increase the score, but BM25 limits that gain. The length factor keeps a large file chunk from winning only because it contains more words.
+
+Updates use lazy deletion. When a chunk changes, `_remove_doc()` marks its old slot in `_deleted` and removes the live ID mapping. The posting list still contains the old slot, but scoring sets deleted rows to zero. `optimize_index()` later rebuilds the arrays, postings, and vocabulary without deleted entries.
+
+Lazy deletion makes normal updates cheaper. It also means deletion has two moments: the chunk disappears from search immediately, while physical index space is reclaimed during maintenance.
+
+## SearchStep combines retrieval paths
+
+[`SearchStep`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/steps/index/search.py) reads the query, limit, score threshold, filters, and vector weight from `RuntimeContext`. It asks for more candidates than the final limit, with a default multiplier of 5 and a hard cap of 200.
+
+When keyword and vector search both return results, the step merges their rankings with Reciprocal Rank Fusion. The constant `k` is 60:
+
+```text
+rrf contribution = branch_weight / (60 + rank)
+```
+
+The default vector weight is `0.7`, so the keyword branch receives `0.3`. RRF uses rank rather than comparing raw cosine and BM25 scores. Those score ranges mean different things and should not be added directly.
+
+If embeddings are disabled or fail, vector search returns an empty list and the step keeps the BM25 ranking. If keyword search is disabled, it can return the vector ranking. The result is then filtered, truncated, and optionally deduplicated inside a tool context.
+
+Each returned chunk includes its path and line range. Link expansion also loads inbound and outbound wiki links for the result files. An Agent can read the matching passage first, then inspect the nearby files when it needs more context. Retrieval therefore stays connected to the files a person can open.
+
+## Auto Dream consolidates daily memory
+
+Daily notes are useful evidence, but they grow quickly and repeat the same facts. Auto Dream processes changed daily files and writes longer-lived digest nodes. Its workflow has four steps.
+
+`DreamExtractStep` scans recent daily paths and compares file modification times with the file catalog. Unchanged files are skipped. Deleted paths are removed from the catalog. Changed files are packed into an LLM request that returns memory units and topic candidates.
+
+Each unit has a name, summary, source paths, and one bucket:
+
+- `personal` for user-specific facts and preferences
+- `procedure` for repeatable methods
+- `wiki` for general knowledge
+
+`DreamIntegrateStep` handles each unit separately. Its Agent can search existing nodes, read files and frontmatter, and write or edit digest files. The structured result records one action: `CREATE`, `CORROBORATE`, `REFINE`, or `CORRECT`. This lets an existing memory gain evidence, become more precise, or replace an outdated statement without creating a duplicate file for every daily note.
+
+`DreamTopicsStep` selects interest topics and avoids recent duplicates before writing `interests.yaml`. `DreamFinishStep` updates the catalog and records a checkpoint. Paths connected to failed units are excluded from that checkpoint, so the next run can try them again.
+
+Auto Dream does not rewrite the daily notes. The daily layer remains evidence. The digest layer is the consolidated view, with links back to its sources. In this design, compression means semantic consolidation. It does not mean compressing a file archive or shortening every conversation to a fixed token count.
+
+## What forgetting means in the current code
+
+ReMe does not currently apply automatic age decay, TTL expiry, or an importance score that silently erases old memory. Calling that behavior "forgetting" would describe a feature the source code does not implement.
+
+Forgetting is explicit here. A person or Agent can correct, move, or delete a memory file. When a watched file disappears, the indexing path removes its chunks, keyword documents, and graph node. BM25 hides lazy-deleted entries immediately and later reclaims their storage during optimization.
+
+This policy favors control and traceability. It also leaves a product decision to the application: when should old evidence be removed, and who is allowed to do it? A time-based retention rule can be added outside this core, but it should delete or update the source files through the same path so every derived index stays consistent.
+
+## Reading the design as an engineer
+
+The source code draws a firm line between memory and acceleration data. Files contain the durable record. `FileStore`, BM25, embeddings, the graph, and the catalog make that record faster to find and easier to connect. `BaseStep` moves runtime data through the workflow. Auto Dream creates a smaller, maintained digest without destroying the daily evidence.
+
+That design costs more filesystem and index coordination than saving messages in one database table. In return, a developer can inspect a memory, follow its source links, rebuild search data, and delete it through an ordinary file operation. For an Agent that needs explainable long-term memory, those properties are part of correctness.
+
+## Source files
+
+- [`BaseStep`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/steps/base_step.py)
+- [`BaseFileStore`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/components/file_store/base_file_store.py)
+- [`LocalFileStore`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/components/file_store/local_file_store.py)
+- [`BM25Index`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/components/keyword_index/bm25_index.py)
+- [`SearchStep`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/steps/index/search.py)
+- [Auto Dream steps](https://github.com/agentscope-ai/ReMe/tree/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/steps/evolve/dream)
+
+</div>
+
+<div className="article-language article-language-zh">
+
+长期记忆听起来不复杂。真正写进工程以后，问题很快就会出现：旧信息怎样纠正，检索结果怎样找到原文，索引损坏后能不能重建，删除一条记忆时又要清理哪些数据。
+
+ReMe 的做法是把文件留作事实来源，再用小型工作步骤和可重建索引处理搜索。本篇沿着一条记忆阅读源码。假设用户提出一项偏好：发布说明要简短，并写清迁移风险。ReMe 可以保存原始对话，生成 daily 笔记，建立索引，在后续任务中找到它，再把有用偏好整理进 digest 文件。源文件删除后，对应的搜索项和图节点也会清理。
+
+阅读入口主要有四处：[`BaseStep`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/steps/base_step.py)、[`LocalFileStore`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/components/file_store/local_file_store.py)、[`BM25Index`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/components/keyword_index/bm25_index.py)，以及 [Auto Dream steps](https://github.com/agentscope-ai/ReMe/tree/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/steps/evolve/dream)。
+
+## 一条记忆经过哪些地方
+
+ReMe 把原始文件和搜索数据分开：
+
+```text
+conversation
+    -> session/*.jsonl
+    -> daily/YYYY-MM-DD/*.md
+    -> FileNode + FileChunk
+    -> BM25 index, optional vectors, and file graph
+    -> search results with file paths and line numbers
+    -> digest/personal, digest/procedure, or digest/wiki
+```
+
+`session`、`daily`、`resource` 和 `digest` 中的文件保存人可以阅读和编辑的记忆。索引、chunk 缓存、catalog 和文件图放在 metadata 下，它们属于派生数据。如果这些数据不一致，系统可以清空它们，再扫描源文件重建。
+
+理解这条边界以后，后面的代码会容易很多。搜索需要快，但索引不应该成为一条记忆唯一的副本。
+
+## Step 是一次工作单元
+
+`BaseStep` 是 ReMe 工作流中的通用执行单元。搜索、抽取、整合和 catalog 更新都由 Step 完成。每个 Step 接收 `RuntimeContext`，执行 `execute()`，最后返回 response。
+
+调用过程很短：
+
+```python
+async def __call__(self, context=None, **kwargs):
+    self.context = RuntimeContext.from_context(context, **kwargs)
+    if self.input_mapping:
+        self.context.apply_mapping(self.input_mapping)
+    result = await self.execute()
+    if self.output_mapping:
+        self.context.apply_mapping(self.output_mapping)
+    return result
+```
+
+容易忽略的部分是 `Ref`。Step 可以使用 `file_store`、`file_catalog`、模型和 Agent wrapper，却不用自己创建这些组件。`Ref` 先从 Step 参数查找，再查 `RuntimeContext`，最后访问应用组件注册表。结果会在当前调用中缓存。下一次调用前，缓存会先清空，这样新的 context override 才能生效。
+
+于是工作流代码可以只处理当前任务。`SearchStep` 直接向 `self.file_store` 请求结果。`DreamExtractStep` 通过 `self.file_catalog` 判断哪些 daily 文件发生了变化。它们不用关心组件在哪里初始化。
+
+这个边界还能避免任务状态串到下一次运行。当前任务的数据放在 `RuntimeContext`，应用共享数据放在 `ApplicationContext.metadata`，持久记忆则放在文件和存储组件中。Step 本身不应该保存跨任务变化的数据。
+
+## FileStore 把文件变成可搜索单元
+
+`BaseFileStore` 的接口不多：写入或更新文件、删除文件、查询图链接、执行关键词或向量搜索，以及整理索引。`LocalFileStore` 是本地实现。
+
+每个进入索引的文件会生成两类对象：
+
+- `FileNode` 保存文件路径、修改时间、链接和 chunk ID。
+- `FileChunk` 保存一段文本、来源路径、行号范围、可选 embedding 和搜索分数。
+
+搜索以 chunk 为单位，管理和删除则以文件为单位。文件更新时，这个区别很重要。
+
+执行 `upsert` 时，`LocalFileStore` 会先找到旧节点，从内存映射中移除旧 chunk，再准备新的节点和 chunk。如果 chunk ID 和文本都没变，它会复用已有 embedding。随后更新文件图，为变化的 chunk 生成 embedding，把旧关键词文档标记为删除，再把新文本写入关键词索引。
+
+顺序可以简化成：
+
+```text
+old FileNode
+    -> remove old chunks
+    -> store new FileNode and links
+    -> embed changed chunks when embeddings are enabled
+    -> retire old BM25 documents
+    -> add new BM25 documents
+```
+
+如果 embedding 调用失败，`LocalFileStore` 会停用出错的 embedding 路径，BM25 仍然可以工作。对本地记忆系统来说，这种降级方式很实用。模型服务暂时不可用时，已经保存的文件仍然能通过关键词找到。
+
+删除也沿用同一条边界。FileStore 先找到 `FileNode`，移除它的全部 chunk ID，再删除文件图节点，并通知关键词索引删除这些文档 ID。源文件变化后，派生搜索数据会跟着更新。
+
+## BM25 不依赖 embedding 模型
+
+`BM25Index` 是倒排索引。ReMe 先对每个 chunk 分词，为新词分配整数 ID，再用 posting list 记录某个词出现在哪些 chunk 中。BM25 的 document ID 直接使用 `FileChunk.id`，所以搜索结果可以找到对应文本、文件路径和行号。
+
+查询词的分数由词频、文档长度、平均文档长度和逆文档频率共同决定。当前实现默认使用 `k1 = 1.5` 和 `b = 0.75`：
+
+```text
+score = IDF * TF * (k1 + 1)
+        / (TF + k1 * (1 - b + b * document_length / average_length))
+```
+
+只出现在少量 chunk 中的查询词会获得更高权重。一个词重复出现可以提高分数，但增长会逐渐受限。文档长度修正则避免大 chunk 仅靠文字更多就排到前面。
+
+BM25 的更新使用 lazy deletion。chunk 变化后，`_remove_doc()` 会在 `_deleted` 中标记旧位置，并移除有效 ID 映射。旧 posting 还在数组里，但评分时会把已删除位置设为零。之后运行 `optimize_index()`，才会重建数组、posting 和词表，真正回收空间。
+
+因此删除分为两个时刻。旧 chunk 会立刻从搜索结果中消失，索引占用的物理空间则在维护任务中回收。
+
+## SearchStep 组合两种检索
+
+[`SearchStep`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/steps/index/search.py) 从 `RuntimeContext` 读取 query、limit、最低分数、过滤条件和 vector weight。它会取比最终 limit 更多的候选项，默认倍数是 5，最多不超过 200 条。
+
+关键词搜索和向量搜索都有结果时，Step 使用 Reciprocal Rank Fusion 合并排名，常量 `k` 为 60：
+
+```text
+rrf contribution = branch_weight / (60 + rank)
+```
+
+vector weight 默认为 `0.7`，因此关键词分支权重是 `0.3`。RRF 比较排名，不会直接把 cosine similarity 和 BM25 原始分数相加，因为两种分数的范围和含义并不相同。
+
+如果 embedding 没有启用或执行失败，向量搜索会返回空列表，Step 继续使用 BM25 排名。关键词搜索关闭时，它也可以只返回向量结果。随后代码执行最低分过滤、数量截断，并可在同一个 tool context 中去重。
+
+每个结果都带文件路径和行号。链接扩展还会读取结果文件的入链和出链。Agent 可以先读命中的段落，需要更多上下文时再访问附近文件。检索结果始终能够回到人可以打开的源文件。
+
+## Auto Dream 整理 daily 记忆
+
+Daily 笔记保留了证据，但数量会不断增加，同一事实也可能重复出现。Auto Dream 只处理发生变化的 daily 文件，再把适合长期使用的信息写进 digest。整个流程分为四个 Step。
+
+`DreamExtractStep` 扫描最近的 daily 路径，用文件修改时间和 catalog 记录做比较。未变化的文件直接跳过，已经消失的路径会从 catalog 删除。变化的文件被放进 LLM 请求，输出 memory unit 和候选 topic。
+
+每个 unit 包含名称、摘要、来源路径和一个分类：
+
+- `personal` 保存用户事实和偏好
+- `procedure` 保存可以重复使用的方法
+- `wiki` 保存一般知识
+
+`DreamIntegrateStep` 逐个处理 unit。它的 Agent 可以搜索已有节点，读取文件和 frontmatter，也可以写入或编辑 digest 文件。结构化结果会记录一种动作：`CREATE`、`CORROBORATE`、`REFINE` 或 `CORRECT`。已有记忆可以补充证据、变得更准确，或者纠正旧内容，而不是每份 daily 笔记都新建一个重复节点。
+
+`DreamTopicsStep` 选择兴趣 topic，去掉近期重复内容，再写入 `interests.yaml`。`DreamFinishStep` 更新 catalog 并记录 checkpoint。失败 unit 关联的路径不会进入 checkpoint，下一次运行还能继续尝试。
+
+Auto Dream 不会改写 daily 笔记。Daily 层继续保存证据，digest 层保存整理后的结论，并保留到来源的链接。这里的压缩是语义整合，不是压缩文件包，也不是把每段对话裁成固定 token 数。
+
+## 当前代码怎样处理遗忘
+
+ReMe 当前没有自动时间衰减、TTL 过期或按重要性静默删除旧记忆的逻辑。把这些行为写成现有功能，会和源码不符。
+
+这里的遗忘是显式操作。人或 Agent 可以修改、移动或删除记忆文件。监听中的文件消失后，索引流程会移除相应 chunk、关键词文档和文件图节点。BM25 会立即隐藏 lazy-deleted 项，并在后续优化时回收存储空间。
+
+这种策略把控制权和可追踪性留给应用，同时也留下一个产品问题：旧证据应该在什么情况下删除，谁有权限执行？应用可以在 ReMe 外层加入保留期限，但删除或修改仍应经过相同的源文件路径，保证派生索引保持一致。
+
+## 从工程角度看这套设计
+
+源码把记忆和加速数据分得很清楚。文件保存持久记录，`FileStore`、BM25、embedding、文件图和 catalog 负责加快查找并建立关联。`BaseStep` 在工作流中传递本次运行的数据，Auto Dream 则在保留 daily 证据的同时维护一份更小的 digest。
+
+与把所有消息写进一张数据库表相比，这种做法需要处理更多文件和索引之间的协调。换来的能力也很具体：开发者可以直接检查记忆，沿着来源链接回看证据，重新构建搜索数据，并通过普通文件操作删除内容。对需要解释长期记忆来源的 Agent 来说，这些能力属于正确性的一部分。
+
+## 源码入口
+
+- [`BaseStep`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/steps/base_step.py)
+- [`BaseFileStore`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/components/file_store/base_file_store.py)
+- [`LocalFileStore`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/components/file_store/local_file_store.py)
+- [`BM25Index`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/components/keyword_index/bm25_index.py)
+- [`SearchStep`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/steps/index/search.py)
+- [Auto Dream steps](https://github.com/agentscope-ai/ReMe/tree/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/steps/evolve/dream)
+
+</div>
