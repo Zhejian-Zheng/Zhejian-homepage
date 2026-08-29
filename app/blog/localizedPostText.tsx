@@ -8,6 +8,14 @@ type PostTranslation = {
 };
 
 const postTranslations: Record<string, PostTranslation> = {
+	"agentscope-java-recoverable-agents": {
+		title: "AgentScope Java 2.0 可恢复 Agent：事件流、HITL 与恢复语义",
+		summary: "从源码分析 AgentScope Java 2.0 的事件流、人工批准、外部工具执行、中断机制和 session 恢复边界。"
+	},
+	"agentscope-java-permissions-and-sandbox": {
+		title: "AgentScope Java 2.0 权限系统：从 ALLOW、ASK、DENY 到沙箱隔离",
+		summary: "从工程角度分析 AgentScope Java 2.0 的权限判断、人工确认、工具校验、沙箱隔离、快照和并发保护。"
+	},
 	"reme-long-term-memory": {
 		title: "ReMe 长期记忆：记录、检索、压缩与遗忘",
 		summary: "从源码出发，说明 ReMe 如何用 Step、FileStore、BM25 和 Auto Dream 记录、检索、整合与删除 Agent 记忆。"
@@ -96,6 +104,7 @@ const postTranslations: Record<string, PostTranslation> = {
 
 const tagTranslations: Record<string, string> = {
 	"AI Agent": "AI Agent",
+	AgentScope: "AgentScope",
 	Algorithms: "算法",
 	"AWS S3": "AWS S3",
 	Automation: "自动化",
@@ -109,9 +118,12 @@ const tagTranslations: Record<string, string> = {
 	Design: "设计",
 	Documentation: "文档",
 	Express: "Express",
+	"Event Streaming": "事件流",
 	"Game Logic": "游戏逻辑",
 	"GitHub Pages": "GitHub Pages",
 	GitHub: "GitHub",
+	HITL: "人工确认",
+	Java: "Java",
 	Kafka: "Kafka",
 	LaTeX: "LaTeX",
 	Licensing: "许可证",
@@ -133,7 +145,9 @@ const tagTranslations: Record<string, string> = {
 	Resume: "简历",
 	Rust: "Rust",
 	Safety: "安全",
+	Sandbox: "沙箱",
 	Scoring: "计分",
+	Security: "安全",
 	Shell: "Shell",
 	Solana: "Solana",
 	"Static Analysis": "静态分析",

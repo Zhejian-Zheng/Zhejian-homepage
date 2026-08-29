@@ -1,6 +1,8 @@
 import type { ComponentType } from "react";
 import AgentDevelopmentGuide, { metadata as agentDevelopmentGuideMetadata } from "@/content/blog/agent-development-guide.mdx";
 import AgentScope2VsLangChain, { metadata as agentScope2VsLangChainMetadata } from "@/content/blog/agentscope-2-vs-langchain.mdx";
+import AgentScopeJavaPermissionsAndSandbox, { metadata as agentScopeJavaPermissionsAndSandboxMetadata } from "@/content/blog/agentscope-java-permissions-and-sandbox.mdx";
+import AgentScopeJavaRecoverableAgents, { metadata as agentScopeJavaRecoverableAgentsMetadata } from "@/content/blog/agentscope-java-recoverable-agents.mdx";
 import BalatroRustScoringEngine, { metadata as balatroRustScoringEngineMetadata } from "@/content/blog/balatro-rust-scoring-engine.mdx";
 import BuildingMyPersonalPage, { metadata as buildingMyPersonalPageMetadata } from "@/content/blog/building-my-personal-page.mdx";
 import CodeWithCodex, { metadata as codeWithCodexMetadata } from "@/content/blog/code-with-codex.mdx";
@@ -31,6 +33,16 @@ export type BlogPost = {
 };
 
 export const blogPosts: BlogPost[] = [
+	{
+		slug: "agentscope-java-recoverable-agents",
+		...agentScopeJavaRecoverableAgentsMetadata,
+		Component: AgentScopeJavaRecoverableAgents
+	},
+	{
+		slug: "agentscope-java-permissions-and-sandbox",
+		...agentScopeJavaPermissionsAndSandboxMetadata,
+		Component: AgentScopeJavaPermissionsAndSandbox
+	},
 	{
 		slug: "reme-long-term-memory",
 		...reMeLongTermMemoryMetadata,

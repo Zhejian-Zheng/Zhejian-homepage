@@ -1,0 +1,346 @@
+export const metadata = {
+	title: "Recoverable Agents in AgentScope Java 2.0: Event Streams, HITL, and Resume Semantics",
+	summary: "A bilingual source code walkthrough of AgentScope Java 2.0 event streams, human approval, external tool execution, interruption, and session recovery.",
+	publishedAt: "2026-08-29",
+	tags: ["AI Agent", "AgentScope", "Java", "Event Streaming", "HITL"]
+};
+
+<div className="article-language article-language-en">
+
+An Agent becomes difficult to operate when one call lasts longer than one HTTP request. The model may stream text, request two tools, wait for approval, and continue several minutes later. A process may restart between those steps. If the runtime exposes only a final string, the application cannot tell whether the task finished, paused, or lost its place.
+
+AgentScope Java 2.0 models an execution as an event stream backed by session state. This article follows one deployment assistant through the implementation at commit [`d60414a6`](https://github.com/agentscope-ai/agentscope-java/tree/d60414a6fc74113ca05c73c79b30601323b0dea5). The assistant prepares a release, asks before publishing it, waits for an external deployment system, and then reports the result.
+
+A useful recovery review asks what is persisted, what is only streamed, and what the next call must provide.
+
+## `call` and `streamEvents` share one execution core
+
+[`ReActAgent`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/ReActAgent.java) sends both blocking and streaming APIs through `buildAgentStream()`.
+
+`callInternal()` consumes that stream, selects the last `AgentResultEvent`, and returns its `Msg`. `streamEvents()` exposes the same stream to the caller. This matters because middleware around `onAgent` sees the same lifecycle in both modes. A production service does not need separate policy code for the REST path and the SSE path.
+
+The outer lifecycle is:
+
+```text
+AgentStartEvent
+    -> reasoning events
+    -> tool events
+    -> zero or more additional reasoning rounds
+    -> AgentResultEvent
+    -> AgentEndEvent
+```
+
+`buildAgentStream()` also runs the normal agent lifecycle, including the execution gate, hooks, tracing, and state handling. It installs an event sink in Reactor context so inner reasoning and acting code can publish events without receiving a UI callback through every method signature.
+
+Cancellation has a concrete effect. When the subscriber cancels the `Flux`, `sink.onCancel()` disposes the lifecycle subscription. A blocking tool may still continue if its implementation does not respond to cancellation. Cancellation also does not create a durable resume point. Durable recovery depends on the state written before cancellation or interruption.
+
+## Event IDs answer different questions
+
+The stream uses three identifiers:
+
+- `replyId` groups events produced by one reply stream.
+- `blockId` groups the start, delta, and end events for one text, thinking, or data block.
+- `toolCallId` connects a tool request with its result.
+
+These IDs have different scopes. `blockId` is meaningful inside its reply. A tool call ID must remain stable when the tool moves from requested to approved, executed, or denied. A session ID belongs to runtime state and spans multiple calls.
+
+The source also creates reply IDs at more than one layer. `buildAgentStream()` creates an ID for the outer Agent lifecycle. Model calls and acting streams create their own IDs for their event sequences. A consumer should therefore correlate events by event type and ID instead of treating the first reply ID as a session-wide trace ID.
+
+A practical UI state model looks like this:
+
+```text
+(replyId, blockId)       -> visible streaming block
+(replyId, toolCallId)    -> tool status in this event sequence
+(userId, sessionId)      -> durable Agent state slot
+```
+
+Mixing these scopes causes familiar bugs. A reconnecting client may attach new deltas to an old message, or a tool result may be displayed under the wrong call even though the backend state is correct.
+
+## Streaming events can rebuild a message
+
+Model output arrives as block lifecycles. Text, thinking, and tool calls each produce start, delta, and end events. Inside `ReActAgent`, `ModelCallBlockLifecycle` makes sure the start event appears before the first delta and the end event appears when the model call closes.
+
+The accumulator contract in [`ContentAccumulator`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/agent/accumulator/ContentAccumulator.java) is deliberately small: add a chunk, report whether content exists, build the aggregated block, and reset. Text concatenation and tool argument assembly can use different implementations while producing normal `ContentBlock` objects for the final message.
+
+This supports two views of the same output:
+
+```text
+incremental AgentEvent stream -> live interface and telemetry
+final Msg                     -> conversation context and return value
+```
+
+Reconstructible events are not automatically a durable event log. The framework emits them, but an application that needs reconnect replay must store them with ordering information. `AgentStateStore` persists Agent state, not every event sent over SSE.
+
+That distinction affects recovery design. Event storage lets a client redraw what already happened. Agent state lets the next call decide what work remains.
+
+## Permission ASK creates a real pause
+
+Suppose the model requests `publish_release`. Permission evaluation returns `ASK`. The acting path marks the related `ToolUseBlock` as `ASKING`, emits `RequireUserConfirmEvent`, and then emits a `RequestStopEvent` with `GenerateReason.PERMISSION_ASKING`.
+
+No approved tool runs in that branch. If the same model response also contained calls denied by policy, the Agent writes synthetic `DENIED` results for those calls before stopping. This prevents denied calls from appearing as unresolved work after resume.
+
+The pause result contains the pending calls:
+
+```java
+agent.streamEvents(message)
+    .doOnNext(event -> {
+        if (event instanceof RequireUserConfirmEvent confirm) {
+            confirm.getToolCalls().forEach(toolCall ->
+                showApproval(toolCall.getId(), toolCall.getName(), toolCall.getInput()));
+        }
+    })
+    .blockLast();
+```
+
+The next call must send `ConfirmResult` objects under `Msg.METADATA_CONFIRM_RESULTS`. The Agent checks its saved context for calls in `ASKING` state. If they exist and the new call contains no confirmation, it fails with an explanatory exception instead of silently starting another reasoning round.
+
+An approved result may carry a modified `ToolUseBlock`. `applyConfirmResults()` replaces the pending block and changes its state to `ALLOWED`. A rejection writes a `ToolResultBlock` with state `DENIED`, which the model can see in the next reasoning step.
+
+This is application-level continuation. The JVM stack is not suspended. The first call returns after persisting pending work. A later call loads the state, recognizes the pending tool IDs, applies confirmation, and enters `resumeAgent()`.
+
+## External execution uses a suspended result
+
+Some tools must run outside the Agent process. A payment provider, deployment controller, or operator console may own the actual side effect. A tool marked `externalTool=true` is not invoked locally by `ToolExecutor`. The executor returns a suspended `ToolResultBlock`. `ReActAgent` then builds a message containing the tool request and pending result, with `GenerateReason.TOOL_SUSPENDED`.
+
+The source tree declares `RequireExternalExecutionEvent` and `ExternalExecutionResultEvent`, and the documentation describes them. In the inspected commit, the runtime execution path does not construct either event class. A consumer should use the suspended result and `GenerateReason.TOOL_SUSPENDED` as the verified contract, or add and test an adapter before depending on the dedicated event types.
+
+The external system performs the operation and returns `ToolResultBlock` values on a later call. Their IDs must match the pending tool call IDs. The Agent validates and adds those results, then resumes reasoning when no pending calls remain.
+
+Permission approval and external execution solve separate problems:
+
+- Approval decides whether an operation may run.
+- External execution decides where it runs and who supplies the result.
+
+A tool can require both. Approval should happen before an external system receives a request. The external result should include a stable operation ID so the application can reject duplicates or safely return the first result after a retry.
+
+## Interrupt is not the same as HITL pause
+
+[`InterruptControl`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/interruption/InterruptControl.java) holds a flag, an interrupt source, and an optional user message for one session. `ReActAgent.interrupt(userId, sessionId)` raises that flag. Reasoning start, acting start, and streaming chunks are checkpoints where execution can notice it.
+
+The control object is `transient` and is excluded from serialized [`AgentState`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/state/AgentState.java). The interrupt signal therefore belongs to the current process. It cannot be used as a cross-process cancellation message after a worker has crashed.
+
+State written around the interruption can still survive. Partial reasoning may be kept or discarded according to shutdown policy, and the conversation context is saved through the normal state lifecycle. A later call works from that saved context. It does not resume the old Java stack or Reactor subscription.
+
+This gives three different behaviors:
+
+| Mechanism | What stops | Durable input for continuation |
+|---|---|---|
+| Permission ASK | Tool execution before approval | `ToolUseBlock` in `ASKING` state plus `ConfirmResult` |
+| External execution | Local execution of an external tool | Pending tool call plus matching `ToolResultBlock` |
+| Interrupt | Current in-process execution at a checkpoint | Saved Agent context, if it was persisted |
+
+Treating all three as a generic paused boolean loses the information needed to resume safely.
+
+## `AgentStateStore` defines the recovery boundary
+
+`AgentState` contains the conversation buffer, summary, reply position, current iteration, permission context, tool context, task context, and plan-mode context. A configured [`AgentStateStore`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/state/AgentStateStore.java) saves that state under `(userId, sessionId)`.
+
+At the start of a call, `activateSlotForContext()` resolves the slot. When a store is configured, it reloads the state on every call instead of trusting a JVM cache. This supports deployments where the next request reaches another replica. Calls for the same slot pass through the execution gate, while different sessions can run independently.
+
+The storage abstraction does not make tool side effects transactional with Agent state. A deployment may succeed, then the worker may fail before it saves the result. The next call can see a pending tool and try again. Each side-effecting tool still needs an idempotency key or a status lookup in the system that owns the operation.
+
+For the deployment assistant, the durable contract should be:
+
+```text
+toolCallId -> deployment operation id
+operation id -> external deployment status
+(userId, sessionId) -> AgentState
+event sequence -> optional replay store for the client
+```
+
+The Agent state tells the workflow what it intended to do. The deployment system remains the authority on whether the deployment actually happened.
+
+## A production review checklist
+
+Before calling an Agent recoverable, test the points where state changes ownership:
+
+1. Disconnect an SSE client during a text block, reconnect, and replay stored events without duplicating text.
+2. Stop after `RequireUserConfirmEvent`, start a new process, and approve the pending call using the same `(userId, sessionId)`.
+3. Submit the same approval twice and verify that the tool side effect occurs once.
+4. Return an external result with an unknown tool call ID and confirm that the Agent rejects it.
+5. Interrupt during reasoning and tool execution, then inspect which partial messages were saved.
+6. Run two requests for the same session and verify their order. Run different sessions and verify that they do not share state.
+
+These checks expose the difference between a fluent demo and a recoverable service. The important output is a documented continuation contract: identifiers, persisted fields, duplicate handling, and the actor responsible for each retry.
+
+## Source files
+
+- [`ReActAgent`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/ReActAgent.java)
+- [`AgentState`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/state/AgentState.java)
+- [`AgentStateStore`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/state/AgentStateStore.java)
+- [`GenerateReason`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/message/GenerateReason.java)
+- [`RequireUserConfirmEvent`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/event/RequireUserConfirmEvent.java)
+- [`RequireExternalExecutionEvent`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/event/RequireExternalExecutionEvent.java)
+- [`InterruptControl`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/interruption/InterruptControl.java)
+
+</div>
+
+<div className="article-language article-language-zh">
+
+一次 Agent 调用超过一个 HTTP 请求的生命周期后，运行问题就会变复杂。模型可能先流式输出文字，再申请两个工具，等待人工批准，几分钟后继续执行。进程也可能在中间重启。如果运行时只返回最终字符串，应用无法判断任务已经完成、正在等待，还是已经丢失执行位置。
+
+AgentScope Java 2.0 用事件流表示执行过程，并用 session state 保存可恢复数据。本篇基于提交 [`d60414a6`](https://github.com/agentscope-ai/agentscope-java/tree/d60414a6fc74113ca05c73c79b30601323b0dea5) 阅读源码。示例是一名部署助手：它准备 release，在发布前请求确认，把实际部署交给外部系统，最后读取结果并回复用户。
+
+判断 Agent 能否恢复时，需要分别确认三件事：哪些数据已经持久化，哪些内容只发到了事件流，下一次调用必须提供什么输入。
+
+## `call` 和 `streamEvents` 共用执行核心
+
+[`ReActAgent`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/ReActAgent.java) 的阻塞接口和流式接口都会进入 `buildAgentStream()`。
+
+`callInternal()` 消费完整事件流，找到最后一个 `AgentResultEvent`，再返回其中的 `Msg`。`streamEvents()` 则把同一条事件流交给调用方。两种方式都会经过相同的 `onAgent` middleware 生命周期。因此，REST 接口和 SSE 接口不需要各写一套策略逻辑。
+
+外层生命周期可以简化为：
+
+```text
+AgentStartEvent
+    -> reasoning events
+    -> tool events
+    -> zero or more additional reasoning rounds
+    -> AgentResultEvent
+    -> AgentEndEvent
+```
+
+`buildAgentStream()` 还会运行 execution gate、hook、tracing 和状态处理。它把 event sink 放进 Reactor context，内部 reasoning 和 acting 代码可以直接发布事件，不用把 UI callback 一层层传下去。
+
+订阅取消也有明确行为。客户端取消 `Flux` 后，`sink.onCancel()` 会释放当前 lifecycle subscription，正在运行的 reactive execution 随之停止。但取消动作本身不会自动生成持久化恢复点。能否恢复取决于取消或中断前已经保存了哪些状态。
+
+## 不同 ID 解决不同问题
+
+事件流主要使用三种标识：
+
+- `replyId` 关联一次 reply stream 产生的事件。
+- `blockId` 关联同一段 text、thinking 或 data 的 start、delta 和 end 事件。
+- `toolCallId` 关联工具请求与工具结果。
+
+这些 ID 的作用域不同。`blockId` 只在对应 reply 中有意义。工具从待执行变为已批准、已完成或已拒绝时，tool call ID 必须保持不变。session ID 则属于运行状态，可以跨越多次调用。
+
+源码还会在多个层级创建 reply ID。`buildAgentStream()` 为外层 Agent lifecycle 生成一个 ID，模型调用和 acting stream 也会为自己的事件序列生成 ID。因此，消费端应根据事件类型和对应 ID 建立关联，不能把收到的第一个 reply ID 当成整个 session 的 trace ID。
+
+前端状态可以按下面的方式组织：
+
+```text
+(replyId, blockId)       -> visible streaming block
+(replyId, toolCallId)    -> tool status in this event sequence
+(userId, sessionId)      -> durable Agent state slot
+```
+
+如果混用这些作用域，前端重连后可能把新 delta 拼到旧消息中，也可能把工具结果显示在错误的调用下面。后端状态即使正确，界面仍会出错。
+
+## 事件流可以重建消息
+
+模型输出使用 block lifecycle。Text、thinking 和 tool call 都会产生 start、delta 与 end 事件。`ReActAgent` 内部的 `ModelCallBlockLifecycle` 保证第一段 delta 之前已经发送 start，并在模型调用结束时补齐 end。
+
+[`ContentAccumulator`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/agent/accumulator/ContentAccumulator.java) 的接口很小：加入 chunk，判断是否有内容，生成聚合后的 block，以及清空状态。文本拼接和工具参数组装可以使用不同实现，最后都生成普通 `ContentBlock`。
+
+同一份输出因此有两种表现形式：
+
+```text
+incremental AgentEvent stream -> live interface and telemetry
+final Msg                     -> conversation context and return value
+```
+
+事件可以重建消息，不等于框架已经提供持久化事件日志。框架负责发出事件。需要断线重放时，应用还要保存事件和顺序。`AgentStateStore` 保存的是 Agent state，不是 SSE 已经发送的每个事件。
+
+两种存储解决的问题不同。事件日志帮助客户端重新显示已经发生的过程，Agent state 帮助下一次调用判断还有什么工作没做。
+
+## Permission ASK 会真正暂停执行
+
+假设模型请求 `publish_release`，权限判断返回 `ASK`。Acting 逻辑会把对应 `ToolUseBlock` 标记为 `ASKING`，发出 `RequireUserConfirmEvent`，随后发出带有 `GenerateReason.PERMISSION_ASKING` 的 `RequestStopEvent`。
+
+进入这个分支后，等待批准的工具不会执行。如果同一轮模型输出中还有被策略直接拒绝的调用，Agent 会先为它们写入合成的 `DENIED` 结果。恢复时，这些已拒绝调用不会再次被当成待处理任务。
+
+应用可以从事件中读取待确认工具：
+
+```java
+agent.streamEvents(message)
+    .doOnNext(event -> {
+        if (event instanceof RequireUserConfirmEvent confirm) {
+            confirm.getToolCalls().forEach(toolCall ->
+                showApproval(toolCall.getId(), toolCall.getName(), toolCall.getInput()));
+        }
+    })
+    .blockLast();
+```
+
+下一次调用必须把 `ConfirmResult` 放在 `Msg.METADATA_CONFIRM_RESULTS` 中。Agent 会先检查保存的 context 是否存在 `ASKING` 状态工具。如果存在，而新调用没有提交确认结果，代码会直接抛出说明性异常，不会悄悄开始一轮新的 reasoning。
+
+批准结果可以携带修改后的 `ToolUseBlock`。`applyConfirmResults()` 会替换待处理 block，并把状态改成 `ALLOWED`。拒绝结果则生成状态为 `DENIED` 的 `ToolResultBlock`，下一轮模型可以看到拒绝原因。
+
+这里恢复的是应用级工作流，不是 JVM 调用栈。第一次调用保存待处理任务后返回。后续调用重新加载状态，识别 pending tool ID，应用确认结果，再进入 `resumeAgent()`。
+
+## 外部执行通过 suspended result 暂停
+
+有些工具必须在 Agent 进程之外运行。例如支付平台、部署控制器或人工操作台才拥有真实副作用。工具标记为 `externalTool=true` 后，`ToolExecutor` 不会在本地调用它。执行器会返回 suspended `ToolResultBlock`，`ReActAgent` 再生成包含工具请求和 pending result 的消息，并设置 `GenerateReason.TOOL_SUSPENDED`。
+
+源码中声明了 `RequireExternalExecutionEvent` 和 `ExternalExecutionResultEvent`，文档也描述了这两个事件。但在当前提交的实际执行路径中，没有代码构造这两个 event class。消费端应把 suspended result 和 `GenerateReason.TOOL_SUSPENDED` 作为已经由源码验证的契约。如果希望依赖专用事件，需要先增加 adapter 并通过测试确认。
+
+外部系统完成操作后，在下一次调用中返回 `ToolResultBlock`。结果 ID 必须与 pending tool call ID 一致。Agent 校验并写入这些结果，全部 pending call 结束后继续 reasoning。
+
+权限批准和外部执行负责不同问题：
+
+- Approval 决定一项操作是否允许发生。
+- External execution 决定操作在哪里运行，以及由谁返回结果。
+
+一个工具可以同时需要两者。应用应先完成批准，再向外部系统提交请求。外部请求还需要稳定的 operation ID，这样重试时可以拒绝重复执行，或者返回第一次执行的结果。
+
+## Interrupt 与 HITL pause 不同
+
+[`InterruptControl`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/interruption/InterruptControl.java) 保存一个 session 的中断标记、来源和可选用户消息。调用 `ReActAgent.interrupt(userId, sessionId)` 会设置标记。Reasoning 开始、acting 开始和 streaming chunk 都是可以观察中断的检查点。
+
+该对象是 `transient`，也不会进入序列化后的 [`AgentState`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/state/AgentState.java)。因此，interrupt signal 只属于当前进程。worker 崩溃后，另一个进程不能靠这个标记继续完成取消。
+
+中断附近保存的状态仍然可以保留。部分 reasoning 是否保存取决于 shutdown policy，对话 context 会走正常状态保存流程。后续调用从已保存 context 继续，但它不会恢复原来的 Java stack 或 Reactor subscription。
+
+三种机制的差异如下：
+
+| Mechanism | What stops | Durable input for continuation |
+|---|---|---|
+| Permission ASK | Tool execution before approval | `ToolUseBlock` in `ASKING` state plus `ConfirmResult` |
+| External execution | Local execution of an external tool | Pending tool call plus matching `ToolResultBlock` |
+| Interrupt | Current in-process execution at a checkpoint | Saved Agent context, if it was persisted |
+
+如果只用一个 paused boolean 表示它们，恢复时就没有足够信息判断下一步应该做什么。
+
+## `AgentStateStore` 决定恢复边界
+
+`AgentState` 保存 conversation buffer、summary、reply position、current iteration、permission context、tool context、task context 和 plan-mode context。配置 [`AgentStateStore`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/state/AgentStateStore.java) 后，系统会按 `(userId, sessionId)` 保存这些数据。
+
+每次调用开始时，`activateSlotForContext()` 先解析 state slot。存在 state store 时，代码每次都会重新加载状态，不会直接相信 JVM cache。这样下一次请求落到其他副本后也能读取最新状态。同一 slot 的调用会经过 execution gate，不同 session 则可以独立运行。
+
+存储抽象不会让工具副作用和 Agent state 自动进入同一个事务。部署可能已经成功，但 worker 在保存结果前失败。下一次调用仍看到 pending tool，于是再次执行。每个有副作用的工具都需要 idempotency key，或者向实际业务系统查询操作状态。
+
+部署助手可以采用下面的持久化关系：
+
+```text
+toolCallId -> deployment operation id
+operation id -> external deployment status
+(userId, sessionId) -> AgentState
+event sequence -> optional replay store for the client
+```
+
+Agent state 说明工作流原本想做什么。部署系统才是部署是否真正发生的事实来源。
+
+## 上线前应该验证什么
+
+判断服务能否恢复时，可以直接测试状态所有权发生变化的位置：
+
+1. 在 text block 中途断开 SSE，重连后重放已保存事件，检查文字没有重复。
+2. 收到 `RequireUserConfirmEvent` 后停止进程，再用相同 `(userId, sessionId)` 启动并批准 pending call。
+3. 重复提交同一个批准结果，检查工具副作用只发生一次。
+4. 返回未知 tool call ID 的外部结果，确认 Agent 会拒绝它。
+5. 分别在 reasoning 和工具执行期间中断，检查哪些部分消息已经保存。
+6. 同时发送两个相同 session 请求，检查执行顺序。再用不同 session 检查是否发生状态串扰。
+
+这些测试最终应产出一份明确的 continuation contract：使用哪些 ID，保存哪些字段，怎样处理重复请求，以及每次重试由哪个系统负责。
+
+## 源码入口
+
+- [`ReActAgent`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/ReActAgent.java)
+- [`AgentState`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/state/AgentState.java)
+- [`AgentStateStore`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/state/AgentStateStore.java)
+- [`GenerateReason`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/message/GenerateReason.java)
+- [`RequireUserConfirmEvent`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/event/RequireUserConfirmEvent.java)
+- [`RequireExternalExecutionEvent`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/event/RequireExternalExecutionEvent.java)
+- [`InterruptControl`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/interruption/InterruptControl.java)
+
+</div>

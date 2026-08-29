@@ -1,0 +1,340 @@
+export const metadata = {
+	title: "AgentScope Java 2.0 Permissions: From ALLOW, ASK, and DENY to Sandbox Isolation",
+	summary: "A bilingual engineering analysis of AgentScope Java 2.0 permission evaluation, HITL approval, tool validation, sandbox isolation, snapshots, and concurrency guards.",
+	publishedAt: "2026-08-29",
+	tags: ["AI Agent", "AgentScope", "Java", "Security", "Sandbox"]
+};
+
+<div className="article-language article-language-en">
+
+An Agent that can call a shell or write files has two separate security problems. The application must decide whether an operation is allowed, and the runtime must limit the damage if the decision is wrong. AgentScope Java 2.0 addresses the first problem with permission evaluation and the second with tool validation and optional sandbox execution.
+
+This article reads the implementation at commit [`d60414a6`](https://github.com/agentscope-ai/agentscope-java/tree/d60414a6fc74113ca05c73c79b30601323b0dea5). The running example is a coding Agent that wants to update a deployment file and run a package command. We will trace the call through `PermissionEngine`, human approval, the tool executor, and the Harness sandbox.
+
+The useful security model has layers:
+
+```text
+model tool request
+    -> permission decision
+    -> optional human approval
+    -> schema and tool-specific validation
+    -> execution environment
+    -> persistent state and audit record
+```
+
+Removing one layer changes the guarantee. A sandbox cannot decide business authorization. An ALLOW rule cannot prevent a container escape or a badly written tool from touching the wrong resource.
+
+## First check which permission path is active
+
+[`ReActAgent.evaluatePermissions()`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/ReActAgent.java) has a compatibility branch that is easy to miss.
+
+When `PermissionContextState` has `DEFAULT` mode, no working directories, and no allow, deny, or ask rules, `isTrivial()` returns true. The Agent uses the lightweight path. A `ToolBase` can still return `ASK` or `DENY` from its own `checkPermissions()`, but the full rule engine is not used. Legacy tools that do not extend `ToolBase` pass as approved.
+
+Any configured mode, rule, or working directory makes the context nontrivial and enables the full [`PermissionEngine`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/permission/PermissionEngine.java) pipeline.
+
+This preserves older applications, but it affects security reviews. A builder that merely constructs the default context has not activated the same policy path as an application that explicitly configures permissions. Tests should assert the decision for each sensitive tool instead of assuming that the presence of a permission object means enforcement is complete.
+
+## The full decision order
+
+`PermissionEngine.checkPermission()` evaluates one tool invocation in this order:
+
+```text
+1. matching DENY rule
+2. matching ASK rule
+3. mode handling and tool self-check
+4. matching ALLOW rule
+5. BYPASS fallback
+6. default ASK, or fallback DENY in DONT_ASK mode
+```
+
+The order is part of the policy.
+
+A matching deny rule wins before every later branch. A matching ask rule also stops evaluation before an allow rule. Tool self-checks run before allow rules, so a tool can block an unsafe input even when the caller has a broad allow entry. `BYPASS` appears near the end rather than at the start.
+
+The mode check has concrete behavior. `EXPLORE` automatically allows tools marked read-only and denies modification tools. `ACCEPT_EDITS` automatically allows read-only tools, while other calls continue through the tool check and rule tables. Other modes do not add a decision at this stage.
+
+A tool self-check can return `ALLOW`, `DENY`, `ASK`, or `PASSTHROUGH`. In this source snapshot, an `ASK` from the tool ends the full-engine path only when its `decisionReason` contains `safety`. Other ASK results continue to later rules and fallback. The lightweight compatibility path treats any tool ASK as a pause. Custom tool authors should test both configurations if they depend on ASK.
+
+## A rule is only as precise as the tool matcher
+
+[`PermissionRule`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/permission/PermissionRule.java) stores a tool name, optional rule content, behavior, and source. Rule tables are keyed by tool name and keep insertion order within that tool.
+
+The engine does not interpret rule content. It calls `tool.matchRule(ruleContent, input)`. The default `ToolBase` matcher accepts only `null`, which means a tool-wide rule. A path pattern, command prefix, repository name, or resource ID works only when that tool overrides `matchRule()` and defines the syntax.
+
+This API allows useful policies:
+
+```text
+ALLOW read_file under /workspace/project
+ASK write_file under /workspace/project
+DENY shell command matching a destructive pattern
+```
+
+Those examples are policy goals, not behavior supplied by a generic string matcher. The owning tool must parse the rule and compare it with normalized input. A security review should read `matchRule()`, `checkPermissions()`, and `generateSuggestions()` for every tool that receives non-null rule content.
+
+Suggested rules need the same care. A human approval screen may offer a broad tool-level rule when the tool does not implement a narrower suggestion. Accepting that suggestion can turn one approved call into approval for every future input to the tool.
+
+## Mode names do not replace source-level checks
+
+[`PermissionMode`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/permission/PermissionMode.java) defines `DEFAULT`, `ACCEPT_EDITS`, `EXPLORE`, `BYPASS`, and `DONT_ASK`. The names are useful, but the implementation order decides the result.
+
+At this commit, `BYPASS` is a fallback after deny rules, ask rules, and tool self-checks. An earlier decision still wins. An application should therefore test the exact tools it intends to bypass instead of reading BYPASS as an unconditional first branch.
+
+`DONT_ASK` converts the default fallback ASK to DENY when no user is available. A matching explicit ask rule returns earlier, before that fallback conversion. An unattended job should avoid explicit ASK rules unless its outer runtime has a deterministic timeout or converts unresolved confirmation into failure.
+
+`setPermissionMode(userId, sessionId, mode)` replaces the mode in the session's `PermissionContextState`, rebuilds the cached engine, and saves the state. The new mode applies to later calls. An in-flight call keeps the engine with which it started.
+
+These details are worth recording in an operational policy. A mode name is too small to describe rule precedence, custom tool checks, and behavior during a rolling deployment.
+
+## How ASK enters the ReAct loop
+
+The Agent evaluates tool calls with `concatMap`, which keeps permission decisions in model order. It divides the result into pending ASK calls and automatically denied IDs.
+
+Denied calls never reach `Toolkit.callTools()`. The Agent creates `ToolResultBlock` values with `DENIED` state so the model can see what happened. Calls that require approval become `ToolUseBlock` values in `ASKING` state. The Agent emits `RequireUserConfirmEvent` and returns with `GenerateReason.PERMISSION_ASKING`.
+
+The application displays the tool name, input, and any suggested rules. On the next call it sends a `ConfirmResult` for each pending tool. Confirmation can approve the input, replace it with a reviewed version, or reject it. Approved blocks move to `ALLOWED`; rejected blocks receive a denied result.
+
+One persistence detail deserves attention. In this source snapshot, accepted suggested rules are added to the current `PermissionEngine`. `applyConfirmResults()` does not copy them into `PermissionContextState`. When a configured state store reloads a session on a later call, the Agent rebuilds the engine from that stored context. An application should not assume that an accepted suggestion is durable across reloads without verifying or persisting the rule itself.
+
+That distinction matters for user interfaces. A checkbox labeled remember this decision should correspond to durable policy storage, not only a mutation of the current JVM cache.
+
+## Permission is not input validation
+
+An ALLOW result only answers the policy question. The tool executor still checks whether the tool is active and validates input against its schema. Preset parameters are merged after model input, and preset values win so the model cannot replace framework-controlled fields.
+
+File tools also need path validation at execution time. `FileToolUtils.validatePath()` resolves relative paths against a base directory, normalizes the result, and rejects paths outside that base. `ToolBase.isDangerousPath()` can detect configured sensitive filenames and directory segments, including a resolved symlink target.
+
+The dangerous-path helper is protected utility code. The default `ToolBase.checkPermissions()` returns `PASSTHROUGH` and does not call it automatically. A custom file tool must use the helper in its own permission check if that behavior is required. Annotation fields that populate dangerous file lists do not remove the need to verify the actual check path.
+
+Shell validation is another boundary. `ShellCommandTool` uses a platform command validator and optional command allowlist during execution. Permission rules can decide who may request the shell, while command validation decides whether this command shape is accepted. Both checks should produce an audit record with normalized input and the final decision.
+
+## Permission is not isolation
+
+Permission logic runs before a tool, but a programming error or incomplete rule may still approve harmful work. Harness sandboxing moves filesystem and command execution into an isolated environment.
+
+[`IsolationScope`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-harness/src/main/java/io/agentscope/harness/agent/IsolationScope.java) controls which calls share a persistent sandbox slot:
+
+| Scope | State sharing |
+|---|---|
+| `SESSION` | One slot per session ID |
+| `USER` | One slot per user ID, with session fallback when user ID is absent |
+| `AGENT` | One slot for all users of the Agent |
+| `GLOBAL` | One slot for the workspace or store instance |
+
+`USER` is the default. The broader scopes are useful for shared workspaces, but they also increase the number of callers that can affect the same files.
+
+The source describes sandbox sharing as sequential reuse of persisted state, not automatic live-container sharing. Concurrent calls for the same scope may run in separate containers and write back to the same slot. Without a guard, the last persisted snapshot wins.
+
+[`SandboxExecutionGuard`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-harness/src/main/java/io/agentscope/harness/agent/sandbox/SandboxExecutionGuard.java) covers the window from acquire through release. Its default is a no-op. Shared scopes in a multi-replica deployment need a real guard, such as a Redis lease or database lock, if concurrent last-write-wins behavior is unacceptable.
+
+## Conversation state and workspace state are separate
+
+Agent state persistence does not preserve files inside a stopped container. Sandbox recovery uses a `SandboxSnapshotSpec`.
+
+The default [`NoopSnapshotSpec`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-harness/src/main/java/io/agentscope/harness/agent/sandbox/snapshot/NoopSnapshotSpec.java) does not persist workspace state between session stops. A new start initializes a fresh workspace from the manifest. Local, object-storage, Redis, or JDBC snapshot implementations can preserve workspace data for later resume.
+
+A distributed deployment therefore has at least three state concerns:
+
+```text
+AgentStateStore       -> conversation, permission, tool, and task state
+Sandbox snapshot      -> files and environment needed by the next sandbox
+Execution guard       -> exclusive access to a shared persistent slot
+```
+
+Configuring one does not imply the other two. A distributed Agent state store cannot restore packages installed inside a vanished container. A remote snapshot cannot stop two replicas from racing on the same user workspace.
+
+## A security review based on behavior
+
+A useful review starts with each side-effecting tool and follows the request to the operating system or external service.
+
+1. Confirm whether the full permission engine or lightweight compatibility path is active.
+2. Record which deny, ask, and allow rules can match the tool and what `ruleContent` means.
+3. Read the tool's `checkPermissions()`, `matchRule()`, and suggested-rule implementation.
+4. Verify schema, path, command, and business validation after approval.
+5. Run the tool in the narrowest practical sandbox scope.
+6. Configure durable snapshots only when workspace recovery is required.
+7. Add a real execution guard when several callers share one sandbox slot.
+8. Log the normalized input, decision source, human response, tool result, and external operation ID.
+
+Then test bypasses. Use path traversal, symlinks, case changes, command composition, duplicate confirmation, stale rules, missing user identity, concurrent requests, and worker restart. The test should check the actual side effect, not only the permission message.
+
+The final security claim should be narrow and testable. For example: this session may write under one workspace after approval, the command passes an allowlist, execution occurs in a session-scoped container, and duplicate operation IDs are rejected. That statement is much more useful than saying the Agent runs in secure mode.
+
+## Source files
+
+- [`PermissionEngine`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/permission/PermissionEngine.java)
+- [`PermissionContextState`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/permission/PermissionContextState.java)
+- [`PermissionRule`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/permission/PermissionRule.java)
+- [`ToolBase`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/tool/ToolBase.java)
+- [`ReActAgent`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/ReActAgent.java)
+- [`IsolationScope`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-harness/src/main/java/io/agentscope/harness/agent/IsolationScope.java)
+- [`SandboxIsolationKey`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-harness/src/main/java/io/agentscope/harness/agent/sandbox/SandboxIsolationKey.java)
+- [`SandboxExecutionGuard`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-harness/src/main/java/io/agentscope/harness/agent/sandbox/SandboxExecutionGuard.java)
+
+</div>
+
+<div className="article-language article-language-zh">
+
+能够调用 shell 或写文件的 Agent 面临两个不同的安全问题。应用需要判断一项操作是否允许执行，运行时还要在判断错误时限制影响范围。AgentScope Java 2.0 用权限判断处理前一个问题，再用工具校验和可选沙箱处理后一个问题。
+
+本篇基于提交 [`d60414a6`](https://github.com/agentscope-ai/agentscope-java/tree/d60414a6fc74113ca05c73c79b30601323b0dea5) 阅读实现。示例是一名 coding Agent，它希望修改部署文件并运行 package command。我们会沿着 `PermissionEngine`、人工批准、工具执行器和 Harness sandbox 追踪一次调用。
+
+安全链路可以分成几层：
+
+```text
+model tool request
+    -> permission decision
+    -> optional human approval
+    -> schema and tool-specific validation
+    -> execution environment
+    -> persistent state and audit record
+```
+
+少一层，系统保证也会随之变化。沙箱不能判断业务授权，ALLOW 规则也不能阻止容器逃逸，或者修复一个会访问错误资源的工具。
+
+## 先确认当前走哪条权限路径
+
+[`ReActAgent.evaluatePermissions()`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/ReActAgent.java) 有一条容易忽略的兼容分支。
+
+当 `PermissionContextState` 使用 `DEFAULT` mode，没有 working directory，也没有 allow、deny 和 ask rule 时，`isTrivial()` 返回 true。Agent 会使用轻量路径。`ToolBase` 仍可以通过自己的 `checkPermissions()` 返回 `ASK` 或 `DENY`，但完整规则引擎不会参与。没有继承 `ToolBase` 的 legacy tool 会直接视为允许。
+
+只要配置了 mode、rule 或 working directory，context 就不再是 trivial，系统会启用完整 [`PermissionEngine`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/permission/PermissionEngine.java) 流程。
+
+这条分支保留了旧应用行为，也会影响安全审查。仅仅创建默认 permission context，与显式配置权限后的执行路径并不相同。测试应该直接检查每个敏感工具的最终 decision，不能因为 builder 中存在 permission 对象就认为完整规则已经生效。
+
+## 完整 decision 顺序
+
+`PermissionEngine.checkPermission()` 按下面的顺序处理一个工具调用：
+
+```text
+1. matching DENY rule
+2. matching ASK rule
+3. mode handling and tool self-check
+4. matching ALLOW rule
+5. BYPASS fallback
+6. default ASK, or fallback DENY in DONT_ASK mode
+```
+
+顺序本身就是策略的一部分。
+
+匹配的 deny rule 会在后续所有分支前返回。Ask rule 也会在 allow rule 前停止判断。工具自检位于 allow rule 之前，因此即使调用方配置了宽泛 allow，工具仍可以拒绝危险输入。`BYPASS` 位于流程后段，并不是第一条分支。
+
+Mode check 的行为也很具体。`EXPLORE` 自动允许标记为 read-only 的工具，并拒绝修改型工具。`ACCEPT_EDITS` 自动允许 read-only 工具，其他调用继续进入工具自检和规则表。其余 mode 在这一阶段不会直接给出 decision。
+
+工具自检可以返回 `ALLOW`、`DENY`、`ASK` 或 `PASSTHROUGH`。在当前源码快照中，完整引擎只有在 `ASK` 的 `decisionReason` 包含 `safety` 时才立即返回。其他 ASK 会继续进入后面的规则和 fallback。轻量兼容路径则会把任何工具 ASK 当成暂停。自定义工具如果依赖 ASK，应该在两种配置下分别测试。
+
+## Rule 的精度取决于工具 matcher
+
+[`PermissionRule`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/permission/PermissionRule.java) 保存 tool name、可选 rule content、behavior 和 source。规则表以 tool name 为键，同一个工具内按加入顺序保存。
+
+引擎不会解释 rule content。它会调用 `tool.matchRule(ruleContent, input)`。默认 `ToolBase` matcher 只接受 `null`，也就是对整个工具生效的规则。Path pattern、command prefix、repository name 或 resource ID 只有在工具覆写 `matchRule()` 并定义语法后才能工作。
+
+应用可能希望表达下面的策略：
+
+```text
+ALLOW read_file under /workspace/project
+ASK write_file under /workspace/project
+DENY shell command matching a destructive pattern
+```
+
+这些是策略目标，不是通用字符串 matcher 自动提供的行为。具体工具必须解析规则，并与标准化后的输入比较。安全审查应该检查每个使用非空 rule content 的工具，确认它的 `matchRule()`、`checkPermissions()` 和 `generateSuggestions()`。
+
+Suggested rule 也有相同问题。工具没有提供更细粒度 suggestion 时，批准界面可能只给出 tool-level rule。用户接受后，一次批准就可能变成该工具未来所有输入都允许。
+
+## 不能只根据 mode 名称判断行为
+
+[`PermissionMode`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/permission/PermissionMode.java) 定义了 `DEFAULT`、`ACCEPT_EDITS`、`EXPLORE`、`BYPASS` 和 `DONT_ASK`。名称方便配置，但最终结果由源码顺序决定。
+
+在这个提交中，`BYPASS` 是 deny rule、ask rule 和工具自检之后的 fallback。前面的 decision 仍然优先。应用不应该只按名字把 BYPASS 理解为无条件放行，而要测试计划绕过的具体工具。
+
+`DONT_ASK` 会在没有用户时把默认 fallback ASK 改成 DENY。显式 ask rule 会更早返回，不会进入这个 fallback conversion。无人值守任务如果配置显式 ASK，还需要由外层 runtime 设置确定的 timeout，或者把未处理确认转成失败。
+
+`setPermissionMode(userId, sessionId, mode)` 会替换 session 的 `PermissionContextState` mode，重建缓存 engine 并保存 state。新 mode 在后续调用生效，正在运行的 call 仍使用开始时绑定的 engine。
+
+这些细节应该写进运行策略。一个 mode 名称无法说明 rule precedence、自定义工具检查和滚动发布期间的实际行为。
+
+## ASK 怎样进入 ReAct loop
+
+Agent 使用 `concatMap` 逐个评估工具调用，因此 decision 顺序与模型输出顺序一致。结果会分成 pending ASK calls 和 automatically denied IDs。
+
+Denied call 不会进入 `Toolkit.callTools()`。Agent 会生成状态为 `DENIED` 的 `ToolResultBlock`，让模型知道发生了什么。需要批准的调用会变成 `ASKING` 状态的 `ToolUseBlock`。随后 Agent 发出 `RequireUserConfirmEvent`，并以 `GenerateReason.PERMISSION_ASKING` 返回。
+
+应用负责显示 tool name、input 和 suggested rules。下一次调用为每个 pending tool 提交 `ConfirmResult`。确认可以批准原始输入，替换为人工检查后的输入，或者直接拒绝。批准后的 block 变为 `ALLOWED`，拒绝后的 block 会得到 denied result。
+
+有一个持久化细节需要注意。在当前源码中，用户接受的 suggested rules 会加入当前 `PermissionEngine`。`applyConfirmResults()` 没有在这条路径中把规则写回 `PermissionContextState`。配置 state store 后，session 在后续调用中重新加载时，Agent 会根据存储的 context 重建 engine。因此，在自行验证或持久化规则前，不应该假设 accepted suggestion 可以跨 reload 保留。
+
+这也会影响 UI 文案。Remember this decision 之类的选项应该对应真正的 durable policy storage，而不是只修改当前 JVM cache。
+
+## Permission 不等于输入校验
+
+ALLOW 只回答策略问题。工具执行器仍会检查工具是否 active，并使用 schema 校验输入。Preset parameters 在模型输入后合并，而且 preset value 优先，因此模型不能覆盖框架控制字段。
+
+文件工具还需要在执行阶段验证路径。`FileToolUtils.validatePath()` 会基于 base directory 解析相对路径，标准化结果，再拒绝 base 外部路径。`ToolBase.isDangerousPath()` 可以识别配置中的敏感文件名和目录 segment，也会检查解析后的 symlink target。
+
+Dangerous-path helper 是 protected utility。默认 `ToolBase.checkPermissions()` 只返回 `PASSTHROUGH`，不会自动调用它。自定义文件工具如果需要该能力，必须在自己的 permission check 中使用。Annotation 即使填充了 dangerous file lists，也不能代替对真实调用路径的检查。
+
+Shell validation 是另一条边界。`ShellCommandTool` 会在执行阶段使用平台 command validator 和可选 command allowlist。Permission rule 决定谁可以申请 shell，command validation 决定这条命令的结构是否接受。两种检查都应该记录标准化输入和最终 decision。
+
+## Permission 不等于隔离
+
+权限逻辑在工具执行前运行，但不完整 rule 或程序错误仍可能批准危险操作。Harness sandbox 会把文件和命令执行放进隔离环境。
+
+[`IsolationScope`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-harness/src/main/java/io/agentscope/harness/agent/IsolationScope.java) 决定哪些调用共享持久化 sandbox slot：
+
+| Scope | State sharing |
+|---|---|
+| `SESSION` | One slot per session ID |
+| `USER` | One slot per user ID, with session fallback when user ID is absent |
+| `AGENT` | One slot for all users of the Agent |
+| `GLOBAL` | One slot for the workspace or store instance |
+
+`USER` 是默认值。更宽的 scope 适合共享工作区，也意味着更多调用方能够影响同一批文件。
+
+源码把 sandbox sharing 定义为持久化状态的 sequential reuse，而不是自动共享同一个运行容器。同一 scope 的并发调用可能各自在独立容器中运行，最后写回同一个 slot。没有 guard 时，最后保存的 snapshot 获胜。
+
+[`SandboxExecutionGuard`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-harness/src/main/java/io/agentscope/harness/agent/sandbox/SandboxExecutionGuard.java) 覆盖 acquire 到 release 的完整窗口，默认实现是 no-op。多副本部署使用共享 scope 时，如果不能接受 concurrent last-write-wins，就要使用真正的 guard，例如 Redis lease 或数据库锁。
+
+## Conversation state 与 workspace state 分开
+
+Agent state persistence 不会自动保存停止容器中的文件。Sandbox recovery 使用 `SandboxSnapshotSpec`。
+
+默认 [`NoopSnapshotSpec`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-harness/src/main/java/io/agentscope/harness/agent/sandbox/snapshot/NoopSnapshotSpec.java) 不会在 session stop 之间保存 workspace。下一次启动会根据 manifest 初始化一个新工作区。需要恢复 workspace 时，可以选择 local、object storage、Redis 或 JDBC snapshot 实现。
+
+因此，分布式部署至少需要考虑三类状态：
+
+```text
+AgentStateStore       -> conversation, permission, tool, and task state
+Sandbox snapshot      -> files and environment needed by the next sandbox
+Execution guard       -> exclusive access to a shared persistent slot
+```
+
+配置其中一项并不会自动包含另外两项。Distributed Agent state store 无法恢复已经消失容器中安装的 package，remote snapshot 也不能阻止两个副本同时修改同一个 user workspace。
+
+## 按实际行为做安全审查
+
+安全审查可以从每个有副作用的工具开始，一直追踪到操作系统或外部服务。
+
+1. 确认当前启用完整 permission engine，还是 lightweight compatibility path。
+2. 记录哪些 deny、ask 和 allow rule 能匹配工具，以及 `ruleContent` 的真实含义。
+3. 阅读工具的 `checkPermissions()`、`matchRule()` 和 suggested-rule 实现。
+4. 验证批准之后仍有 schema、path、command 和业务校验。
+5. 让工具运行在满足需求的最窄 sandbox scope 中。
+6. 只有需要 workspace recovery 时才配置 durable snapshot。
+7. 多个调用方共享 sandbox slot 时加入真正的 execution guard。
+8. 记录 normalized input、decision source、人工响应、tool result 和 external operation ID。
+
+之后再测试绕过场景，包括 path traversal、symlink、大小写变化、command composition、重复确认、旧规则、缺失 user identity、并发请求和 worker restart。检查目标应该是真实副作用，而不是 permission message 是否看起来正确。
+
+最终安全声明应该具体并且可以测试。例如：这个 session 只能在批准后写入指定 workspace，命令需要通过 allowlist，执行发生在 session-scoped container 中，重复 operation ID 会被拒绝。这样的描述比 secure mode 更能说明系统实际提供了什么。
+
+## 源码入口
+
+- [`PermissionEngine`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/permission/PermissionEngine.java)
+- [`PermissionContextState`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/permission/PermissionContextState.java)
+- [`PermissionRule`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/permission/PermissionRule.java)
+- [`ToolBase`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/tool/ToolBase.java)
+- [`ReActAgent`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/ReActAgent.java)
+- [`IsolationScope`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-harness/src/main/java/io/agentscope/harness/agent/IsolationScope.java)
+- [`SandboxIsolationKey`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-harness/src/main/java/io/agentscope/harness/agent/sandbox/SandboxIsolationKey.java)
+- [`SandboxExecutionGuard`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-harness/src/main/java/io/agentscope/harness/agent/sandbox/SandboxExecutionGuard.java)
+
+</div>
