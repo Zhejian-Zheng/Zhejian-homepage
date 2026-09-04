@@ -2,38 +2,113 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Shared layout helpers */
+:root {
+	color-scheme: dark;
+	--field-ink: #07111f;
+	--notebook-navy: #0e1a2b;
+	--route-blue: #4d8dff;
+	--signal-amber: #f2a65a;
+	--map-moss: #8faf87;
+	--paper-mist: #e9eef5;
+}
+
+html {
+	background: var(--field-ink);
+	scroll-behavior: smooth;
+}
+
+body {
+	font-family: var(--font-body), "PingFang SC", "Microsoft YaHei", sans-serif;
+	background-color: var(--field-ink);
+	background-image:
+		linear-gradient(rgba(233, 238, 245, 0.025) 1px, transparent 1px),
+		linear-gradient(90deg, rgba(233, 238, 245, 0.025) 1px, transparent 1px);
+	background-size: 48px 48px;
+}
+
+::selection {
+	background: var(--signal-amber);
+	color: var(--field-ink);
+}
+
 .container-page {
-	@apply min-h-screen w-full flex flex-col;
+	@apply min-h-screen w-full bg-field-ink text-field-paper;
 }
 .content-center {
 	@apply flex flex-1 flex-col items-center justify-center px-4;
 }
 
-/* Simple glass panel */
 .glass {
-	@apply bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl;
+	@apply rounded-sm border border-white/10 bg-field-navy/90;
 }
 
-/* Buttons */
 .btn {
-	@apply inline-flex items-center justify-center rounded-xl px-4 py-2 font-medium transition;
+	@apply inline-flex min-h-10 items-center justify-center rounded-sm px-4 py-2 font-medium transition;
 }
 .btn-primary {
-	@apply btn bg-primary/80 hover:bg-primary;
+	@apply btn bg-primary text-field-ink hover:bg-field-paper;
 }
 .btn-secondary {
-	@apply btn bg-secondary/80 hover:bg-secondary;
+	@apply btn border border-white/15 bg-field-navy hover:border-secondary hover:text-secondary;
 }
 
-/* Icon button circle */
 .btn-circle {
-	@apply w-12 h-12 rounded-full flex items-center justify-center;
+	@apply flex h-10 w-10 items-center justify-center rounded-full;
 }
 
-/* Footer */
 .site-footer {
-	@apply text-white/80 text-sm text-center py-4;
+	@apply py-6 text-center font-mono text-xs uppercase tracking-[0.16em] text-slate-400;
+}
+
+.field-page {
+	@apply min-h-screen bg-field-ink px-4 pb-20 pt-28 text-field-paper;
+}
+
+.field-wrap {
+	@apply mx-auto w-full max-w-6xl;
+}
+
+.field-display {
+	font-family: var(--font-display), "Arial Narrow", sans-serif;
+	@apply uppercase tracking-[-0.02em];
+}
+
+html[lang="zh-CN"] .field-display {
+	font-family: var(--font-body), "PingFang SC", sans-serif;
+	letter-spacing: 0;
+}
+
+.field-meta {
+	@apply font-mono text-[0.68rem] uppercase tracking-[0.2em] text-slate-400;
+}
+
+.field-panel {
+	@apply border border-white/10 bg-field-navy/95;
+}
+
+.field-record {
+	@apply relative border-t border-white/15 py-5 transition-colors;
+}
+
+.field-record::before {
+	content: "";
+	@apply absolute left-0 top-0 h-px w-10 bg-accent;
+}
+
+.field-record-link {
+	@apply transition hover:border-primary/70 hover:bg-white/[0.025] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 focus-visible:ring-offset-field-ink;
+}
+
+.field-arrow {
+	@apply font-mono text-sm text-primary transition-transform;
+}
+
+.group:hover .field-arrow {
+	transform: translate(3px, -3px);
+}
+
+.field-input {
+	@apply w-full rounded-sm border border-white/15 bg-field-ink/70 px-4 py-3 text-field-paper outline-none transition placeholder:text-slate-500 focus:border-primary focus:ring-2 focus:ring-primary/20;
 }
 
 .article-language {
@@ -85,6 +160,19 @@ html[lang="zh-CN"] .article-language-en {
 }
 
 @media (prefers-reduced-motion: reduce) {
+	html {
+		scroll-behavior: auto;
+	}
+
+	*,
+	*::before,
+	*::after {
+		scroll-behavior: auto !important;
+		transition-duration: 0.01ms !important;
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+	}
+
 	.language-transition-root {
 		transition: opacity 120ms ease;
 		transform: none;

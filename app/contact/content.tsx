@@ -14,66 +14,62 @@ type FormStatus = {
 
 const contactCopy = {
 	en: {
-		eyebrow: "Contact",
-		title: "Get in Touch",
-		intro: "If you'd like to collaborate, chat about projects, or just say hi, feel free to reach out through any of the channels below.",
+		eyebrow: "Transmission line · Open",
+		title: "Open Channel",
+		intro: "A direct line for thoughtful technical work, collaboration, and conversations that benefit from concrete context.",
+		reasonsTitle: "Good reasons to write",
+		reasons: ["Agent systems and LLM application engineering", "Backend or full-stack product collaboration", "Technical writing, code review, and engineering discussion"],
+		channelsTitle: "Direct channels",
 		email: "Email",
-		send: "Send",
 		github: "GitHub",
-		open: "Open",
 		linkedin: "LinkedIn",
-		linkedinName: "Zhejian Zheng",
-		connect: "Connect",
-		location: "Location",
-		locationValue: "Sydney, Australia · Ningbo, China",
-		workMode: "Working remotely / hybrid",
-		formTitle: "Send a Message",
-		formIntro: "Share a quick note and it will be delivered straight to my inbox.",
+		location: "Sydney, Australia · Ningbo, China",
+		workMode: "Remote and hybrid collaboration",
+		formCode: "MSG-01",
+		formTitle: "Send a field message",
+		formIntro: "Include the problem, intended outcome, and any useful links. Clear context makes the first reply more useful.",
 		name: "Name",
 		namePlaceholder: "Your name",
 		emailPlaceholder: "you@example.com",
 		message: "Message",
-		messagePlaceholder: "Tell me what you would like to build, discuss, or ask.",
-		formNotConfigured: "Add your Web3Forms access key to .env.local before this form can send messages.",
-		formNotConfiguredStatus: "The contact form is not configured yet. Add NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY to .env.local.",
-		success: "Thanks, your message has been sent. I will get back to you soon.",
-		fallbackError: "Unable to send your message right now.",
+		messagePlaceholder: "What are you building, investigating, or deciding?",
+		formNotConfigured: "This form is not connected yet. Email me directly while the channel is being configured.",
+		formNotConfiguredStatus: "The contact form is not configured. Use the email link instead.",
+		success: "Message delivered. I will reply as soon as I can.",
+		fallbackError: "The message could not be delivered. Please use the email link instead.",
 		sending: "Sending...",
-		submit: "Send Message",
-		quickNoteTitle: "Quick Note",
-		quickNote: "I usually respond within 1-2 business days. For faster replies, include a short summary of what you'd like to collaborate on (scope, timeline, and any links/docs).",
-		footer: "Thanks for reaching out—looking forward to connecting."
+		submit: "Send message",
+		response: "Typical response · 1–2 business days",
+		footer: "Channel remains open for useful work and clear questions"
 	},
 	zh: {
-		eyebrow: "联系",
-		title: "联系我",
-		intro: "如果你想合作、交流项目，或者只是打个招呼，可以通过下面的方式联系我。",
+		eyebrow: "通信线路 · 开放",
+		title: "保持联系",
+		intro: "这里适合讨论具体的技术工作、合作机会，以及那些带着清楚背景信息的问题。",
+		reasonsTitle: "适合联系我的事项",
+		reasons: ["Agent 系统与 LLM 应用工程", "后端或全栈产品合作", "技术写作、代码审查与工程讨论"],
+		channelsTitle: "直接联系方式",
 		email: "邮箱",
-		send: "发送",
 		github: "GitHub",
-		open: "打开",
 		linkedin: "LinkedIn",
-		linkedinName: "郑哲坚",
-		connect: "连接",
-		location: "所在地",
-		locationValue: "澳大利亚悉尼 · 中国宁波",
-		workMode: "支持远程 / 混合协作",
-		formTitle: "发送消息",
-		formIntro: "写下一段简短信息，它会直接发送到我的邮箱。",
+		location: "澳大利亚悉尼 · 中国宁波",
+		workMode: "支持远程与混合协作",
+		formCode: "消息-01",
+		formTitle: "发送一条现场消息",
+		formIntro: "请说明问题、希望达成的结果，以及有帮助的链接。背景越清楚，第一次回复就越有价值。",
 		name: "姓名",
 		namePlaceholder: "你的名字",
 		emailPlaceholder: "you@example.com",
 		message: "消息",
-		messagePlaceholder: "告诉我你想构建、讨论或咨询的内容。",
-		formNotConfigured: "请先在 .env.local 中添加 Web3Forms access key，表单才能发送消息。",
-		formNotConfiguredStatus: "联系表单还没有配置。请在 .env.local 中添加 NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY。",
-		success: "谢谢，你的消息已经发送。我会尽快回复你。",
-		fallbackError: "暂时无法发送消息，请稍后再试。",
+		messagePlaceholder: "你正在构建、调查或决定什么？",
+		formNotConfigured: "表单暂未连接。配置完成前，请直接通过邮箱联系我。",
+		formNotConfiguredStatus: "联系表单尚未配置，请使用邮箱链接。",
+		success: "消息已送达，我会尽快回复。",
+		fallbackError: "消息未能送达，请改用邮箱联系。",
 		sending: "发送中...",
 		submit: "发送消息",
-		quickNoteTitle: "小提示",
-		quickNote: "我通常会在 1-2 个工作日内回复。为了更快沟通，可以附上一段简短说明，比如合作范围、时间线以及相关链接或文档。",
-		footer: "感谢联系，期待和你交流。"
+		response: "通常回复时间 · 1–2 个工作日",
+		footer: "欢迎有明确背景的问题与值得投入的合作"
 	}
 } as const;
 
@@ -87,10 +83,7 @@ export default function ContactContent() {
 		event.preventDefault();
 
 		if (!WEB3FORMS_ACCESS_KEY) {
-			setStatus({
-				type: "error",
-				message: copy.formNotConfiguredStatus
-			});
+			setStatus({ type: "error", message: copy.formNotConfiguredStatus });
 			return;
 		}
 
@@ -104,174 +97,124 @@ export default function ContactContent() {
 		try {
 			setIsSubmitting(true);
 			setStatus({ type: "idle", message: "" });
-
-			const response = await fetch(WEB3FORMS_ENDPOINT, {
-				method: "POST",
-				body: formData
-			});
+			const response = await fetch(WEB3FORMS_ENDPOINT, { method: "POST", body: formData });
 			const result = await response.json().catch(() => null);
 
 			if (!response.ok || result?.success === false) {
-				throw new Error(result?.message ?? "Unable to send your message right now.");
+				throw new Error(result?.message ?? copy.fallbackError);
 			}
 
 			form.reset();
-			setStatus({
-				type: "success",
-				message: copy.success
-			});
+			setStatus({ type: "success", message: copy.success });
 		} catch (error) {
-			setStatus({
-				type: "error",
-				message: error instanceof Error ? error.message : copy.fallbackError
-			});
+			setStatus({ type: "error", message: error instanceof Error ? error.message : copy.fallbackError });
 		} finally {
 			setIsSubmitting(false);
 		}
 	};
 
+	const channels = [
+		{ label: copy.email, value: "zj.zheng1@gmail.com", href: "mailto:zj.zheng1@gmail.com", external: false },
+		{ label: copy.github, value: "@Zhejian-Zheng", href: "https://github.com/Zhejian-Zheng", external: true },
+		{ label: copy.linkedin, value: language === "zh" ? "郑哲坚" : "Zhejian Zheng", href: "https://www.linkedin.com/in/zhejian-zheng-9a5563312/", external: true }
+	];
+
 	return (
-		<div className="min-h-screen bg-slate-900 text-white px-4 pb-16 pt-24">
+		<div className="field-page">
 			<SiteNav active="contact" />
 
-			<div className="mx-auto max-w-3xl space-y-8">
-				<header className="space-y-2">
-					<p className="text-sm uppercase tracking-[0.3em] text-slate-400">{copy.eyebrow}</p>
-					<h1 className="text-4xl font-bold">{copy.title}</h1>
-					<p className="text-slate-200">
-						{copy.intro}
-					</p>
+			<main className="field-wrap">
+				<header className="grid gap-8 border-b border-white/15 pb-10 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
+					<div>
+						<p className="field-meta text-accent">{copy.eyebrow}</p>
+						<h1 className="field-display mt-4 text-6xl font-semibold leading-none sm:text-8xl">{copy.title}</h1>
+					</div>
+					<p className="text-base leading-7 text-slate-300">{copy.intro}</p>
 				</header>
 
-				<section className="grid sm:grid-cols-2 gap-4">
-					<a
-						className="glass p-4 flex items-center justify-between hover:bg-white/15 transition"
-						href="mailto:zj.zheng1@gmail.com"
-					>
-						<div>
-							<p className="text-sm text-slate-200">{copy.email}</p>
-							<p className="text-lg font-semibold text-white">zj.zheng1@gmail.com</p>
-						</div>
-						<span className="text-sm text-slate-300">{copy.send}</span>
-					</a>
+				<div className="grid gap-10 py-12 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+					<div className="space-y-10">
+						<section>
+							<p className="field-meta text-secondary">{copy.reasonsTitle}</p>
+							<ul className="mt-5 border-b border-white/15">
+								{copy.reasons.map((reason, index) => (
+									<li key={reason} className="grid grid-cols-[36px_1fr] border-t border-white/15 py-4 text-sm leading-6 text-slate-300">
+										<span className="font-mono text-xs text-accent">0{index + 1}</span>
+										{reason}
+									</li>
+								))}
+							</ul>
+						</section>
 
-					<a
-						className="glass p-4 flex items-center justify-between hover:bg-white/15 transition"
-						href="https://github.com/Zhejian-Zheng"
-						target="_blank"
-						rel="noreferrer"
-					>
-						<div>
-							<p className="text-sm text-slate-200">{copy.github}</p>
-							<p className="text-lg font-semibold text-white">@Zhejian-Zheng</p>
-						</div>
-						<span className="text-sm text-slate-300">{copy.open}</span>
-					</a>
-
-					<a
-						className="glass p-4 flex items-center justify-between hover:bg-white/15 transition"
-						href="https://www.linkedin.com/in/zhejian-zheng-9a5563312/"
-						target="_blank"
-						rel="noreferrer"
-					>
-						<div>
-							<p className="text-sm text-slate-200">{copy.linkedin}</p>
-							<p className="text-lg font-semibold text-white">{copy.linkedinName}</p>
-						</div>
-						<span className="text-sm text-slate-300">{copy.connect}</span>
-					</a>
-
-					<div className="glass p-4">
-						<p className="text-sm text-slate-200">{copy.location}</p>
-						<p className="text-lg font-semibold text-white">{copy.locationValue}</p>
-						<p className="text-sm text-slate-300 mt-1">{copy.workMode}</p>
+						<section>
+							<p className="field-meta text-secondary">{copy.channelsTitle}</p>
+							<div className="mt-5 border-b border-white/15">
+								{channels.map((channel) => (
+									<a
+										key={channel.label}
+										href={channel.href}
+										target={channel.external ? "_blank" : undefined}
+										rel={channel.external ? "noreferrer" : undefined}
+										className="group field-record-link flex items-center justify-between gap-4 border-t border-white/15 py-4"
+									>
+										<div>
+											<p className="field-meta">{channel.label}</p>
+											<p className="mt-1 break-all text-sm text-field-paper">{channel.value}</p>
+										</div>
+										<span className="field-arrow" aria-hidden="true">↗</span>
+									</a>
+								))}
+							</div>
+							<div className="mt-5 border-l-2 border-accent pl-4">
+								<p className="text-sm text-field-paper">{copy.location}</p>
+								<p className="mt-1 font-mono text-xs uppercase tracking-[0.12em] text-slate-500">{copy.workMode}</p>
+							</div>
+						</section>
 					</div>
-				</section>
 
-				<section className="glass p-5 sm:p-6 space-y-5">
-					<div>
-						<h2 className="text-2xl font-semibold">{copy.formTitle}</h2>
-						<p className="text-slate-200 mt-1">
-							{copy.formIntro}
-						</p>
-					</div>
-					<form onSubmit={handleSubmit} className="space-y-4">
-						<input
-							type="checkbox"
-							name="botcheck"
-							className="hidden"
-							tabIndex={-1}
-							autoComplete="off"
-						/>
-						<div className="grid sm:grid-cols-2 gap-4">
-							<label className="space-y-2">
-								<span className="text-sm text-slate-200">{copy.name}</span>
-								<input
-									name="name"
-									type="text"
-									required
-									className="w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-white placeholder:text-slate-400 outline-none transition focus:border-primary/70 focus:ring-2 focus:ring-primary/20"
-									placeholder={copy.namePlaceholder}
-								/>
+					<section className="field-panel border-t-2 border-t-primary p-6 sm:p-8">
+						<p className="field-meta text-primary">{copy.formCode}</p>
+						<h2 className="field-display mt-3 text-4xl font-semibold">{copy.formTitle}</h2>
+						<p className="mt-3 max-w-2xl text-sm leading-6 text-slate-400">{copy.formIntro}</p>
+
+						<form onSubmit={handleSubmit} className="mt-8 space-y-5">
+							<input type="checkbox" name="botcheck" className="hidden" tabIndex={-1} autoComplete="off" />
+							<div className="grid gap-5 sm:grid-cols-2">
+								<label className="space-y-2">
+									<span className="field-meta text-slate-300">{copy.name}</span>
+									<input name="name" type="text" required className="field-input" placeholder={copy.namePlaceholder} />
+								</label>
+								<label className="space-y-2">
+									<span className="field-meta text-slate-300">{copy.email}</span>
+									<input name="email" type="email" required className="field-input" placeholder={copy.emailPlaceholder} />
+								</label>
+							</div>
+							<label className="block space-y-2">
+								<span className="field-meta text-slate-300">{copy.message}</span>
+								<textarea name="message" required rows={7} className="field-input resize-none" placeholder={copy.messagePlaceholder} />
 							</label>
-							<label className="space-y-2">
-								<span className="text-sm text-slate-200">{copy.email}</span>
-								<input
-									name="email"
-									type="email"
-									required
-									className="w-full rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-white placeholder:text-slate-400 outline-none transition focus:border-primary/70 focus:ring-2 focus:ring-primary/20"
-									placeholder={copy.emailPlaceholder}
-								/>
-							</label>
-						</div>
-						<label className="block space-y-2">
-							<span className="text-sm text-slate-200">{copy.message}</span>
-							<textarea
-								name="message"
-								required
-								rows={5}
-								className="w-full resize-none rounded-xl border border-white/10 bg-white/10 px-4 py-3 text-white placeholder:text-slate-400 outline-none transition focus:border-primary/70 focus:ring-2 focus:ring-primary/20"
-								placeholder={copy.messagePlaceholder}
-							/>
-						</label>
-						{!WEB3FORMS_ACCESS_KEY && (
-							<p className="rounded-xl border border-amber-300/30 bg-amber-300/10 px-4 py-3 text-sm text-amber-100">
-								{copy.formNotConfigured}
-							</p>
-						)}
-						{status.message && (
-							<p
-								className={`rounded-xl border px-4 py-3 text-sm ${
-									status.type === "success"
-										? "border-emerald-300/30 bg-emerald-300/10 text-emerald-100"
-										: "border-rose-300/30 bg-rose-300/10 text-rose-100"
-								}`}
-							>
-								{status.message}
-							</p>
-						)}
-						<button
-							type="submit"
-							disabled={isSubmitting || !WEB3FORMS_ACCESS_KEY}
-							className="btn-primary px-5 py-3 disabled:cursor-not-allowed disabled:opacity-60"
-						>
-							{isSubmitting ? copy.sending : copy.submit}
-						</button>
-					</form>
-				</section>
 
-				<section className="space-y-3">
-					<h2 className="text-2xl font-semibold">{copy.quickNoteTitle}</h2>
-					<p className="text-slate-200">
-						{copy.quickNote}
-					</p>
-				</section>
+							{!WEB3FORMS_ACCESS_KEY && (
+								<p className="border-l-2 border-accent bg-accent/10 px-4 py-3 text-sm text-amber-100">{copy.formNotConfigured}</p>
+							)}
+							{status.message && (
+								<p className={`border-l-2 px-4 py-3 text-sm ${status.type === "success" ? "border-secondary bg-secondary/10 text-green-100" : "border-rose-400 bg-rose-400/10 text-rose-100"}`} role="status">
+									{status.message}
+								</p>
+							)}
 
-				<footer className="text-slate-400 text-sm pt-6">
-					{copy.footer}
-				</footer>
-			</div>
+							<div className="flex flex-col gap-3 border-t border-white/10 pt-5 sm:flex-row sm:items-center sm:justify-between">
+								<button type="submit" disabled={isSubmitting || !WEB3FORMS_ACCESS_KEY} className="btn-primary px-6 py-3 font-mono text-xs uppercase tracking-[0.12em] disabled:cursor-not-allowed disabled:opacity-40">
+									{isSubmitting ? copy.sending : copy.submit}
+								</button>
+								<p className="field-meta">{copy.response}</p>
+							</div>
+						</form>
+					</section>
+				</div>
+
+				<footer className="site-footer border-t border-white/15">{copy.footer}</footer>
+			</main>
 		</div>
 	);
 }
