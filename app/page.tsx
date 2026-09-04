@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import HomeClient from "./home-client";
+import HomeClient, { selectedBuildSlugs, type HomePostPreview } from "./home-client";
+import { blogPosts } from "./blog/posts";
 
 export const metadata: Metadata = {
 	title: "Zhejian Zheng – Software Engineer",
@@ -17,5 +18,19 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-	return <HomeClient />;
+	const selectedBuildSet = new Set<string>(selectedBuildSlugs);
+	const toPreview = ({ slug, title, summary, publishedAt, tags }: (typeof blogPosts)[number]): HomePostPreview => ({
+		slug,
+		title,
+		summary,
+		publishedAt,
+		tags
+	});
+	const selectedBuilds = selectedBuildSlugs
+		.map((slug) => blogPosts.find((post) => post.slug === slug))
+		.filter((post): post is (typeof blogPosts)[number] => Boolean(post))
+		.map(toPreview);
+	const latestNotes = blogPosts.filter((post) => !selectedBuildSet.has(post.slug)).slice(0, 3).map(toPreview);
+
+	return <HomeClient selectedBuilds={selectedBuilds} latestNotes={latestNotes} />;
 }
