@@ -23,7 +23,6 @@ const contactCopy = {
 		email: "Email",
 		github: "GitHub",
 		linkedin: "LinkedIn",
-		open: "Open",
 		location: "Sydney, Australia · Ningbo, China",
 		workMode: "Remote and hybrid collaboration",
 		formCode: "MSG-01",
@@ -53,7 +52,6 @@ const contactCopy = {
 		email: "邮箱",
 		github: "GitHub",
 		linkedin: "LinkedIn",
-		open: "打开",
 		location: "澳大利亚悉尼 · 中国宁波",
 		workMode: "支持远程与混合协作",
 		formCode: "消息-01",
@@ -163,7 +161,7 @@ export default function ContactContent() {
 											<p className="field-meta">{channel.label}</p>
 											<p className="mt-1 break-all text-sm text-field-paper">{channel.value}</p>
 										</div>
-										<span className="field-arrow" aria-label={copy.open}>↗</span>
+										<span className="field-arrow" aria-hidden="true">↗</span>
 									</a>
 								))}
 							</div>
