@@ -53,42 +53,40 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
 	const Post = post.Component;
 
 	return (
-		<div className="min-h-screen bg-slate-950 text-white px-4 pb-16 pt-24">
+		<div className="field-page">
 			<SiteNav active="blog" />
 
-			<div className="mx-auto max-w-6xl">
+			<div className="field-wrap">
 				<Link
 					href="/blog"
-					className="inline-flex rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-sm text-primary transition hover:border-primary/60 hover:bg-primary/15"
+					className="field-meta inline-flex min-h-10 items-center border-b border-primary text-primary transition hover:border-accent hover:text-accent"
 				>
 					<LocalizedText en="Back to blog" zh="返回博客" />
 				</Link>
 
-				<div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_280px]">
+				<div className="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_280px]">
 					<article className="min-w-0">
-						<header className="relative overflow-hidden rounded-lg border border-white/10 bg-slate-900/80 p-6 shadow-2xl shadow-black/20 sm:p-8">
-							<div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-secondary to-accent" />
-							<div className="space-y-5 pt-2">
+						<header className="field-panel border-l-2 border-l-accent p-6 sm:p-9">
+							<div className="space-y-5">
 								<div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.25em] text-slate-400">
-									<span className="text-primary">
+									<span className="font-mono text-accent">
 										<LocalizedText en="Technical Note" zh="技术笔记" />
 									</span>
 									<span>
 										<LocalizedDate date={post.publishedAt} />
 									</span>
-									<span>MDX</span>
 								</div>
 								<div className="space-y-4">
-									<h1 className="text-4xl font-bold leading-tight text-white sm:text-5xl">
+									<h1 className="field-display text-4xl font-semibold leading-[0.98] text-field-paper sm:text-6xl">
 										<LocalizedPostTitle slug={post.slug} title={post.title} />
 									</h1>
-									<p className="max-w-3xl text-lg leading-8 text-slate-200">
+									<p className="max-w-3xl text-lg leading-8 text-slate-300">
 										<LocalizedPostSummary slug={post.slug} summary={post.summary} />
 									</p>
 								</div>
 								<div className="flex flex-wrap gap-3">
 									{post.tags.map((tag) => (
-										<span key={tag} className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs text-slate-200">
+										<span key={tag} className="border border-white/15 px-3 py-1 font-mono text-[0.65rem] uppercase tracking-[0.12em] text-slate-400">
 											<LocalizedTag tag={tag} />
 										</span>
 									))}
@@ -96,16 +94,16 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
 							</div>
 						</header>
 
-						<div className="mt-8 rounded-lg border border-white/10 bg-slate-900/70 px-6 py-8 text-slate-100 shadow-xl shadow-black/20 sm:px-8 [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-4 [&_code]:rounded [&_code]:border [&_code]:border-white/10 [&_code]:bg-white/10 [&_code]:px-1.5 [&_code]:py-0.5 [&_h2]:mt-12 [&_h2]:border-l-4 [&_h2]:border-primary [&_h2]:pl-4 [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:text-white [&_li]:ml-5 [&_li]:list-disc [&_li::marker]:text-primary [&_p]:leading-8 [&_p]:text-slate-200 [&_ul]:space-y-3">
+						<div className="field-panel mt-6 px-6 py-8 text-slate-200 sm:px-9 [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-4 [&_code]:rounded-sm [&_code]:border [&_code]:border-white/10 [&_code]:bg-field-ink [&_code]:px-1.5 [&_code]:py-0.5 [&_h2]:mt-12 [&_h2]:border-l-2 [&_h2]:border-accent [&_h2]:pl-4 [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:text-field-paper [&_h3]:mt-8 [&_h3]:text-xl [&_h3]:font-semibold [&_li]:ml-5 [&_li]:list-disc [&_li::marker]:text-accent [&_p]:leading-8 [&_pre]:my-6 [&_pre]:overflow-x-auto [&_pre]:border [&_pre]:border-white/10 [&_pre]:bg-field-ink [&_pre]:p-4 [&_ul]:space-y-3">
 							<Post />
 						</div>
 
 						{previousPost || nextPost ? (
-							<nav className="mt-8 grid gap-4 sm:grid-cols-2">
+							<nav className="mt-8 grid gap-px bg-white/10 sm:grid-cols-2">
 								{previousPost ? (
 									<Link
 										href={`/blog/${previousPost.slug}`}
-										className="rounded-lg border border-white/10 bg-white/[0.04] p-4 transition hover:border-primary/50 hover:bg-white/[0.07]"
+										className="bg-field-navy p-4 transition hover:bg-white/[0.05]"
 									>
 										<p className="text-xs uppercase tracking-[0.22em] text-slate-500">
 											<LocalizedText en="Previous" zh="上一篇" />
@@ -120,7 +118,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
 								{nextPost ? (
 									<Link
 										href={`/blog/${nextPost.slug}`}
-										className="rounded-lg border border-white/10 bg-white/[0.04] p-4 text-left transition hover:border-primary/50 hover:bg-white/[0.07] sm:text-right"
+										className="bg-field-navy p-4 text-left transition hover:bg-white/[0.05] sm:text-right"
 									>
 										<p className="text-xs uppercase tracking-[0.22em] text-slate-500">
 											<LocalizedText en="Next" zh="下一篇" />
@@ -135,8 +133,8 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
 					</article>
 
 					<aside className="lg:sticky lg:top-24 lg:self-start">
-						<div className="rounded-lg border border-white/10 bg-white/[0.04] p-5">
-							<p className="text-xs uppercase tracking-[0.3em] text-primary">
+						<div className="field-panel border-t-2 border-t-secondary p-5">
+							<p className="field-meta text-secondary">
 								<LocalizedText en="Article Notes" zh="文章信息" />
 							</p>
 							<div className="mt-5 space-y-5 text-sm text-slate-300">
@@ -154,7 +152,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
 									</p>
 									<div className="mt-3 flex flex-wrap gap-2">
 										{post.tags.map((tag) => (
-											<span key={tag} className="rounded-full border border-white/10 px-2.5 py-1 text-xs">
+											<span key={tag} className="border border-white/10 px-2.5 py-1 font-mono text-[0.65rem] uppercase tracking-[0.1em]">
 												<LocalizedTag tag={tag} />
 											</span>
 										))}

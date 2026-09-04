@@ -1,269 +1,158 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import SiteNav from "../components/SiteNav";
+import { LocalizedText } from "../components/language";
+import { LocalizedDate, LocalizedPostSummary, LocalizedPostTitle, LocalizedTag } from "./localizedPostText";
+import { blogCategoryOrder, getBlogCategory, type BlogCategoryKey } from "./categories";
+import { blogPosts, type BlogPost } from "./posts";
 
 export const metadata: Metadata = {
 	title: "Blog – Zhejian Zheng",
-	description: "Technical writeups about full-stack systems, data workflows, web design, human-computer interaction, and the decisions behind my public repositories.",
+	description: "Field notes on agent engineering, backend systems, data workflows, product interfaces, and the decisions behind real projects.",
 	openGraph: {
 		title: "Blog – Zhejian Zheng",
-		description: "Technical writeups about full-stack systems, data workflows, web design, and engineering decisions.",
-		type: "website",
+		description: "Engineering field notes on agents, systems, data, and product decisions.",
+		type: "website"
 	},
 	twitter: {
 		card: "summary",
 		title: "Blog – Zhejian Zheng",
-		description: "Technical writeups about full-stack systems, data workflows, web design, and engineering decisions.",
-	},
+		description: "Engineering field notes on agents, systems, data, and product decisions."
+	}
 };
-import { LocalizedText } from "../components/language";
-import { LocalizedDate, LocalizedPostSummary, LocalizedPostTitle, LocalizedTag } from "./localizedPostText";
-import { blogPosts } from "./posts";
+
+const categoryCopy: Record<BlogCategoryKey, { index: string; titleEn: string; titleZh: string; bodyEn: string; bodyZh: string }> = {
+	agents: {
+		index: "01",
+		titleEn: "Agent Engineering",
+		titleZh: "Agent 工程",
+		bodyEn: "Source-level notes on runtimes, memory, permissions, recovery, and framework choices.",
+		bodyZh: "从源码出发，记录运行时、记忆、权限、恢复机制与框架选型。"
+	},
+	systems: {
+		index: "02",
+		titleEn: "Systems & Data",
+		titleZh: "系统与数据",
+		bodyEn: "Backend architecture, protocols, automation, databases, and deterministic system design.",
+		bodyZh: "后端架构、网络协议、自动化、数据库与确定性系统设计。"
+	},
+	product: {
+		index: "03",
+		titleEn: "Product & Interface",
+		titleZh: "产品与界面",
+		bodyEn: "How technical decisions become understandable workflows and maintainable products.",
+		bodyZh: "技术决策如何转化为清晰的流程、界面与可维护的产品。"
+	},
+	archive: {
+		index: "04",
+		titleEn: "Project Archive",
+		titleZh: "项目档案",
+		bodyEn: "Earlier experiments, references, and practical engineering records.",
+		bodyZh: "早期实验、工程参考与实践记录。"
+	}
+};
+
+function ArticleRecord({ post }: { post: BlogPost }) {
+	return (
+		<Link href={`/blog/${post.slug}`} className="group field-record-link grid gap-4 border-t border-white/15 px-1 py-6 sm:grid-cols-[120px_minmax(0,1fr)_24px] sm:px-4">
+			<p className="field-meta pt-1 text-accent"><LocalizedDate date={post.publishedAt} /></p>
+			<div>
+				<h3 className="text-xl font-semibold leading-snug text-field-paper transition group-hover:text-primary">
+					<LocalizedPostTitle slug={post.slug} title={post.title} />
+				</h3>
+				<p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-400">
+					<LocalizedPostSummary slug={post.slug} summary={post.summary} />
+				</p>
+				<div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 font-mono text-[0.65rem] uppercase tracking-[0.12em] text-slate-500">
+					{post.tags.slice(0, 3).map((tag) => <span key={tag}><LocalizedTag tag={tag} /></span>)}
+				</div>
+			</div>
+			<span className="field-arrow hidden sm:block" aria-hidden="true">↗</span>
+		</Link>
+	);
+}
 
 export default function BlogPage() {
-	const aiAgentSlugs = new Set(["code-with-codex"]);
-	const aiAgentPosts = blogPosts.filter((post) => aiAgentSlugs.has(post.slug));
-	const allTags = Array.from(new Set(blogPosts.flatMap((post) => post.tags))).slice(0, 14);
-	const selectedProjectSlugs = new Set([
-		"solana-orderflow-event-driven-escrow",
-		"safe-rl-supervised-shield",
-		"legal-youth-prototype-web",
-		"tcp-udp-simulator"
-	]);
-	const selectedProjectPosts = blogPosts.filter((post) => selectedProjectSlugs.has(post.slug));
-	const remainingPosts = blogPosts.filter((post) => !aiAgentSlugs.has(post.slug) && !selectedProjectSlugs.has(post.slug));
-	const countedPosts = blogPosts.length;
+	const featured = blogPosts[0];
+	const remaining = blogPosts.slice(1);
+	const grouped = Object.fromEntries(
+		blogCategoryOrder.map((category) => [category, remaining.filter((post) => getBlogCategory(post.slug) === category)])
+	) as Record<BlogCategoryKey, BlogPost[]>;
 
 	return (
-		<div className="min-h-screen bg-slate-950 text-white px-4 pb-16 pt-24">
+		<div className="field-page">
 			<SiteNav active="blog" />
 
-			<div className="mx-auto max-w-6xl space-y-12">
-				<header className="relative overflow-hidden border-b border-white/10 pb-10">
-					<div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-primary via-secondary to-accent" />
-					<div className="grid gap-8 pt-8 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-end">
-						<div className="space-y-5">
-							<p className="text-sm uppercase tracking-[0.3em] text-primary">
-								<LocalizedText en="Build Log" zh="构建日志" />
-							</p>
-							<div className="space-y-4">
-								<h1 className="max-w-3xl text-4xl font-bold leading-tight text-white sm:text-6xl">
-									<LocalizedText en="Blogs" zh="博客" />
-								</h1>
-								<p className="max-w-2xl text-lg leading-8 text-slate-200">
-									<LocalizedText
-										en="Short technical writeups about full-stack systems, data workflows, web design, human-computer interaction, and the decisions behind my public repositories."
-										zh="这里记录我在全栈系统、数据流程、网页设计、人机交互和公开项目中的技术思考与实现决策。"
-									/>
-								</p>
-							</div>
-						</div>
-
-						<div className="grid grid-cols-3 gap-3 text-center lg:grid-cols-1 lg:text-left">
-							<div className="rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3">
-								<p className="text-2xl font-bold text-white">{countedPosts}</p>
-								<p className="text-xs uppercase tracking-[0.2em] text-slate-400">
-									<LocalizedText en="Posts" zh="文章" />
-								</p>
-							</div>
-							<div className="rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3">
-								<p className="text-2xl font-bold text-white">{allTags.length}</p>
-								<p className="text-xs uppercase tracking-[0.2em] text-slate-400">
-									<LocalizedText en="Topics" zh="主题" />
-								</p>
-							</div>
-							<div className="rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3">
-								<p className="text-2xl font-bold text-white">MDX</p>
-								<p className="text-xs uppercase tracking-[0.2em] text-slate-400">
-									<LocalizedText en="Format" zh="格式" />
-								</p>
-							</div>
-						</div>
+			<main className="field-wrap">
+				<header className="grid gap-8 border-b border-white/15 pb-10 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end">
+					<div>
+						<p className="field-meta text-accent"><LocalizedText en="Notebook index · 2024—2026" zh="笔记索引 · 2024—2026" /></p>
+						<h1 className="field-display mt-4 text-6xl font-semibold leading-none sm:text-8xl">
+							<LocalizedText en="Engineering field notes" zh="工程现场笔记" />
+						</h1>
 					</div>
-				</header>
-
-				<section className="rounded-lg border border-white/10 bg-white/[0.03] p-5 shadow-2xl shadow-black/20 sm:p-6">
-					<div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-						<div>
-							<p className="text-sm uppercase tracking-[0.3em] text-primary">
-								<LocalizedText en="Selected Work" zh="精选作品" />
-							</p>
-							<h2 className="mt-2 text-3xl font-bold text-white">
-								<LocalizedText en="Featured Projects" zh="代表项目" />
-							</h2>
-						</div>
-						<p className="max-w-md text-sm leading-6 text-slate-400">
-							<LocalizedText
-								en="Project-focused notes that best represent my work across full-stack systems, data, UX, and engineering architecture."
-								zh="这些项目笔记最能代表我在全栈系统、数据、用户体验和工程架构上的实践。"
-							/>
-						</p>
-					</div>
-
-					<div className="grid gap-4 md:grid-cols-2">
-						{selectedProjectPosts.map((post) => (
-							<article
-								key={post.slug}
-								className="rounded-lg border border-white/10 bg-slate-900/80 p-5 transition hover:-translate-y-1 hover:border-primary/60 hover:bg-slate-900 hover:shadow-lg hover:shadow-primary/15"
-							>
-								<div className="flex items-start justify-between gap-4">
-									<h3 className="text-2xl font-semibold leading-snug text-white">
-										<LocalizedPostTitle slug={post.slug} title={post.title} />
-									</h3>
-									<span className="h-2 w-2 shrink-0 rounded-full bg-primary shadow-[0_0_20px_rgba(37,99,235,0.8)]" />
-								</div>
-								<p className="mt-3 text-sm leading-7 text-slate-300">
-									<LocalizedPostSummary slug={post.slug} summary={post.summary} />
-								</p>
-								<div className="mt-5 flex flex-wrap gap-3">
-									{post.tags.map((tag) => (
-										<span key={tag} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-slate-300">
-											<LocalizedTag tag={tag} />
-										</span>
-									))}
-								</div>
-								<Link
-									href={`/blog/${post.slug}`}
-									className="mt-5 inline-flex rounded-lg border border-primary/40 bg-primary px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:-translate-y-0.5 hover:bg-primary/85"
-								>
-									<LocalizedText en="Read case note" zh="阅读项目笔记" />
-								</Link>
-							</article>
-						))}
-					</div>
-				</section>
-
-				<section className="space-y-5">
-					<div className="flex items-end justify-between gap-4">
-						<div>
-							<p className="text-sm uppercase tracking-[0.3em] text-primary">
-								<LocalizedText en="Reflection" zh="思考" />
-							</p>
-							<h2 className="mt-2 text-3xl font-bold text-white">
-								<LocalizedText en="AI Agent Inspiration" zh="AI Agent 灵感" />
-							</h2>
-						</div>
-						<span className="hidden rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-sm text-slate-200 sm:inline-flex">
-							{aiAgentPosts.length} <LocalizedText en="post" zh="篇" />
-						</span>
-					</div>
-					<p className="max-w-3xl text-sm leading-7 text-slate-400">
+					<p className="text-base leading-7 text-slate-300">
 						<LocalizedText
-							en="Notes on building with AI agents, from implementation speed to product judgment, verification habits, and keeping the final work personal."
-							zh="记录我如何与 AI agent 一起构建项目：从实现速度、产品判断、验证习惯，到如何保持作品的个人表达。"
+							en="Detailed records of how I build agent systems, backend infrastructure, and product interfaces—and where the trade-offs actually appear."
+							zh="详细记录我如何构建 Agent 系统、后端基础设施和产品界面，以及工程取舍真正出现在哪里。"
 						/>
 					</p>
+				</header>
 
-					<div className="grid gap-4 lg:grid-cols-2">
-						{aiAgentPosts.map((post) => (
-							<article
-								key={post.slug}
-								className="group rounded-lg border border-primary/30 bg-gradient-to-br from-primary/10 via-slate-900/80 to-accent/10 p-5 shadow-xl shadow-primary/10 transition hover:-translate-y-1 hover:border-accent/70 hover:shadow-lg hover:shadow-accent/15"
-							>
-								<div className="space-y-4">
-									<div className="flex items-start justify-between gap-4">
-										<p className="text-xs uppercase tracking-[0.25em] text-primary">
-											<LocalizedDate date={post.publishedAt} />
-										</p>
-										<span className="h-2 w-2 shrink-0 rounded-full bg-accent shadow-[0_0_20px_rgba(245,158,11,0.8)]" />
-									</div>
-									<div className="space-y-3">
-										<h3 className="text-2xl font-semibold leading-snug text-white group-hover:text-accent transition">
-											<LocalizedPostTitle slug={post.slug} title={post.title} />
-										</h3>
-										<p className="text-sm leading-7 text-slate-300">
-											<LocalizedPostSummary slug={post.slug} summary={post.summary} />
-										</p>
-									</div>
-								</div>
-								<div className="mt-5 flex flex-wrap gap-3">
-									{post.tags.map((tag) => (
-										<span key={tag} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-slate-300">
-											<LocalizedTag tag={tag} />
-										</span>
-									))}
-								</div>
-								<Link
-									href={`/blog/${post.slug}`}
-									className="mt-5 inline-flex rounded-lg border border-accent/40 bg-primary px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:-translate-y-0.5 hover:bg-primary/85"
-								>
-									<LocalizedText en="Read note" zh="阅读笔记" />
-								</Link>
-							</article>
-						))}
+				<section className="grid border-b border-white/15 bg-field-navy/80 lg:grid-cols-[260px_minmax(0,1fr)]">
+					<div className="border-b border-white/15 p-6 lg:border-b-0 lg:border-r lg:p-8">
+						<p className="field-meta text-secondary"><LocalizedText en="Featured record" zh="重点记录" /></p>
+						<p className="mt-4 font-mono text-xs uppercase tracking-[0.15em] text-slate-500"><LocalizedDate date={featured.publishedAt} /></p>
 					</div>
-				</section>
-
-				<section className="space-y-5">
-					<div className="flex items-end justify-between gap-4">
-						<div>
-							<p className="text-sm uppercase tracking-[0.3em] text-slate-400">
-								<LocalizedText en="Project Writeups" zh="项目复盘" />
-							</p>
-							<h2 className="mt-2 text-3xl font-semibold text-white">
-								<LocalizedText en="Technical case notes" zh="技术案例笔记" />
+					<Link href={`/blog/${featured.slug}`} className="group field-record-link p-6 lg:p-8">
+						<div className="flex items-start justify-between gap-5">
+							<h2 className="max-w-3xl text-3xl font-semibold leading-tight text-field-paper transition group-hover:text-primary sm:text-5xl">
+								<LocalizedPostTitle slug={featured.slug} title={featured.title} />
 							</h2>
+							<span className="field-arrow" aria-hidden="true">↗</span>
 						</div>
-						<span className="hidden rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-sm text-slate-300 sm:inline-flex">
-							{remainingPosts.length} <LocalizedText en="posts" zh="篇" />
-						</span>
-					</div>
-
-					<div className="grid gap-4 lg:grid-cols-2">
-						{remainingPosts.map((post) => {
-						return (
-							<article
-								key={post.slug}
-								className="group rounded-lg border border-white/10 bg-slate-900/80 p-5 shadow-xl shadow-black/20 transition hover:-translate-y-1 hover:border-primary/60 hover:bg-slate-900 hover:shadow-lg hover:shadow-primary/15"
-							>
-								<div className="space-y-4">
-									<div className="flex items-start justify-between gap-4">
-										<p className="text-xs uppercase tracking-[0.25em] text-slate-400">
-											<LocalizedDate date={post.publishedAt} />
-										</p>
-										<span className="h-2 w-2 shrink-0 rounded-full bg-primary shadow-[0_0_20px_rgba(37,99,235,0.8)]" />
-									</div>
-									<div className="space-y-3">
-										<h3 className="text-2xl font-semibold leading-snug text-white group-hover:text-primary transition">
-											<LocalizedPostTitle slug={post.slug} title={post.title} />
-										</h3>
-										<p className="text-sm leading-7 text-slate-300">
-											<LocalizedPostSummary slug={post.slug} summary={post.summary} />
-										</p>
-									</div>
-								</div>
-								<div className="mt-5 flex flex-wrap gap-3">
-									{post.tags.map((tag) => (
-										<span key={tag} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-xs text-slate-300">
-											<LocalizedTag tag={tag} />
-										</span>
-									))}
-								</div>
-								<Link
-									href={`/blog/${post.slug}`}
-									className="mt-5 inline-flex rounded-lg border border-primary/40 bg-primary px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-primary/20 transition hover:-translate-y-0.5 hover:border-accent/60 hover:bg-primary/85 hover:shadow-primary/30"
-								>
-									<LocalizedText en="Read note" zh="阅读笔记" />
-								</Link>
-							</article>
-						);
-						})}
-					</div>
+						<p className="mt-5 max-w-3xl text-base leading-7 text-slate-300">
+							<LocalizedPostSummary slug={featured.slug} summary={featured.summary} />
+						</p>
+						<div className="mt-6 flex flex-wrap gap-3">
+							{featured.tags.map((tag) => (
+								<span key={tag} className="border border-white/15 px-2.5 py-1 font-mono text-[0.65rem] uppercase tracking-[0.12em] text-slate-400">
+									<LocalizedTag tag={tag} />
+								</span>
+							))}
+						</div>
+					</Link>
 				</section>
 
-				<footer className="border-t border-white/10 pt-8 text-sm text-slate-400">
-					<LocalizedText en="Thanks for reading. You can visit my " zh="感谢阅读。你也可以访问我的 " />
-					<a
-						href="https://github.com/Zhejian-Zheng"
-						target="_blank"
-						rel="noreferrer"
-						className="text-primary hover:text-primary/80 underline underline-offset-4"
-					>
-						GitHub
-					</a>{" "}
-					<LocalizedText en="to explore my code and projects." zh="查看我的代码和项目。" />
+				<div className="space-y-16 py-14">
+					{blogCategoryOrder.map((category) => {
+						const copy = categoryCopy[category];
+						const posts = grouped[category];
+						if (posts.length === 0) return null;
+
+						return (
+							<section key={category} className="grid gap-8 lg:grid-cols-[260px_minmax(0,1fr)]">
+								<header>
+									<p className="field-meta text-accent">Section / {copy.index}</p>
+									<h2 className="field-display mt-3 text-4xl font-semibold">
+										<LocalizedText en={copy.titleEn} zh={copy.titleZh} />
+									</h2>
+									<p className="mt-4 text-sm leading-6 text-slate-400">
+										<LocalizedText en={copy.bodyEn} zh={copy.bodyZh} />
+									</p>
+								</header>
+								<div className="border-b border-white/15">
+									{posts.map((post) => <ArticleRecord key={post.slug} post={post} />)}
+								</div>
+							</section>
+						);
+					})}
+				</div>
+
+				<footer className="site-footer border-t border-white/15">
+					<LocalizedText en="End of index · New records added continuously" zh="索引结束 · 持续更新新记录" />
 				</footer>
-			</div>
+			</main>
 		</div>
 	);
 }
