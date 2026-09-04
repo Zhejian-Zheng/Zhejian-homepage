@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import HomeClient, { selectedBuildSlugs, type HomePostPreview } from "./home-client";
+import HomeClient, { type HomePostPreview } from "./home-client";
+import { selectedBuildSlugs } from "./home-data";
 import { blogPosts } from "./blog/posts";
 
 export const metadata: Metadata = {

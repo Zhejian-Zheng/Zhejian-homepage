@@ -21,10 +21,15 @@ test("shared theme and navigation expose the field-notes system", async () => {
 });
 
 test("homepage replaces quotes with equal project and article records", async () => {
-	const home = await source("app/home-client.tsx");
+	const [home, homeData, page] = await Promise.all([
+		source("app/home-client.tsx"),
+		source("app/home-data.ts"),
+		source("app/page.tsx")
+	]);
 
 	assert.doesNotMatch(home, /api\.quotable\.io/);
-	assert.match(home, /selectedBuildSlugs/);
+	assert.match(homeData, /selectedBuildSlugs/);
+	assert.match(page, /selectedBuildSlugs/);
 	assert.match(home, /latestNotes/);
 	assert.match(home, /fieldRecord/);
 });

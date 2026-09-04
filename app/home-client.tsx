@@ -23,12 +23,6 @@ export type HomePostPreview = {
 	tags: string[];
 };
 
-export const selectedBuildSlugs = [
-	"solana-orderflow-event-driven-escrow",
-	"safe-rl-supervised-shield",
-	"github-repo-review-agent"
-] as const;
-
 const BG_IMAGES: BgImage[] = [bgBerlin, bgYosemite, bgBerchtesgaden, bgBall, bgCityscape];
 
 const homeCopy = {
