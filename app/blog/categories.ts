@@ -3,6 +3,7 @@ export type BlogCategoryKey = "agents" | "systems" | "product" | "archive";
 export const blogCategoryOrder: BlogCategoryKey[] = ["agents", "systems", "product", "archive"];
 
 const categoryBySlug: Partial<Record<string, BlogCategoryKey>> = {
+	"llm-wiki-in-practice": "agents",
 	"agentscope-java-recoverable-agents": "agents",
 	"agentscope-java-permissions-and-sandbox": "agents",
 	"reme-long-term-memory": "agents",

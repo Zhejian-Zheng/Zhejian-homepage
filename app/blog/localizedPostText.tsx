@@ -8,6 +8,10 @@ type PostTranslation = {
 };
 
 const postTranslations: Record<string, PostTranslation> = {
+	"llm-wiki-in-practice": {
+		title: "LLM Wiki 实践：把项目资料整理成可追溯的工程知识",
+		summary: "我如何使用由 LLM 编译的 Wiki，把项目文档整理成可搜索、有关联并且能够追溯来源的工程知识。"
+	},
 	"agentscope-java-recoverable-agents": {
 		title: "AgentScope Java 2.0 可恢复 Agent：事件流、HITL 与恢复语义",
 		summary: "从源码分析 AgentScope Java 2.0 的事件流、人工批准、外部工具执行、中断机制和 session 恢复边界。"
@@ -124,8 +128,10 @@ const tagTranslations: Record<string, string> = {
 	GitHub: "GitHub",
 	HITL: "人工确认",
 	Java: "Java",
+	"Knowledge Base": "知识库",
 	Kafka: "Kafka",
 	LaTeX: "LaTeX",
+	"LLM Wiki": "LLM Wiki",
 	Licensing: "许可证",
 	MDX: "MDX",
 	MongoDB: "MongoDB",

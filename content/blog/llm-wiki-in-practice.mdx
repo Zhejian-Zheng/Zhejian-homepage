@@ -1,0 +1,174 @@
+export const metadata = {
+	title: "LLM Wiki in Practice: Turning Documents into Traceable Engineering Knowledge",
+	summary: "How I use an LLM-compiled wiki to turn project documents into searchable, linked, and source-aware engineering knowledge.",
+	publishedAt: "2026-09-05",
+	tags: ["LLM Wiki", "Knowledge Base", "Documentation", "AI Agent"]
+};
+
+<div className="article-language article-language-en">
+
+Most teams do not lack documents. They lack a reliable way to turn those documents into knowledge that can be found, checked, and updated.
+
+I started using LLM Wiki for that gap. It is an LLM-compiled knowledge base built from Markdown files. Source material is kept as evidence. The LLM reads those sources and produces smaller, connected articles with metadata, links, and references back to the original material. Codex can then query the wiki as part of an engineering task.
+
+That description sounds close to RAG, but the working model is different. A typical RAG system retrieves chunks when a question arrives and generates an answer for that request. LLM Wiki also creates durable articles before the next question is asked. I can open those articles in Obsidian, edit them, review their sources, and use them again without repeating the whole synthesis step.
+
+## The model I use
+
+My wiki has three layers:
+
+```text
+source documents
+    -> raw files with provenance
+    -> compiled Markdown articles
+    -> indexes used for navigation and queries
+```
+
+The raw layer is the evidence. Normal compilation does not rewrite it. The compiled layer contains readable articles organized by topic, concept, or reference. Indexes are derived data, so they can be rebuilt from the files.
+
+This separation matters. If an answer looks wrong, I can trace it to an article and then back to the source. If an index breaks, the knowledge is still present in Markdown. The search layer helps me find information, but it is not the only copy of that information.
+
+## Why I separate topics
+
+I do not put every document into one large knowledge base. Each subject gets its own topic wiki with separate sources, articles, indexes, and activity logs.
+
+This keeps retrieval focused. An onboarding question should not pull context from an unrelated product analysis. It also gives each topic its own lifecycle. I can compile one topic, leave another as an intake queue, or archive a topic without disturbing the rest of the hub.
+
+The files still use ordinary Markdown and YAML frontmatter. A compiled article records fields such as title, summary, tags, source paths, update date, and confidence. Those fields make the collection easier to inspect without opening every document.
+
+## How I use it in real work
+
+I currently use two topic wikis.
+
+The first supports engineering onboarding. I ingested five DingTalk knowledge nodes covering onboarding, system architecture, navigation, shared utilities, and local port conflicts. These sources are stored in the raw layer and have not been compiled yet. I deliberately left them there because ingestion and publication are separate decisions. A document can be collected before I decide that it is ready to become maintained guidance.
+
+The second topic supports product and engineering research. I ingested two PDFs with 13 and 29 pages. LLM Wiki compiled those 42 pages into four linked articles covering product scope, technical routing and evidence, measurement questions, and reference analysis.
+
+The useful result was not a shorter PDF. The wiki separated confirmed source material from engineering suggestions and open decisions. One article could describe the product boundary while another kept unresolved metrics and permission questions visible. Links connected the articles without forcing all of the information into one long summary.
+
+My normal workflow is:
+
+```text
+1. Create a focused topic wiki
+2. Ingest documents without changing the originals
+3. Check source metadata and provenance
+4. Compile new sources into connected articles
+5. Review claims, confidence, and unresolved gaps
+6. Lint the wiki and query it during later work
+```
+
+Compilation is incremental by default. When I add a source, the system can process the new material instead of rebuilding every article. Each write is also recorded in an append-only activity log, which makes the state of a topic easier to understand later.
+
+## What the LLM is allowed to do
+
+The LLM is a compiler here, not the source of truth. Its job is to organize evidence, combine related material, and write useful connections. It should not fill missing facts with plausible text.
+
+I expect the generated articles to keep source paths and state uncertainty directly. In the product research topic, suggested architecture and target metrics remain labelled as proposals rather than implemented behavior. Questions that still need an owner or a decision remain open instead of being rewritten as conclusions.
+
+This changes how I review generated content. A fluent article can still be wrong. I check whether a claim has a source, whether a recommendation is being presented as a fact, and whether the article preserves disagreement between documents.
+
+## Where it helps
+
+LLM Wiki works well for material that will be read more than once. Engineering onboarding, architecture notes, product research, incident knowledge, and a growing set of technical references all fit that pattern.
+
+It is less useful for a one-off question with no long-term value. In that case, creating a topic, maintaining sources, and compiling articles would add work without improving the next task. I also would not use it as a replacement for an operational database, an access-control system, or the original source archive.
+
+## What this changes in my engineering workflow
+
+Before using this approach, I often treated document search and document writing as separate tasks. Now they share one pipeline. The same source that answers a question can become part of a maintained article, and the article keeps enough provenance for the next engineer to inspect it.
+
+For technical readers, the interesting part is the boundary between immutable sources, generated articles, and rebuildable indexes. For a technical recruiter, the practical result is simpler: I can take a mixed set of project documents, organize them into a maintainable knowledge system, and keep the generated output tied to evidence.
+
+I still make the final editorial decisions. The LLM reduces the cost of reading, grouping, and drafting. It does not decide which internal information is safe to publish, whether a recommendation is approved, or when an article is accurate enough to guide engineering work.
+
+## Closing note
+
+My understanding of LLM Wiki is not "chat with a folder." It is a compilation workflow for knowledge that needs to survive beyond one conversation. Markdown keeps the result inspectable. Provenance keeps it accountable. Topic boundaries keep it useful.
+
+The two wikis I use are still small, which is useful at this stage. I can see where the workflow saves time and where human review is still required before I trust it with a larger engineering knowledge base.
+
+</div>
+
+<div className="article-language article-language-zh">
+
+大多数团队并不缺文档。真正缺少的，是一种可靠的方法，把文档整理成能够查找、核对和持续更新的知识。
+
+我使用 LLM Wiki，主要是为了解决这个问题。它是一个由 LLM 编译的 Markdown 知识库。原始资料作为证据保留下来，LLM 阅读这些资料，再生成更聚焦、互相关联的文章。文章带有元数据、链接和原文引用。后续做工程任务时，Codex 可以直接查询这些内容。
+
+它听起来和 RAG 很像，但工作方式并不相同。常见的 RAG 系统会在收到问题后检索文本片段，再为当次请求生成答案。LLM Wiki 还会提前生成可以长期保存的文章。我可以在 Obsidian 里打开、修改和检查这些文章，也可以在之后继续使用，不需要每次都重新完成整套整理过程。
+
+## 我使用的知识模型
+
+我的 Wiki 分成三层：
+
+```text
+原始文档
+    -> 带来源信息的 raw 文件
+    -> 编译后的 Markdown 文章
+    -> 用于导航和查询的索引
+```
+
+raw 层保存证据，正常的编译过程不会改写它。编译层保存适合阅读的文章，可以按主题、概念或参考资料组织。索引属于派生数据，即使损坏，也能根据文件重新生成。
+
+这个边界很重要。如果答案有问题，我可以先找到对应文章，再回到原始资料核对。如果索引出现错误，Markdown 文件中的知识仍然存在。搜索层负责提高查找效率，但它不是知识的唯一副本。
+
+## 为什么要按主题隔离
+
+我不会把所有文档都塞进一个大型知识库。每个领域都有独立的 topic wiki，分别管理来源、文章、索引和操作日志。
+
+这样可以减少无关内容对检索的干扰。入职问题不应该混入另一项产品分析的上下文。不同主题也能拥有自己的维护节奏。我可以编译一个主题，把另一个主题暂时留在资料队列中，也可以单独归档旧主题。
+
+底层文件仍然是普通的 Markdown 和 YAML frontmatter。编译后的文章会记录标题、摘要、标签、来源路径、更新时间和置信度。查看这些字段，就能先判断文章是否相关，不必逐个打开文件。
+
+## 我在实际工作中怎样使用
+
+我目前维护两个 topic wiki。
+
+第一个用于工程研发入门。我从钉钉导入了 5 个知识节点，内容涉及入职、系统架构、网址导航、公共工具和本地端口冲突。这些资料目前保存在 raw 层，还没有进入编译阶段。这是我有意保留的状态，因为收集资料和发布知识应该是两个不同的决定。资料可以先进入队列，等内容完整、边界清楚以后，再整理成长期维护的文章。
+
+第二个主题用于产品与工程研究。我导入了两份 PDF，页数分别是 13 页和 29 页。LLM Wiki 把这 42 页资料整理成 4 篇互相关联的文章，分别讨论产品范围、技术路由与证据、指标问题和参考分析。
+
+对我来说，有用的结果并不是一份更短的 PDF。Wiki 把原文已经确认的内容、工程建议和待决策问题分开了。一篇文章可以说明产品边界，另一篇则保留尚未确定的指标与权限问题。文章之间通过链接建立关系，不需要把所有信息挤进一篇很长的总结。
+
+我的常用流程是：
+
+```text
+1. 创建边界明确的 topic wiki
+2. 导入资料，同时保留原文
+3. 检查来源信息和元数据
+4. 把新增资料编译成互相关联的文章
+5. 审查结论、置信度和未解决问题
+6. 运行 lint，并在后续任务中查询 Wiki
+```
+
+编译默认采用增量方式。增加资料后，系统可以只处理新内容，不必重建全部文章。每次写入还会追加到操作日志中，之后回看时，可以知道一个主题经历了哪些变化。
+
+## LLM 可以做什么
+
+在这个系统中，LLM 是编译器，不是事实来源。它可以组织证据、合并相关资料、建立文章之间的联系，但不能用听起来合理的文字补齐缺失事实。
+
+我要求生成的文章保留来源路径，并直接说明不确定性。在产品研究主题中，建议采用的架构和目标指标仍然被标记为方案，而不是已经上线的能力。需要负责人确认的问题会继续留在待决策清单中，不会被改写成确定结论。
+
+这也改变了我审查生成内容的方法。文章读起来顺畅，内容仍然可能出错。我会检查每项结论有没有来源，建议是否被误写成事实，不同文档之间的分歧有没有保留下来。
+
+## 它适合哪些工作
+
+LLM Wiki 适合会被反复使用的资料，例如工程入门、架构笔记、产品研究、事故经验和持续增长的技术参考。
+
+如果只是回答一次性问题，而且内容没有长期价值，我不会专门建立 Wiki。创建主题、维护来源和编译文章都会增加成本。它也不能替代业务数据库、权限系统或原始资料存档。
+
+## 它怎样改变我的工程工作流
+
+以前，我经常把查文档和写文档当成两个独立任务。现在它们可以共用一条流程。用于回答问题的资料，可以继续整理成长期维护的文章。文章保留来源信息，下一位工程师可以继续核对。
+
+对技术人员来说，值得关注的是三个边界：不可随意修改的原始资料、由 LLM 生成的文章，以及可以重新构建的索引。对技术 HR 来说，结果更直观。我能够把混杂的项目文档整理成可维护的知识系统，同时让生成内容始终能够回到证据。
+
+最终的编辑决定仍然由我负责。LLM 可以减少阅读、分类和起草的工作量，但它不能替我决定哪些内部信息可以公开，某项建议是否已经通过，或者一篇文章是否准确到足以指导工程实施。
+
+## 最后的理解
+
+我对 LLM Wiki 的理解，不是“和一个文件夹聊天”。它是一套知识编译流程，目标是让知识在一次对话结束后仍然可以使用。Markdown 让内容可以检查，来源记录让结论可以追踪，主题隔离则减少无关信息的干扰。
+
+我现在使用的两个 Wiki 规模还不大，这反而方便我观察真实效果。我能够看清哪些步骤节省了时间，也能知道哪些地方仍然需要人工审核，然后再决定是否把它扩展到更大的工程知识库。
+
+</div>

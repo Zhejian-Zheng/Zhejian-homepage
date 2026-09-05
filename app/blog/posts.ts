@@ -10,6 +10,7 @@ import GithubPagesToNextPortfolio, { metadata as githubPagesToNextPortfolioMetad
 import GithubRepoReviewAgent, { metadata as githubRepoReviewAgentMetadata } from "@/content/blog/github-repo-review-agent.mdx";
 import LeetcodeAlgorithmNotes, { metadata as leetcodeAlgorithmNotesMetadata } from "@/content/blog/leetcode-algorithm-notes.mdx";
 import LegalYouthPrototypeWeb, { metadata as legalYouthPrototypeWebMetadata } from "@/content/blog/legal-youth-prototype-web.mdx";
+import LlmWikiInPractice, { metadata as llmWikiInPracticeMetadata } from "@/content/blog/llm-wiki-in-practice.mdx";
 import MagicChessVueRulesEngine, { metadata as magicChessVueRulesEngineMetadata } from "@/content/blog/magic-chess-vue-rules-engine.mdx";
 import MongodbPostgresqlPracticalTakeaways, { metadata as mongodbPostgresqlPracticalTakeawaysMetadata } from "@/content/blog/mongodb-postgresql-practical-takeaways.mdx";
 import PilatesHealthQuizProgressRecovery, { metadata as pilatesHealthQuizProgressRecoveryMetadata } from "@/content/blog/pilates-health-quiz-progress-recovery.mdx";
@@ -33,6 +34,11 @@ export type BlogPost = {
 };
 
 export const blogPosts: BlogPost[] = [
+	{
+		slug: "llm-wiki-in-practice",
+		...llmWikiInPracticeMetadata,
+		Component: LlmWikiInPractice
+	},
 	{
 		slug: "agentscope-java-recoverable-agents",
 		...agentScopeJavaRecoverableAgentsMetadata,
