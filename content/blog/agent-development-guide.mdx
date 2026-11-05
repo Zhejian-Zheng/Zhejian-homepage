@@ -19,24 +19,24 @@ export const metadata = {
 
 <ArticleLanguage language="en">
 
-An Agent is easier to understand once you stop treating it as a special kind of intelligence. In software terms, it is usually a loop around a language model. The model reads the current state, decides whether to answer or use a tool, receives the tool result, and makes another decision.
+An Agent stops looking mysterious once you treat it as software. In most systems it is a loop around a language model: the model reads the current state, decides whether to answer or call a tool, receives the tool result, and makes another decision.
 
-That loop can search documents, call an API, write a file, or ask a person for approval. The model chooses the next action, but ordinary code still controls what actions exist and what the system is allowed to do.
+The loop can search documents, call an API, write a file, or stop and ask a person for approval. The model picks the next action. Ordinary code still decides which actions exist and what the system is allowed to do.
 
-This article explains the parts you need for a first Agent and the engineering work that turns a demo into a dependable application.
+A first Agent needs only a few parts. The work that makes it dependable is mostly ordinary application code.
 
 ## Start with the task, not the framework
 
-Before choosing a library, write down one job the Agent should complete. "Help users with research" is too broad. "Find three relevant sources, extract their publication dates, and return a cited summary" is testable.
+Before you pick a library, write down one job the Agent should complete. "Help users with research" is too broad. "Find three relevant sources, extract their publication dates, and return a cited summary" is testable.
 
-A useful task definition answers four questions:
+A workable task definition answers four questions:
 
 - What input does the Agent receive?
 - What result counts as complete?
 - Which actions may it take?
 - Which actions require human approval?
 
-The stop condition matters as much as the prompt. Without one, an Agent can repeat a failed tool call, keep gathering unnecessary context, or spend far more tokens than the task is worth. Set a maximum number of steps, a time limit, and a clear success condition in code.
+The stop condition matters as much as the prompt. Without one, an Agent can retry a failed tool call, keep gathering unnecessary context, or spend far more tokens than the task is worth. Set a step limit, a time limit, and a clear success condition in code.
 
 ## The smallest useful execution loop
 
@@ -80,11 +80,11 @@ async def run_agent(request, tools, max_steps=8):
     raise RuntimeError("Agent reached the step limit")
 ```
 
-The language model supplies `decision`. Your application owns everything around it: tool definitions, validation, execution, state, limits, and error handling. Keeping that boundary visible makes the system easier to debug.
+The model supplies `decision`. Everything around it belongs to your application: tool definitions, validation, execution, state, limits, and error handling. Keeping that boundary visible makes the system easier to debug.
 
 ## Instructions give the Agent a working contract
 
-A system prompt should tell the Agent what job it has, what information it can trust, how it should use tools, and when it must stop or ask for help. Long prompts are not automatically better. A short contract with specific rules is easier to test than several pages of advice.
+A system prompt should say what job the Agent has, what information it can trust, how it should use tools, and when it must stop or ask for help. Longer prompts are not automatically better. A short contract with specific rules is easier to test than several pages of advice.
 
 For a source research Agent, the contract might say:
 
@@ -101,7 +101,7 @@ Prompt rules cannot enforce security. If a tool must never delete production dat
 
 ## Tools are APIs for the model
 
-A tool is a function the model can request. Its name, description, and input schema are part of the Agent's interface. Vague tools lead to vague behavior.
+A tool is a function the model can request. Its name, description, and input schema are part of the Agent's interface. Vague tools produce vague behavior.
 
 Prefer a small tool with an explicit contract:
 
@@ -112,29 +112,29 @@ async def search_source(query: str, limit: int = 5) -> list[SearchResult]:
 
 Avoid a catch-all tool such as `do_research(data: dict)`. The model has to guess what belongs in `data`, and your logs will not explain what action it intended.
 
-Tool code should validate arguments at the boundary. It should also return useful failures. "Search timed out after 10 seconds" gives the Agent a chance to retry with a smaller query. A raw stack trace usually does not.
+Tool code should validate arguments at the boundary. It should also fail in a way the Agent can act on. "Search timed out after 10 seconds" gives the Agent a chance to retry with a smaller query. A raw stack trace usually does not.
 
-Tool descriptions deserve tests because the model sees them as instructions. Check common requests, invalid arguments, empty results, timeouts, and permission failures. You do not need a separate Agent for every tool. One Agent with a clear set of tools is often enough.
+Tool descriptions deserve tests because the model treats them as instructions. Cover common requests, invalid arguments, empty results, timeouts, and permission failures. You do not need a separate Agent for every tool. One Agent with a clear set of tools is often enough.
 
 ## State and memory solve different problems
 
 State is the information needed for the current run. It may contain conversation messages, completed steps, tool results, a token budget, and approval status.
 
-Memory carries selected information across runs. A support Agent might remember a user's product preference. A coding Agent might remember repository conventions. Saving the whole conversation forever is rarely a good memory strategy. It increases cost, exposes old sensitive data, and makes irrelevant details compete for attention.
+Memory carries selected information across runs. A support Agent might remember a user's product preference. A coding Agent might remember repository conventions. Saving the whole conversation forever is rarely a good memory strategy. It raises cost, keeps sensitive data around longer, and makes irrelevant details compete for attention.
 
-Use three practical buckets:
+In practice, three categories are enough:
 
 - Current state for the active task
 - A short summary for long conversations
 - Persistent memory for facts that remain useful later
 
-Define who can write persistent memory and how users can correct or delete it. A wrong memory can quietly affect every later answer.
+Define who can write persistent memory and how users can correct or delete it. A wrong memory can quietly shape later answers.
 
 ## Use workflows where order matters
 
 An Agent loop is useful when the next action depends on incomplete information. Ordinary code is better when the order is already known.
 
-Suppose an expense system must parse a receipt, validate the amount, request approval above a limit, and write an accounting record. Those steps have business meaning. Put them in a workflow. The model may help parse the receipt or explain an exception, but it should not decide whether validation happens.
+Suppose an expense system must parse a receipt, validate the amount, request approval above a limit, and write an accounting record. Those steps have business meaning, so put them in a workflow. The model may help parse the receipt or explain an exception. It should not decide whether validation happens.
 
 A practical application often mixes both styles:
 
@@ -162,11 +162,11 @@ Reading a public page and sending an email are different kinds of action. Classi
 
 Read-only tools can often run automatically. Actions that publish content, move money, delete data, change permissions, or contact another person should usually pause for approval. The approval screen needs to show the exact action and arguments, not a vague message such as "The Agent wants to continue."
 
-Also protect tools from prompt injection. Text returned by a website, document, or email is data, even when it contains instructions. Do not let retrieved text grant itself permission to call a sensitive tool.
+Protect tools from prompt injection as well. Text returned by a website, document, or email is data, even when it contains instructions. Retrieved text should never be able to grant itself permission to call a sensitive tool.
 
 ## Failure is part of the loop
 
-Tools time out. APIs rate-limit requests. Models produce invalid arguments. Users change their minds halfway through a task. Plan these cases before deployment.
+Tools time out, APIs rate-limit, models produce invalid arguments, and users change their minds halfway through a task. Decide how each case should behave before deployment.
 
 For each tool, decide:
 
@@ -181,7 +181,7 @@ Use idempotency keys for actions that may be retried, such as creating an order 
 
 You need a record of what the system did: model requests, tool names, validated arguments, tool results, latency, token usage, state changes, approvals, and the final outcome.
 
-Do not depend on private chain-of-thought text for debugging. Observable actions are more useful and easier to handle safely. A trace should let you answer practical questions:
+Do not debug from private chain-of-thought text. Observable actions are more useful and safer to store. A trace should answer practical questions:
 
 - Which tool failed?
 - What input reached it?
@@ -197,7 +197,7 @@ A response can sound confident and still fail the job. Evaluate complete outcome
 
 For a research Agent, useful checks include source validity, citation coverage, factual agreement with sources, unnecessary tool calls, cost, and completion time. For an action Agent, also check whether it followed approval and permission rules.
 
-Start with a small set of real examples. Include normal requests, ambiguous requests, missing data, tool failures, and hostile content inside retrieved documents. Save failures as regression cases. This gives you a better signal than asking whether a handful of demo conversations look good.
+Start with a small set of real examples. Include normal requests, ambiguous requests, missing data, tool failures, and hostile content inside retrieved documents. Save failures as regression cases. That gives you a better signal than asking whether a handful of demo conversations look good.
 
 ## A sensible build order
 
@@ -211,17 +211,17 @@ Build one narrow path first:
 6. Create an evaluation set from real examples.
 7. Add memory or multiple Agents only when a measured problem calls for them.
 
-The last point saves a lot of work. Multi-agent coordination does not repair an unclear task, a weak tool contract, or missing evaluation. A small Agent with good boundaries is a better first system because you can see why it succeeds and why it fails.
+The last point saves a lot of work. Multi-agent coordination does not repair an unclear task, a weak tool contract, or missing evaluation. A small Agent with good boundaries is a better first system, because you can see why it succeeds and why it fails.
 
 </ArticleLanguage>
 
 <ArticleLanguage language="zh">
 
-理解 Agent 不需要先接受一套神秘概念。从软件结构看，它通常就是语言模型外面的一层循环。模型读取当前状态，决定直接回答还是调用工具，拿到工具结果后再做下一次判断。
+Agent 并不神秘，把它当成软件看就可以。多数情况下，它就是语言模型外面的一层循环：模型读取当前状态，决定直接回答还是调用工具，拿到工具结果后再判断一次。
 
-这个循环可以搜索文档、调用 API、写文件，也可以暂停下来请人确认。下一步做什么由模型判断，但有哪些动作可用、系统允许做什么，仍然由普通代码控制。
+这个循环可以搜索文档、调用 API、写文件，也可以停下来请人确认。下一步做什么由模型判断；有哪些动作可用、系统允许做什么，仍由普通代码决定。
 
-下面从一个最小 Agent 开始，逐步讲清楚哪些部分属于模型，哪些部分必须由工程代码负责，以及怎样把 demo 做成可以维护的应用。
+一个最小 Agent 需要的组件不多，真正决定它能不能长期运行的，是模型外面那层代码。
 
 ## 先定义任务，再选择框架
 
@@ -234,7 +234,7 @@ The last point saves a lot of work. Multi-agent coordination does not repair an 
 - 它可以执行哪些动作？
 - 哪些动作必须由人确认？
 
-停止条件和 prompt 一样重要。没有停止条件，Agent 可能反复调用失败的工具，继续收集没有必要的信息，或者消耗远超任务价值的 token。最大步数、超时时间和成功条件都应该写在代码里。
+停止条件和 prompt 一样重要。没有停止条件，Agent 可能反复重试已经失败的工具调用，继续收集没有必要的信息，或者消耗远超任务价值的 token。最大步数、超时时间和成功条件都应该写在代码里。
 
 ## 最小可用的执行循环
 
@@ -278,7 +278,7 @@ async def run_agent(request, tools, max_steps=8):
     raise RuntimeError("Agent reached the step limit")
 ```
 
-`decision` 来自语言模型，周围的部分都属于应用代码，包括工具定义、参数校验、执行、状态、限制和错误处理。把这条边界留在代码里，后面才容易定位问题。
+模型只负责给出 `decision`。工具定义、参数校验、执行、状态、限制和错误处理都在应用代码里。把这条边界划清楚，出问题时才知道该看哪里。
 
 ## Instructions 是 Agent 的工作约定
 
@@ -312,21 +312,21 @@ async def search_source(query: str, limit: int = 5) -> list[SearchResult]:
 
 工具要在边界处校验参数，也要返回对恢复有帮助的错误。"搜索在 10 秒后超时"能让 Agent 尝试缩小查询范围，直接返回一段 stack trace 通常没有这个作用。
 
-工具描述也值得测试，因为模型会把描述当成使用说明。常见请求、非法参数、空结果、超时和权限错误都要覆盖。不要因为有多个工具，就急着给每个工具配一个 Agent。很多任务用一个 Agent 和一组清楚的工具就够了。
+工具描述也值得测试，因为模型会把描述当成使用说明。常见请求、非法参数、空结果、超时和权限错误都要覆盖。工具多并不等于要给每个工具配一个 Agent。很多任务用一个 Agent 加一组清楚的工具就够了。
 
 ## State 和 memory 不是同一个东西
 
 State 保存当前这次运行需要的信息，例如对话消息、已完成步骤、工具结果、token 预算和审批状态。
 
-Memory 把经过选择的信息带到后续运行。客服 Agent 可以记住用户的产品偏好，编程 Agent 可以记住仓库约定。把所有历史对话永久保存，并不是好的 memory 方案。这样会提高成本，保留过期的敏感信息，也会让无关细节占用模型注意力。
+Memory 把经过选择的信息带到后续运行。客服 Agent 可以记住用户的产品偏好，编程 Agent 可以记住仓库约定。把所有历史对话永久保存，并不是好的 memory 方案：成本会上升，过期的敏感信息一直留着，无关细节还会占用模型的注意力。
 
-可以先分成三个实用层次：
+实际使用时，分成三类就够了：
 
 - 当前任务使用的 state
 - 长对话压缩后的短摘要
 - 以后仍然有用的持久 memory
 
-还要定义谁可以写持久 memory，以及用户怎样纠正或删除它。一条错误记忆可能在很长时间里影响后续答案，而且不容易被发现。
+还要定义谁可以写持久 memory，以及用户怎样纠正或删除它。一条错误记忆可能长期影响后续答案，而且不容易被发现。
 
 ## 顺序明确的地方使用 workflow
 
@@ -352,7 +352,7 @@ Agent 补充缺失信息
 确定性写入
 ```
 
-这样安排后，需要灵活判断的部分仍然灵活，业务上必须稳定的部分也不会交给模型临场决定。
+这样拆分后，需要灵活判断的地方仍然交给模型，业务上必须稳定的步骤则由代码保证。
 
 ## 在产生后果之前请求确认
 
@@ -364,7 +364,7 @@ Agent 补充缺失信息
 
 ## 失败也是执行循环的一部分
 
-工具会超时，API 会限流，模型可能生成无效参数，用户也可能在任务中途改变要求。这些情况应该在上线前就有处理方式。
+工具会超时，API 会限流，模型可能生成无效参数，用户也可能在任务中途改变要求。这些情况在上线前都要有明确的处理方式。
 
 每个工具都要明确：
 
@@ -409,6 +409,6 @@ Agent 补充缺失信息
 6. 从真实样例建立 evaluation set。
 7. 只有测量结果证明有需要时，再加入 memory 或多个 Agent。
 
-最后一点能省下很多无效工作。多个 Agent 解决不了模糊的任务定义、含糊的工具接口和缺失的评估。边界清楚的小 Agent 更适合作为第一版，因为你能看见它为什么成功，也能看见它为什么失败。
+最后一点能省下很多返工。多个 Agent 解决不了模糊的任务定义、含糊的工具接口和缺失的评估。边界清楚的小 Agent 更适合作为第一版，因为你能看见它为什么成功，也能看见它为什么失败。
 
 </ArticleLanguage>

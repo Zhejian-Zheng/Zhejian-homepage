@@ -38,6 +38,7 @@ const navItems: Array<{ key: Exclude<NavKey, "home">; href: string }> = [
 export default function SiteNav() {
 	const pathname = usePathname();
  const active: NavKey = pathname.startsWith("/blog") ? "blog" : pathname === "/about" ? "about" : pathname === "/contact" ? "contact" : "home";
+ const isBlog = pathname.startsWith("/blog");
  const { language } = useLanguage();
 	const copy = navCopy[language];
 	const [menuOpen, setMenuOpen] = useState(false);
@@ -45,7 +46,7 @@ export default function SiteNav() {
  const closeMenu = () => setMenuOpen(false);
 
 	return (
-		<nav onKeyDown={(event) => { if (event.key === "Escape") { closeMenu(); document.getElementById("menu-toggle")?.focus(); } }} className="fixed inset-x-0 top-0 z-[100] border-b border-white/10 bg-field-ink/95 backdrop-blur-lg">
+		<nav onKeyDown={(event) => { if (event.key === "Escape") { closeMenu(); document.getElementById("menu-toggle")?.focus(); } }} className={`site-nav fixed inset-x-0 top-0 z-[100] border-b border-white/10 bg-field-ink/95${isBlog ? " nav--blog" : ""}`}>
 			<div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4">
 				<Link href="/" onClick={closeMenu} className="brand-link text-base font-semibold text-field-paper transition hover:text-accent sm:text-lg">
 					<span className="brand-monogram" aria-hidden="true">z.</span><span className="hidden sm:inline">{copy.brand}</span>

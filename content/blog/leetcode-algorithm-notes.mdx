@@ -19,9 +19,9 @@ export const metadata = {
 
 <ArticleLanguage language="en">
 
-The Leet-Code repo is an algorithm practice notebook. It contains Python solutions organized by problem number, with a mix of brute-force approaches, optimized attempts, and exploratory notes.
+The Leet-Code repo is an algorithm practice notebook. The Python solutions are organized by problem number, and they mix brute-force versions, optimized attempts, and exploratory notes.
 
-That makes it valuable as a learning record. The code shows not only final answers, but also the path from direct thinking to better patterns.
+Read in order, the code shows the path from a direct approach to a better pattern.
 
 ## Patterns in the Repo
 
@@ -31,56 +31,56 @@ Examples include Two Sum, Longest Substring Without Repeating Characters, Climbi
 
 ## Learning Value
 
-Some solutions are intentionally simple. A brute-force solution is often the first version that proves the idea. Later, the same problem can be revisited with a hash map, sliding window, dynamic programming table, or sorted scan.
+Some solutions are intentionally simple. Brute force is often the first version that proves the idea. Later the same problem can be revisited with a hash map, a sliding window, a dynamic programming table, or a sorted scan.
 
-That progression matters because interview-style problem solving is mostly pattern recognition under constraints.
+The progression matters: interview-style problems are mostly pattern recognition under constraints.
 
 ## Knowledge Points
 
-- Hash maps often turn repeated lookup problems from quadratic time into linear time.
-- Sliding windows are useful when a substring or subarray must satisfy a moving constraint.
-- Two pointers work well when input is sorted or can be scanned from both ends.
-- Dynamic programming stores overlapping subproblem results instead of recomputing them.
-- Sorting can simplify a problem but usually changes time complexity to O(n log n).
-- Recursion is expressive, but memoization is often needed when states repeat.
-- Maintaining notes beside code makes it easier to revisit mistakes and improvements.
+- A hash map often turns a repeated-lookup problem from quadratic time into linear time.
+- A sliding window helps when a substring or subarray has to satisfy a constraint that moves as you scan.
+- Two pointers work when the input is sorted, or when you can scan it from both ends.
+- Dynamic programming stores the results of overlapping subproblems instead of recomputing them.
+- Sorting can simplify a problem, at the cost of O(n log n) time.
+- Recursion is expressive, but repeated states usually need memoization.
+- Keeping notes next to the code makes mistakes and improvements easier to revisit.
 
 ## Takeaway
 
-This repo is less about one polished product and more about building algorithm fluency. The next step would be adding complexity notes and a short reflection for each solved problem.
+The repo is a learning record more than a product. Its next step is complexity notes and a short reflection for every solved problem.
 
 </ArticleLanguage>
 
 <ArticleLanguage language="zh">
 
-这个 LeetCode 仓库是一本算法练习笔记。它包含按题号组织的 Python 解法，混合了暴力解法、优化尝试和探索性笔记。
+这个 LeetCode 仓库就是一本算法练习笔记。Python 解法按题号排列，既有暴力版本，也有优化过的尝试和一些随手记下的探索。
 
-这让它作为学习记录很有价值：代码不只展示最终答案，也展示了从直接思路到更好模式的演进过程。
+按顺序读下来，能看到一道题从直白思路走到更好模式的过程。
 
 ## 仓库中的模式
 
-许多题目落入常见分类：数组、字符串、哈希表、排序、双指针、递归、动态规划和基础数学。
+题目大多集中在几类：数组、字符串、哈希表、排序、双指针、递归、动态规划和基础数学。
 
-例子包括两数之和、最长无重复字符子串、爬楼梯、最长连续序列、两数之和 II、包含类匹配问题和子数组计数。
+比如两数之和、最长无重复字符子串、爬楼梯、最长连续序列、两数之和 II、Contains 这类匹配题，以及子数组计数。
 
 ## 学习价值
 
-有些解法是有意保持简单的。暴力解法通常是证明思路的第一个版本，之后可以用哈希表、滑动窗口、动态规划表或有序扫描重新解决同一道题。
+有些解法是故意写简单的。暴力解通常是第一个能把思路跑通的版本，同一道题过阵子回头再做，可以换哈希表、滑动窗口、DP 表或者排序后扫描。
 
-这种演进很重要，因为面试式解题本质上是在约束条件下的模式识别。
+这种前后差异才是重点。面试题大多是在约束条件下做模式识别。
 
 ## 知识点
 
-- 哈希表经常把重复查找问题从二次时间复杂度降低到线性时间。
-- 当子串或子数组需要满足移动约束时，滑动窗口很有用。
-- 当输入已排序或可以从两端扫描时，双指针效果很好。
-- 动态规划存储重叠子问题的结果，而不是重复计算。
-- 排序可以简化问题，但通常会把时间复杂度变为 O(n log n)。
-- 递归表达力强，但当状态重复时通常需要记忆化。
-- 在代码旁边维护笔记，更容易回顾错误和改进。
+- 哈希表常把反复查找的问题从平方级降到线性级。
+- 子串或子数组的约束随扫描移动时，滑动窗口就派得上用场。
+- 输入有序，或者能从两头往中间扫时，双指针很好用。
+- 动态规划把重叠子问题的结果存下来，不重复计算。
+- 排序能简化问题，代价通常是 O(n log n) 的时间。
+- 递归写起来顺，但状态重复时一般要加记忆化。
+- 笔记写在代码旁边，回头查错和看改进都方便。
 
 ## 总结
 
-这个仓库不是一个精良的产品，更多是关于建立算法熟练度。下一步可以为每道解决的题目添加复杂度注释和简短反思。
+这个仓库更像一份学习记录，离成品还有距离。下一步是给每道做过的题补上复杂度注释和一小段复盘。
 
 </ArticleLanguage>

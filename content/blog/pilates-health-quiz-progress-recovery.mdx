@@ -21,13 +21,13 @@ export const metadata = {
 
 <ArticleLanguage language="en">
 
-Recently, I worked on a small Pilates Health Quiz project. The core goal was to let users fill in health information through a step-by-step questionnaire, save progress on the backend, and eventually generate a basic health assessment result. The project looks like a simple form at first, but the real implementation involved a lot of product and engineering details: step-by-step saving, progress recovery, backend validation, session recognition, and state restoration after users leave halfway through.
+The Pilates Health Quiz started as a small project. The goal was to let someone answer a step-by-step health questionnaire, keep the answers on the backend, and produce a basic health assessment at the end. On the surface it is a simple form. Most of the work went into saving each step, restoring progress when someone comes back, validating answers on the server, recognizing the session, and handling the case where a person closes the page halfway through.
 
-## Project Background
+## Project background
 
-The core workflow is straightforward: users fill in information such as gender, goals, age, height, current weight, target weight, and exercise frequency. After each step, the frontend syncs the current answer to the backend. If the user closes the page and later returns, the system should automatically restore the previous answers and current progress.
+The workflow is easy to describe. A user fills in gender, goals, age, height, current weight, target weight, and exercise frequency, one step at a time. After each step, the frontend syncs the current answer to the backend. If the user closes the page and returns later, the app should restore the previous answers and the step they were on.
 
-The main stack includes:
+The stack:
 
 - Next.js 16
 - React 19
@@ -36,17 +36,17 @@ The main stack includes:
 - Zod
 - Vitest
 
-## Step-by-Step Saving: Not Waiting Until the End
+## Saving each step
 
-It is tempting to build a questionnaire as a single final submission, but this project required saving every step. The benefit is simple: users do not lose their progress if they leave midway.
+It is tempting to build the questionnaire as one final submission. This project needed every step saved, so someone who leaves midway does not lose progress.
 
-Whenever a user selects an answer or submits a numeric input, the frontend calls the save logic:
+The frontend saves whenever the user selects an answer or submits a numeric input:
 
 ```ts
 PATCH /api/sessions/:sessionId/answers
 ```
 
-The request body only sends incremental data for the current step:
+The request body carries only the increment for the current step:
 
 ```ts
 {
@@ -61,20 +61,20 @@ The request body only sends incremental data for the current step:
 }
 ```
 
-The backend uses Prisma `upsert` to save answers. That means when a user changes the same question, the system updates the existing answer instead of creating duplicate records.
+On the backend, Prisma `upsert` writes the answer. Changing the same question updates the existing row instead of creating a duplicate.
 
-## Progress Recovery: From localStorage to Cookie Session
+## Progress recovery: from localStorage to a cookie session
 
-At first, the project stored a randomly generated `sessionId` in frontend `localStorage`. This worked, but it had an obvious limitation: session identification depended entirely on frontend-readable data, which does not feel like a real backend session.
+The first version generated a random `sessionId` and stored it in frontend `localStorage`. It worked, with one obvious limitation: session identity depended entirely on data the frontend could read. That is not a server session.
 
-I later upgraded this to an HttpOnly cookie session.
+So I moved the session into an HttpOnly cookie.
 
-The current flow is:
+The flow now:
 
-1. When a user answers for the first time, the frontend requests `POST /api/sessions`
-2. The backend creates a user and assessment record
-3. The backend writes an HttpOnly cookie: `pilates_health_quiz_session`
-4. When the user reopens the page, the frontend requests:
+1. The first answer triggers `POST /api/sessions`.
+2. The backend creates the user and the assessment record.
+3. It writes an HttpOnly cookie named `pilates_health_quiz_session`.
+4. When the user reopens the page, the frontend calls:
 
 ```ts
 GET /api/sessions/current
@@ -82,78 +82,78 @@ GET /api/sessions/current
 
 The backend reads the sessionId from the cookie and returns that user's assessment progress and saved answers.
 
-With this approach, the frontend no longer needs to read or write a local random ID. Session recognition is handled by the backend, which is much closer to the login/session model used in real products.
+The frontend no longer reads or writes a local random ID. Session recognition happens on the backend, which is closer to how login and session handling work in a real product.
 
-## A Practical Pitfall: 409 Save Conflict
+## The 409 that blocked edits
 
-During development, I ran into a typical issue: when users returned to an earlier question and changed their answer, the backend returned `409 Conflict`, and the frontend displayed "Unable to save your answer."
+I hit a bug that seems typical of step-by-step flows. When a user went back to an earlier question and changed the answer, the backend returned `409 Conflict` and the frontend showed "Unable to save your answer."
 
-The reason was backend progress validation. The backend did not allow `currentStep` to move backward. But when a user edits an earlier question, the `currentStep` sent by the frontend can be lower than the furthest progress already recorded by the backend.
+The backend validated progress and refused to let `currentStep` move backward. Editing an earlier question sends a `currentStep` lower than the furthest step already recorded.
 
-The fix was to separate the "current UI step" from the "furthest step known by the backend":
+The fix separated the step the UI is on from the furthest step the backend knows:
 
-- The UI can freely go back to earlier questions for editing
-- When saving to the backend, `currentStep` is never lower than the backend's known highest progress
+- The UI can go back to earlier questions and edit them.
+- When saving, `currentStep` is never lower than the backend's known maximum.
 
-This keeps the backend's anti-skip-step validation while still allowing users to edit previous answers.
+The backend keeps its anti-skip validation, and users can still fix old answers.
 
-## Backend Validation Matters Too
+## Validation on the backend
 
-This project does not rely only on frontend input restrictions. The backend also uses Zod and custom validation to ensure answers are valid, for example:
+The project does not rely on frontend restrictions alone. The backend uses Zod and some custom checks:
 
-- Height must be between 100-250 cm
-- Weight must be between 30-300 kg
-- Age must be between 13-100
-- Question keys must match known steps
-- Required prerequisite steps cannot be skipped
+- Height must be between 100 and 250 cm.
+- Weight must be between 30 and 300 kg.
+- Age must be between 13 and 100.
+- Question keys must match known steps.
+- Required prerequisite steps cannot be skipped.
 
-This prevents users from bypassing the frontend and submitting invalid data directly through the API.
+So a request that skips the frontend and posts invalid data straight to the API still fails.
 
-## Test Coverage
+## Tests
 
-I also added tests for the core API flows, including:
+I wrote tests for the main API flows:
 
-- Creating a session
-- Saving answers step by step
-- Blocking skipped-step submissions
-- Blocking invalid answers
-- Restricting access to unpaid results
-- Unlocking full results after payment
-- Restoring current progress through cookie session
+- Creating a session.
+- Saving answers step by step.
+- Blocking skipped-step submissions.
+- Blocking invalid answers.
+- Restricting access to unpaid results.
+- Unlocking full results after payment.
+- Restoring current progress through the cookie session.
 
-The cookie session test verifies that `Set-Cookie` exists, then uses that cookie to request `/api/sessions/current` and confirms that the backend can restore the correct session and answers.
+The cookie test checks that `Set-Cookie` is present, sends that cookie to `/api/sessions/current`, and confirms that the backend restores the right session and answers.
 
-## Current Completion Status
+## Where the project stands
 
-At this point, the project has the core skeleton of a health assessment product:
+The project has the core skeleton of a health assessment product:
 
 - Step-by-step questionnaire flow
 - Incremental saving at each step
 - Backend persistence
 - Cookie session progress recovery
 - Backend field validation
-- Simulated payment unlock flow
+- A simulated payment unlock
 - API test coverage
 
-One clear next step would be upgrading the current guest cookie session into a real account system, such as email login, OAuth login, or binding the cookie session to a user account. That would allow users to recover progress even after switching devices.
+The next step is turning the guest cookie session into a real account system: email login, OAuth, or binding the cookie session to an account. That would let someone recover progress on another device.
 
-## Summary
+## What I took away
 
-This project reminded me that a seemingly simple questionnaire becomes much more interesting when it needs to behave like a usable product. The core challenge is not just rendering a form; it is deciding how state is saved, restored, validated, and protected across abnormal paths.
+A questionnaire stops being a form once it has to behave like a product. The decisions that matter are about state: where it is saved, how it is restored, where validation lives, how it is protected, and what happens when things go wrong.
 
-Moving from a local random ID to an HttpOnly cookie session made the application feel much closer to a real online product. It is not just "able to save progress" anymore. It now has the beginning of real user session capability.
+Moving the session from a local random ID to an HttpOnly cookie made the app feel closer to a real product. Session recognition no longer depends on a value the frontend can read. The backend owns it now, which is the beginning of real session handling.
 
 </ArticleLanguage>
 
 <ArticleLanguage language="zh">
 
-最近我做了一个 Pilates Health Quiz 小项目，核心目标是让用户通过分步问卷填写身体信息，并在后端保存进度，最终生成一份基础健康评估结果。这个项目看起来像一个简单表单，但真正做起来后，里面其实包含了不少产品和工程细节：分步保存、进度恢复、后端校验、Session 识别，以及用户中途退出后的状态恢复。
+前段时间做了个小项目，叫 Pilates Health Quiz。目标不复杂：让用户按步骤填一份健康问卷，答案存在后端，最终生成一份基础健康评估。表面上它就是个表单，真正花时间的都在后面：每一步怎么存、用户回来怎么恢复、答案在哪一层校验、session 怎么认，以及用户中途关掉页面之后怎么办。
 
 ## 项目背景
 
-这个应用的核心流程很清晰：用户依次填写性别、目标、年龄、身高、当前体重、目标体重、运动频率等信息。每完成一步，前端都会把当前答案同步到后端。用户关闭页面后再次进入，系统需要自动恢复之前填写过的内容和当前进度。
+流程一句话能说完：用户依次填性别、目标、年龄、身高、当前体重、目标体重、运动频率，每完成一步，前端就把这一步的答案同步到后端。用户关掉页面再进来，系统要能还原之前填过的内容和当前步骤。
 
-技术栈主要是：
+技术栈：
 
 - Next.js 16
 - React 19
@@ -162,17 +162,17 @@ Moving from a local random ID to an HttpOnly cookie session made the application
 - Zod
 - Vitest
 
-## 分步保存：不是等到最后才提交
+## 每一步都保存
 
-最开始容易把问卷做成“最后统一提交”的形式，但这个项目的要求是每一步都要保存。这样做的好处是用户中途退出也不会丢进度。
+最容易想到的写法是一次性提交。这个项目要求每一步都落库，用户中途退出才不会丢掉已经填的内容。
 
-前端每次用户选择答案或提交数字输入时，会调用保存逻辑：
+用户选中一个答案，或者提交一个数字，前端就调一次保存接口：
 
 ```ts
 PATCH /api/sessions/:sessionId/answers
 ```
 
-请求体只提交当前这一步的增量数据：
+请求体只带当前这一步的增量：
 
 ```ts
 {
@@ -187,45 +187,45 @@ PATCH /api/sessions/:sessionId/answers
 }
 ```
 
-后端用 Prisma 的 `upsert` 保存答案，所以用户修改同一道题时不会产生重复记录，而是更新已有答案。
+后端用 Prisma 的 `upsert` 写答案。同一道题改答案时会更新已有记录，不会多出一条。
 
 ## 进度恢复：从 localStorage 到 Cookie Session
 
-一开始，项目通过前端 `localStorage` 保存随机生成的 `sessionId`。这种方式能用，但它有一个明显问题：session 识别完全依赖前端可读数据，不够像真正的后端 Session。
+最早的做法是在前端生成一个随机 `sessionId`，存进 `localStorage`。能用，但问题也很直接：session 的身份完全来自前端能读到的一个值，这和真正的后端 session 不是一回事。
 
-后来我把它升级成了 HttpOnly cookie session。
+后来我把它换成了 HttpOnly cookie session。
 
-现在流程变成：
+现在的流程：
 
-1. 用户第一次答题时，前端请求 `POST /api/sessions`
+1. 用户第一次答题，前端请求 `POST /api/sessions`
 2. 后端创建用户和测评记录
 3. 后端写入 HttpOnly cookie：`pilates_health_quiz_session`
-4. 用户再次打开页面时，前端请求：
+4. 用户再打开页面时，前端请求：
 
 ```ts
 GET /api/sessions/current
 ```
 
-后端从 cookie 里读取 sessionId，再返回该用户的测评进度和已填写答案。
+后端从 cookie 里取出 sessionId，返回这个用户的测评进度和已保存的答案。
 
-这样前端不再需要读写本地随机 ID，session 识别交给后端处理，更接近真实产品里的登录态/会话机制。
+这样前端不用再碰本地随机 ID，session 识别由后端负责，和真实产品里的登录态更接近。
 
-## 一个实际踩坑：409 保存冲突
+## 踩过的坑：409 保存冲突
 
-开发过程中遇到过一个典型问题：用户回到前面的题修改答案时，后端返回 `409 Conflict`，前端显示“无法保存你的答案”。
+开发时遇到过一个很典型的问题。用户回到前面的题改答案，后端返回 `409 Conflict`，前端提示“无法保存你的答案”。
 
-原因是后端有进度校验逻辑，不允许 `currentStep` 倒退。而用户编辑前面的问题时，前端发过去的 `currentStep` 可能小于后端已经记录的最远进度。
+原因是后端有进度校验，不允许 `currentStep` 倒退。用户编辑前面的题时，前端发过去的 `currentStep` 可能比后端记录的最远进度小。
 
-解决方式是把“UI 当前步骤”和“后端已知最远步骤”分开处理：
+改法是把“UI 当前在第几步”和“后端已知走到第几步”分开：
 
-- UI 可以自由回到前面的题编辑
-- 保存到后端时，`currentStep` 不会小于后端已知的最高进度
+- UI 可以自由回到前面的题修改。
+- 保存时，`currentStep` 不低于后端已知的最高进度。
 
-这样既保留了后端防跳步校验，也允许用户修改旧答案。
+后端的防跳步校验还在，用户也能改旧答案。
 
-## 后端校验也很重要
+## 后端也得校验
 
-这个项目不是只在前端限制输入。后端也用 Zod 和自定义校验确保答案合法，比如：
+这个项目没有只靠前端限制输入。后端用 Zod 和自定义校验兜底，比如：
 
 - 身高必须在 100-250 cm
 - 体重必须在 30-300 kg
@@ -233,27 +233,27 @@ GET /api/sessions/current
 - 问题 key 必须是已知步骤
 - 不能跳过前置必填步骤
 
-这能避免用户绕过前端直接调用 API 提交非法数据。
+即使用户绕过前端直接调 API，非法数据也进不来。
 
-## 测试覆盖
+## 测试
 
-我也给核心 API 流程加了测试，包括：
+核心 API 流程都加了测试：
 
 - 创建 session
 - 分步保存答案
 - 阻止跳步提交
 - 阻止非法答案
-- 未付费结果访问限制
+- 未付费结果的访问限制
 - 支付后解锁完整结果
-- cookie session 能恢复当前进度
+- 用 cookie session 恢复当前进度
 
-其中 cookie session 的测试会验证 `Set-Cookie` 是否存在，并用 cookie 请求 `/api/sessions/current`，确认后端能恢复正确的 session 和答案。
+cookie session 那条测试会先确认响应里有 `Set-Cookie`，再拿这个 cookie 请求 `/api/sessions/current`，检查后端恢复出来的 session 和答案对不对。
 
-## 当前完成度
+## 现在做到哪一步
 
-目前这个项目已经具备了一个健康测评产品的核心骨架：
+项目现在已经有了一个健康测评产品的基本骨架：
 
-- 分步问卷填写
+- 分步问卷
 - 每步增量保存
 - 后端持久化
 - Cookie session 恢复进度
@@ -261,12 +261,12 @@ GET /api/sessions/current
 - 支付解锁结果的模拟流程
 - API 测试覆盖
 
-还可以继续加强的地方是：把现在的游客 cookie session 升级成真正的账户系统，比如邮箱登录、OAuth 登录，或者把 cookie session 和用户账户绑定起来。这样用户换设备后也能恢复进度。
+接下来比较明确的一步，是把游客 cookie session 换成真正的账户体系：邮箱登录、OAuth 登录，或者把 cookie session 绑到用户账户上。这样用户换设备也能接着填。
 
-## 总结
+## 复盘
 
-这次开发让我重新意识到，一个看似简单的问卷应用，真正要做成可用产品时，重点不只是 UI 表单，而是状态如何保存、如何恢复、如何校验、如何处理异常路径。
+问卷一旦要当产品用，就不只是表单了。真正要定的是状态：存哪、怎么恢复、校验放哪一层、出错的时候怎么处理。
 
-从本地随机 ID 到 HttpOnly cookie session，这一步让整个应用更接近真实线上产品。它不只是“能保存”，而是开始具备了真正的用户会话能力。
+从本地随机 ID 换成 HttpOnly cookie session 之后，session 由后端识别，不再依赖前端那个随机值。应用因此更像线上产品，用户会话也开始由后端管了。
 
 </ArticleLanguage>

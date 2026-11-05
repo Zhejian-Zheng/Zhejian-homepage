@@ -19,80 +19,80 @@ export const metadata = {
 
 <ArticleLanguage language="en">
 
-Balatro Rust is a command-line scoring engine. It reads round input, evaluates the played hand, applies card effects and joker modifiers, then outputs the final chip times multiplier score.
+Balatro Rust is a command-line scoring engine. It reads round input, works out the hand that was played, applies card effects and joker modifiers, and prints the final score as chips times multiplier.
 
-The interesting part is deterministic rule composition. A card game like this has many overlapping effects, and the program needs a stable order of operations.
+The part that needs care is deterministic rule composition. A hand can trigger several effects at once, so the engine needs one fixed order of operations.
 
 ## Scoring Pipeline
 
-The scoring flow is staged. First, the base poker hand is evaluated. Then played cards contribute chips and effects. Held cards can add their own effects. Finally, independent joker and edition effects modify the result.
+Scoring runs in stages. The engine evaluates the base poker hand first. Played cards then add chips and their own effects, held cards add theirs, and independent joker and edition effects adjust the result last.
 
-That staging makes the system easier to test because each effect family has a clear place in the pipeline.
+Each effect family has a fixed place in that order, which is what makes the system testable.
 
 ## Hand Evaluation
 
-The poker hand detector checks stronger hands before weaker hands. It also supports special modifiers such as altered straight detection, smeared suits, and shortcut-style rules.
+The hand detector checks strong hands before weak ones. It also supports variant modifiers: altered straight detection, smeared suits, and shortcut-style rules.
 
-This ordering matters. If a hand qualifies for multiple categories, the engine must choose the highest-priority category consistently.
+Check order decides which category applies. When a hand matches more than one category, the engine has to pick the highest-priority one, and it has to pick the same one every time.
 
 ## Joker Effects
 
-Jokers are organized by when they apply: scored-card effects, held-card effects, independent effects, and edition effects. The project also handles blueprint-like behavior by normalizing copied joker effects before final scoring.
+Jokers are grouped by when they apply: scored-card effects, held-card effects, independent effects, and edition effects. The project handles blueprint-like behavior by normalizing copied joker effects before final scoring.
 
-That structure keeps one large scoring problem from turning into a single unreadable function.
+Splitting the effects this way keeps one large scoring problem from turning into a single unreadable function.
 
 ## Knowledge Points
 
-- Rust is a good fit for deterministic engines because enums, structs, and pattern matching make state explicit.
-- CLI tools can use structured input such as YAML to make test cases easy to write and replay.
-- Rule ordering is critical in game engines because multiple rules may match the same state.
-- Separating effect timing reduces accidental interactions between card effects.
-- Floating behavior should be avoided when final output needs exact floor-based scoring.
-- Complex game logic benefits from small modules grouped by responsibility.
-- Testable scoring engines are built around pure transformations wherever possible.
+- Rust fits deterministic engines well: enums, structs, and pattern matching keep state explicit.
+- Structured input such as YAML makes CLI test cases easy to write and replay.
+- Rule order matters in a game engine because more than one rule can match the same state.
+- Splitting effects by when they fire cuts down on accidental interactions between card effects.
+- Floating-point arithmetic is worth avoiding when the output needs exact floor-based scoring.
+- Complex game logic is easier to work with when it lives in small modules grouped by responsibility.
+- Scoring engines are easier to test when they are built from pure transformations wherever possible.
 
 ## Takeaway
 
-This repo shows how to turn a rule-heavy game into a staged evaluation system. The main engineering lesson is to make timing and priority explicit.
+The repo turns a rule-heavy game into a staged evaluation system. The engineering lesson is to make timing and priority explicit.
 
 </ArticleLanguage>
 
 <ArticleLanguage language="zh">
 
-Balatro Rust 是一个命令行计分引擎。它读取回合输入，评估已打出的牌型，应用牌效果和小丑牌修正，然后输出最终的筹码乘以倍数后的分数。
+Balatro Rust 是一个命令行计分引擎：读取回合输入，算出打出的牌型，结算卡牌效果和小丑牌修正，最后输出筹码乘以倍数的分数。
 
-其亮点在于确定性的规则组合。像这样的纸牌游戏有很多重叠的效果，程序需要一个稳定的操作顺序。
+麻烦的地方在于规则组合必须确定。一手牌可能同时触发好几层效果，程序得有一套固定的结算顺序。
 
 ## 计分流程
 
-计分流程是分阶段进行的。首先，评估基础扑克牌型。然后，打出的牌贡献筹码和效果。保留的牌可以添加它们自己的效果。最后，独立的小丑牌和版本效果会修改结果。
+计分分阶段进行。先评估基础牌型，打出的牌贡献筹码和自身效果，手牌也能追加效果，最后由独立的小丑牌和版本效果修正结果。
 
-这种分阶段的方式使得系统更容易测试，因为每种效果在流程中都有明确的位置。
+每种效果在流程里都有固定位置，系统因此更容易测试。
 
 ## 牌型评估
 
-扑克牌型检测器会先检查强牌型，再检查弱牌型。它还支持特殊修正，例如变顺检测、混合花色和快捷规则。
+牌型检测先看强牌，再看弱牌，另外支持几种变体规则：变体顺子检测、花色混合和 Shortcut 规则。
 
-这种顺序至关重要。如果一手牌符合多个类别，引擎必须始终选择优先级最高的类别。
+顺序会直接影响结果。一手牌同时够得上多个牌型时，引擎要取优先级最高的那个，而且每次都得取同一个。
 
 ## 小丑牌效果
 
-小丑牌按其生效时机进行分类：已计分牌效果、已持有牌效果、独立效果和版本效果。该项目还通过在最终计分前规范化复制的小丑牌效果来处理类似蓝图的行为。
+小丑牌按生效时机分组：计分牌效果、手牌效果、独立效果和版本效果。项目对 Blueprint 这类复制行为的处理，是在最终计分之前先把复制出来的小丑牌效果规范化。
 
-这种结构避免了大型计分问题演变成一个难以阅读的单一函数。
+按时机分组，一个庞大的计分问题就不会变成一个读不下去的大函数。
 
 ## 知识点
 
-- Rust 非常适合确定性引擎，因为枚举、结构体和模式匹配使状态显式化。
-- CLI 工具可以使用 YAML 等结构化输入，使测试用例的编写和复现变得简单。
-- 规则顺序在游戏引擎中至关重要，因为多个规则可能匹配相同的状态。
-- 分离效果生效时间可以减少卡牌效果之间的意外交互。
-- 当最终输出需要精确的基于底数的计分时，应避免使用浮动行为。
-- 复杂的游戏逻辑受益于按职责分组的小模块。
-- 可测试的计分引擎尽可能围绕纯转换构建。
+- Rust 适合写确定性引擎：枚举、结构体和模式匹配把状态摆在明面上。
+- CLI 工具用 YAML 这类结构化输入，测试用例写起来方便，也方便复现。
+- 游戏引擎里规则顺序很关键，因为同一条状态可能被多条规则命中。
+- 按生效时机拆分效果，可以减少牌与牌之间意外的相互影响。
+- 最终分数要精确向下取整时，沿途最好别用浮点数。
+- 复杂的游戏逻辑拆成按职责划分的小模块，处理起来会轻松很多。
+- 计分引擎尽量建立在纯转换之上，测试才好写。
 
 ## 要点
 
-本仓库展示了如何将规则繁多的游戏转换为分阶段评估系统。主要的工程教训是要明确规定时间和优先级。
+这个仓库把规则繁多的游戏拆成了一套分阶段评估的流程。工程上最值得记的一点是：时机和优先级要明确写出来。
 
 </ArticleLanguage>

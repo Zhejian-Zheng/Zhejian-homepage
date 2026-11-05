@@ -21,8 +21,13 @@ def check() -> None:
     canonical=page.locator('link[rel="canonical"]').get_attribute('href')
     assert canonical=='https://zhejian-homepage.vercel.app'+path+'?lang='+lang,(path,lang,canonical)
     assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth'),path
+    if path == '/blog':
+     assert page.locator('a[href^="/blog/"]').count()==27,'blog should expose all 27 notes'
+     assert page.locator('.index-console').is_visible()
     if '/blog/sidecar' in path:
      assert page.locator('.article-language').count()==1
+     assert page.locator('.article-meta-row .lang-switch').is_visible()
+     assert page.locator('.article-toc a').count()>0
      body=page.locator('.article-language').inner_text()
      assert ('执行之前重新观察' in body)==(lang=='zh')
      assert ('Observe again before acting' in body)==(lang=='en')
@@ -50,11 +55,23 @@ def check() -> None:
   assert image_response.status==200 and len(image_response.body())<=200000
   print('About image bytes:',len(image_response.body()))
   assert page.locator('html').get_attribute('lang')=='zh-CN'
-  for width in [390,320]:
-   page.set_viewport_size({'width':width,'height':844})
+  page.goto(BASE_URL+'/blog/sidecar-gui-agent-harness?lang=en',wait_until='networkidle')
+  page.locator('.article-meta-row .lang-switch button').filter(has_text='中文').click()
+  page.wait_for_url('**/blog/sidecar-gui-agent-harness?lang=zh')
+  assert page.locator('html').get_attribute('lang')=='zh-CN'
+  assert '执行之前重新观察' in page.locator('.article-language').inner_text()
+  page.locator('.article-meta-row .lang-switch button').filter(has_text='EN').click()
+  page.wait_for_url('**/blog/sidecar-gui-agent-harness?lang=en')
+  assert 'Observe again before acting' in page.locator('.article-language').inner_text()
+  for width,height in [(1024,768),(768,1024),(390,844),(320,844)]:
+   page.set_viewport_size({'width':width,'height':height})
    for path in ['/','/about','/blog','/contact','/blog/sidecar-gui-agent-harness']:
     page.goto(BASE_URL+path+'?lang=zh',wait_until='networkidle')
     assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth'),(path,width)
+    if width==390 and path=='/blog':
+     assert page.locator('.toc-mobile').count()==0
+    if width==390 and '/blog/sidecar' in path:
+     assert page.locator('.toc-mobile').is_visible()
     if width==390:page.screenshot(path=f'/tmp/site-mobile-{path.strip("/").replace("/","-") or "home"}.png',full_page=True)
   page.emulate_media(reduced_motion='reduce')
   page.goto(BASE_URL+'/',wait_until='networkidle')
@@ -65,6 +82,6 @@ def check() -> None:
   assert not page.locator('#mobile-navigation').is_visible()
   assert page.evaluate('document.activeElement.id')=='menu-toggle'
   assert not errors,errors
-  print(json.dumps({'pages':results,'keyboard':'passed','route_focus':'passed','locale_switch':'passed','mobile':'320/390 passed','reduced_motion':'passed','errors':errors},ensure_ascii=False))
+  print(json.dumps({'pages':results,'keyboard':'passed','route_focus':'passed','locale_switch':'passed','article_language_switch':'passed','mobile':'1024/768/390/320 passed','reduced_motion':'passed','errors':errors},ensure_ascii=False))
   browser.close()
 check()

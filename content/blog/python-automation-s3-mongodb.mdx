@@ -2,7 +2,7 @@ import ArticleLanguage from "@/app/components/ArticleLanguage";
 
 export const metadata = {
   "title": "Shipping Faster at Jobgen.ai: Python Automation with AWS S3 & MongoDB",
-  "summary": "How Python automation, AWS S3, and MongoDB helped speed up delivery and keep task artifacts easier to track.",
+  "summary": "How Python automation, AWS S3, and MongoDB helped speed up delivery and make task artifacts easier to track.",
   "publishedAt": "2026-05-16",
   "tags": [
     "Python",
@@ -19,44 +19,44 @@ export const metadata = {
 
 <ArticleLanguage language="en">
 
-During my internship/project at Jobgen.ai, I focused on speeding up delivery with Python automation, integrating AWS S3 for object storage and MongoDB for fast metadata and state tracking.
+At Jobgen.ai I worked on speeding up delivery with Python automation, using AWS S3 for object storage and MongoDB for fast metadata and state tracking.
 
-The useful pattern was separating heavy files from lightweight operational records. S3 handled artifacts, while MongoDB made it easy to look up task status, file keys, retries, timestamps, and processing stages.
+The useful pattern was keeping heavy files apart from lightweight operational records. S3 held the artifacts, and MongoDB made task status, file keys, retries, timestamps, and processing stages easy to look up.
 
 ## Highlights
 
-- Data flow: tasks to Python preprocessing to S3 upload to MongoDB records.
-- S3 signed URLs plus batch upload and verification scripts kept artifacts consistent and safely accessible.
-- MongoDB acted as the quick lookup layer for task status and processed files.
-- Python CLI tools wrapped boto3 and pymongo for resumable batch uploads, validation, write-back, cleanup, and lightweight alert flows.
-- Logging and retry thresholds made failures easier to notice and debug.
+- Data flow: task → Python preprocessing → S3 upload → MongoDB record.
+- Signed S3 URLs plus batch upload and verification scripts kept artifacts consistent and safely accessible.
+- MongoDB was the quick lookup layer for task status and processed files.
+- Python CLI tools wrapped boto3 and pymongo for resumable batch uploads, validation, write-back, cleanup, and lightweight alerts.
+- Logging and retry limits made failures easier to notice and debug.
 
 ## Takeaways
 
-- Separate blobs from metadata to make debugging and scaling easier.
+- Separating blobs from metadata makes debugging and scaling easier.
 - Automating repetitive delivery steps reduces human error.
-- Python is a strong glue layer for CLI workflows, batch processing, and API integrations.
+- Python is strong glue for CLI workflows, batch processing, and API integration.
 
 </ArticleLanguage>
 
 <ArticleLanguage language="zh">
 
-在 Jobgen.ai 的实习项目期间，我重点通过 Python 自动化加快交付速度，将 AWS S3 用于对象存储，MongoDB 用于快速的元数据和状态追踪。
+在 Jobgen.ai 做实习项目时，我的重点是用 Python 自动化加快交付，对象存储接 AWS S3，元数据和状态追踪用 MongoDB。
 
-一个实用的模式是将大文件与轻量级操作记录分离：S3 处理制品，MongoDB 负责快速查询任务状态、文件 key、重试次数、时间戳和处理阶段。
+实际用下来比较顺手的分法，是把大文件和轻量的操作记录分开。S3 放产物，MongoDB 存任务状态、文件 key、重试次数、时间戳和处理阶段，查起来很快。
 
 ## 亮点
 
 - 数据流：任务 → Python 预处理 → S3 上传 → MongoDB 记录。
-- S3 签名 URL 加上批量上传和验证脚本，让制品保持一致且安全可访问。
-- MongoDB 充当任务状态和已处理文件的快速查询层。
-- Python CLI 工具封装了 boto3 和 pymongo，用于可恢复的批量上传、校验、回写、清理和轻量级告警流程。
-- 日志记录和重试阈值让故障更容易被发现和调试。
+- S3 签名 URL 让产物能安全访问，批量上传和验证脚本保证一致性。
+- MongoDB 是任务状态和已处理文件的快速查询层。
+- Python CLI 工具封装 boto3 和 pymongo，负责可续传的批量上传、校验、回写、清理和轻量告警。
+- 日志和重试上限让故障更容易被发现和排查。
 
 ## 总结
 
-- 将二进制对象与元数据分开存储，让调试和扩展都更简单。
-- 自动化重复的交付步骤可以减少人为错误。
-- Python 是 CLI 工作流、批处理和 API 集成的强力胶水层。
+- 二进制对象和元数据分开存，调试和扩展都会轻松一些。
+- 重复的交付步骤交给脚本，人为错误会少很多。
+- CLI 工作流、批处理和 API 集成，用 Python 做胶水很合适。
 
 </ArticleLanguage>

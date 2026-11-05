@@ -168,7 +168,7 @@ export default function AboutContent() {
 						<h1 className="field-display mt-5 max-w-6xl text-4xl font-semibold leading-tight sm:text-6xl">{copy.title}</h1>
 						<p className="mt-7 max-w-2xl text-lg leading-8 text-slate-300">{copy.intro}</p>
 					</div>
-					<figure className="border border-white/15 bg-field-navy p-3 lg:-rotate-1">
+					<figure className="about-portrait border border-white/15 bg-field-navy p-3">
 						<div className="relative aspect-[16/10] overflow-hidden">
 							<Image src={personalPage} alt={copy.portraitAlt} fill priority className="object-cover" sizes="(max-width: 1024px) 100vw, 420px" />
 						</div>

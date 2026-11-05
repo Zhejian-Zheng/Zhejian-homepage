@@ -2,7 +2,7 @@ import ArticleLanguage from "@/app/components/ArticleLanguage";
 
 export const metadata = {
   "title": "Safe Reinforcement Learning with a Supervised Shield",
-  "summary": "A grid-world experiment where Q-learning is combined with a supervised safety classifier to reduce hazard violations.",
+  "summary": "A grid-world experiment with a supervised safety classifier in front of a Q-learning agent, and a threshold that decides how much safety costs.",
   "publishedAt": "2026-05-16",
   "tags": [
     "Reinforcement Learning",
@@ -13,86 +13,86 @@ export const metadata = {
   "category": "systems",
   "zh": {
     "title": "带监督保护层的安全强化学习",
-    "summary": "一个网格世界实验，将 Q-learning 与监督式安全分类器结合，减少智能体进入危险状态的次数。"
+    "summary": "一个网格世界实验：在 Q-learning 前面加一层监督式安全分类器，看阈值如何决定安全的代价。"
   }
 };
 
 <ArticleLanguage language="en">
 
-This project explores a simple but powerful idea: reinforcement learning agents can learn faster or behave more safely when a supervised model filters risky actions.
+This project puts a small idea to work: an RL agent that can ask a supervised model whether an action looks risky before it takes it. The experiment asks whether that filter makes learning faster, safer, or both, and what it costs.
 
-The environment is a 10 by 10 grid world with a start state, a goal, and hazards. A baseline Q-learning agent learns from reward feedback. The shielded version uses a classifier to predict the risk level of candidate actions before the action is selected.
+The world is a 10 by 10 grid with a start state, a goal, and hazards. A baseline Q-learning agent learns from reward alone. The shielded version sends candidate actions through a classifier before it commits.
 
 ## Environment
 
-Each state-action pair can be represented with position, action, and environment-derived features. The reward function is intentionally direct: reaching the goal is positive, normal steps have a small penalty, and hazards carry a large penalty.
+Each state-action pair is described by position, action, and features derived from the environment. The reward is deliberately plain: positive at the goal, a small penalty for an ordinary step, a large penalty for a hazard.
 
-This makes the safety problem visible. A policy can eventually learn to reach the goal, but it may still collect many hazard violations during exploration.
+That shaping makes the failure mode visible. An agent can learn to reach the goal and still have collected a lot of hazard violations on the way.
 
 ## Supervised Shield
 
-The supervised layer is trained from labeled state-action examples. A multi-source BFS distance map from hazards creates risk labels such as immediate hazard, near hazard, farther risk, and safe.
+The shield is a classifier trained on labeled state-action examples. The labels come from a multi-source BFS distance map grown outward from the hazards: immediate hazard, near hazard, farther risk, safe.
 
-The model then classifies actions before the Q-learning policy commits to one. If an action is predicted as too risky under the selected threshold, the agent chooses from safer candidates.
+At each step the policy proposes an action and the classifier assigns it a risk level. If that level crosses the selected threshold, the agent picks among the safer candidates instead.
 
 ## Results Pattern
 
-The most useful lesson is not simply "shielding is good." It is that the threshold matters. A permissive threshold can remove hazard violations while preserving good reward. An overly strict threshold can make the agent too conservative and hurt success rate.
+The threshold does most of the work. A loose threshold removes hazard violations without giving up much reward. A strict one makes the agent so conservative that success rate drops.
 
-That tradeoff is exactly the kind of behavior safe RL systems need to expose.
+Both effects show up in the same experiment. A safety layer that only reports fewer violations says nothing about whether the task still gets done.
 
 ## Knowledge Points
 
-- Q-learning separates value estimation from the environment model, which makes it approachable for grid-world experiments.
-- Supervised learning can encode domain knowledge into a reusable action filter.
-- BFS labeling is a practical way to generate safety labels when hazards are known.
-- Safety systems should track both violation reduction and task performance.
-- False negatives are especially important: a missed dangerous action can break the safety promise.
-- A shield can be viewed as policy guidance, not a replacement for the RL algorithm.
-- Evaluation should compare baseline reward, success rate, violations, and intervention behavior together.
+- Q-learning keeps value estimation separate from the environment model, which makes it easy to drop into a grid-world experiment.
+- A supervised model can carry domain knowledge into the loop as a reusable action filter.
+- When the hazards are known, BFS distance gives a consistent way to label training data.
+- A safety layer has to be judged on violations and task performance at the same time.
+- False negatives matter most: one dangerous action that gets through can break the safety promise.
+- The shield is policy guidance, not a replacement for the RL algorithm.
+- Evaluation needs baseline reward, success rate, violations, and intervention counts side by side.
 
 ## Takeaway
 
-This repo shows how classical RL and supervised learning can cooperate. The agent still learns a policy, but the classifier adds a safety boundary around exploration and action selection.
+Classical RL and supervised learning do different jobs here. The agent still learns the policy; the classifier draws a boundary around the actions it may consider. Most of the engineering sits in choosing that boundary, and the threshold is the first thing I would tune.
 
 </ArticleLanguage>
 
 <ArticleLanguage language="zh">
 
-这个项目探索了一个简单但有力的想法：当监督学习模型过滤掉危险动作时，强化学习 agent 可以学得更快，也能表现得更安全。
+这个项目把一个小想法跑了一遍：让 RL agent 在动手之前，先问监督模型这个动作危不危险。实验想知道这层过滤能不能让学习更快、更安全，又要付出什么。
 
-实验环境是一个 10×10 的网格世界，包含起始状态、目标和若干危险区域。基准 Q-learning agent 从奖励反馈中学习；加了"安全盾"的版本会在动作被选择之前，用分类器预测候选动作的风险等级。
+环境是 10×10 的网格，有起点、目标和若干危险格。基准 Q-learning agent 只看奖励学习；加盾的版本会把候选动作先送进分类器，再决定执行哪一个。
 
 ## 实验环境
 
-每个状态-动作对可以用位置、动作和环境衍生特征来表示。奖励函数设计得很直接：到达目标为正奖励，普通步骤有小惩罚，进入危险区域有大惩罚。
+每个状态-动作对用位置、动作和环境衍生特征来描述。奖励函数写得很直白：到目标给正奖励，普通走一步有小惩罚，进危险格有大惩罚。
 
-这让安全问题变得可见——策略最终可以学会到达目标，但在探索过程中可能还是会触碰很多危险区域。
+这样设计以后，失败模式就摆在明面上了：策略可以学会到达目标，但在探索过程中还是会积累很多次违规。
 
 ## 监督安全盾
 
-监督层从带标注的状态-动作样本中训练。以危险区域为起点的多源 BFS 距离图生成风险标签，比如"立即危险"、"附近危险"、"较远风险"和"安全"。
+安全盾是一个分类器，训练数据是带标注的状态-动作样本。标签来自以危险格为起点的多源 BFS 距离图，分成立即危险、附近危险、较远风险和安全四档。
 
-模型在 Q-learning 策略选定动作前先对动作分类。如果某个动作在设定阈值下被判定为过于危险，agent 就从更安全的候选动作中选择。
+每一步，Q-learning 策略先给出动作，分类器再判断这个动作的风险等级。等级超过当前阈值时，agent 就从更安全的候选动作里挑一个。
 
 ## 实验结论
 
-最有价值的发现不是简单的"加盾好"，而是阈值至关重要。宽松的阈值可以减少危险违规，同时保留好的奖励；过于严格的阈值会让 agent 太保守，影响成功率。
+阈值的位置比"要不要加盾"更影响结果。阈值放宽，危险违规能降下来，奖励也基本不掉；阈值太严，agent 会变得过于保守，成功率跟着下降。
 
-这个权衡正是安全 RL 系统需要暴露和分析的核心行为。
+两个方向在同一个实验里都能看到。只看违规次数下降，并不能说明任务还做不做得完。
 
 ## 知识点
 
-- Q-learning 将价值估计与环境模型分离，适合在网格世界实验中直接使用。
-- 监督学习可以把领域知识编码成可复用的动作过滤器。
-- 当危险区域已知时，BFS 标注是生成安全标签的实用方法。
-- 安全系统应该同时追踪违规减少情况和任务完成率。
-- 假阴性（漏掉危险动作）尤为重要，一次遗漏就可能打破安全承诺。
-- 安全盾可以理解为策略指导，而不是对 RL 算法的替代。
-- 评估应该将基线奖励、成功率、违规次数和干预行为综合比较。
+- Q-learning 把价值估计和环境模型分开，放进网格世界实验里很直接。
+- 监督模型可以把领域知识变成一个可复用的动作过滤器。
+- 危险格已知时，BFS 距离是生成安全标签的实用办法。
+- 安全层的效果要同时看违规次数和任务完成情况。
+- 假阴性最要命：漏掉一个危险动作，安全承诺就破了。
+- 安全盾是策略指导，不替代 RL 算法本身。
+- 评估时把基线奖励、成功率、违规次数和干预次数放在一起看。
 
 ## 总结
 
-这个仓库展示了经典 RL 与监督学习如何协作。agent 仍然在学习策略，但分类器在探索和动作选择周围添加了安全边界。
+经典 RL 和监督学习在这里各干各的活。策略仍然是 agent 自己学出来的，分类器只圈定它可以考虑的动作范围。真正要调的是这个范围有多紧，所以我第一个动的参数就是阈值。
 
 </ArticleLanguage>

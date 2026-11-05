@@ -6,13 +6,13 @@ module.exports = {
 	theme: {
 		extend: {
 			colors: {
-				primary: "#D4C7B4",
-				secondary: "#D4C7B4",
-				accent: "#D4C7B4",
+				primary: "#6CE7F5",
+				secondary: "#8CEEF8",
+				accent: "#6CE7F5",
 				field: {
-					ink: "#191A1B",
-					navy: "#222426",
-					paper: "#F1EFE9"
+					ink: "#050B0F",
+					navy: "#081219",
+					paper: "#ECF7F8"
 				}
 			}
 		}

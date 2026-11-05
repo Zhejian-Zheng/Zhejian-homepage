@@ -19,80 +19,80 @@ export const metadata = {
 
 <ArticleLanguage language="en">
 
-Magic Chess is an ongoing browser chess prototype built with Vue 3 and TypeScript. It is not a fully shipped game yet, but it is a useful exploration of rule-engine structure, board state, and custom chess-like mechanics.
+Magic Chess is an ongoing browser chess prototype built with Vue 3 and TypeScript. It is not a shipped game yet, but it is a useful place to work out rule-engine structure, board state, and custom chess-like mechanics.
 
-That makes it a useful rules-engine project. Chess already has many edge cases, and custom variants add another layer of design pressure.
+Chess already has plenty of edge cases, and the custom variants add another layer.
 
 ## State Model
 
-The core types model pieces, colors, positions, boards, moves, game status, and game modes. Keeping these types explicit makes later logic easier to reason about because every move function works with the same vocabulary.
+The core types model pieces, colors, positions, boards, moves, game status, and game modes. Keeping them explicit makes later logic easier to reason about, since every move function works from the same vocabulary.
 
 The game composable owns the shared state: board, selected square, valid moves, current player, captured pieces, move history, timers, promotion state, and AI move timing.
 
 ## Move Validation
 
-The move validator handles standard piece movement, special cases like en passant and castling, and custom modes such as ghost pawns, heavy knights, bishop sniper behavior, and rook charge behavior.
+The validator handles standard piece movement, special cases such as en passant and castling, and custom modes: ghost pawns, heavy knights, bishop sniper behavior, and rook charge behavior.
 
-One important pattern is simulation. Candidate moves are checked against a cloned board so illegal moves that expose the king can be filtered out before the UI accepts them.
+One pattern shows up throughout: simulation. Candidate moves are checked against a cloned board, so a move that exposes the king gets filtered out before the UI accepts it.
 
 ## Check and Endgame Detection
 
-Check detection is separated from general move generation. The project avoids recursive validation loops by using attacking moves when asking whether a king is threatened.
+Check detection is separate from general move generation. To avoid recursive validation loops, the project asks whether a king is threatened using attacking moves.
 
-The detector also explores checkmate, stalemate, and insufficient material conditions. These pieces point toward a more complete game experience, even though the project still needs finishing work before it should be presented as a polished game.
+The detector also checks for checkmate, stalemate, and insufficient material. The project still needs finishing work before it would pass as a polished game.
 
 ## Knowledge Points
 
-- Vue composables are a clean way to centralize game state and expose actions to components.
+- A Vue composable is a clean place to keep game state and expose actions to components.
 - TypeScript union types and interfaces make board-game logic safer and easier to inspect.
-- Chess validation often needs simulation because a move can be locally valid but globally illegal.
-- Check detection should avoid calling full legal-move generation in a recursive way.
-- Custom game modes are easier to add when the base rules are modular.
-- UI highlights should be derived from state, not manually synchronized with DOM behavior.
-- Timers, history, captured pieces, and promotion UI are part of the product experience, not optional extras.
+- Chess validation often needs simulation because a move can be locally valid and globally illegal.
+- Check detection should avoid calling full legal-move generation recursively.
+- Custom modes are easier to add when the base rules are modular.
+- UI highlights should be derived from state, not synced to the DOM by hand.
+- Timers, history, captured pieces, and the promotion UI are part of the game, not optional extras.
 
 ## Takeaway
 
-This repo is best understood as a work-in-progress game logic prototype. Its strongest lesson is how to separate state, rule validation, endgame detection, and rendering before polishing the full gameplay experience.
+The repo is a work-in-progress game logic prototype. Its strongest lesson is how to separate state, rule validation, endgame detection, and rendering before polishing the gameplay.
 
 </ArticleLanguage>
 
 <ArticleLanguage language="zh">
 
-Magic Chess 是一个基于 Vue 3 和 TypeScript 的浏览器端国际象棋原型，目前仍在持续开发中。它还不是一个完整交付的游戏，但作为规则引擎结构、棋盘状态管理和自定义棋类规则的探索，价值很高。
+Magic Chess 是一个还在开发中的浏览器端国际象棋原型，用 Vue 3 和 TypeScript 写的。它还不是一个能交付的游戏，但拿来摸索规则引擎结构、棋盘状态和自定义棋类玩法，挺合适。
 
-这让它成为一个有意思的规则引擎项目。国际象棋本身就有大量边界情况，自定义变体又增加了一层设计压力。
+国际象棋本身的边界情况就多，加上自定义变体，又多了一层要处理的东西。
 
 ## 状态模型
 
-核心类型对棋子、颜色、位置、棋盘、走法、游戏状态和游戏模式进行了建模。让类型保持显式，使后续逻辑更容易推理，因为每个走法函数都使用同一套语言。
+核心类型覆盖棋子、颜色、位置、棋盘、走法、对局状态和游戏模式。这些类型写清楚之后，后面的逻辑就好推理，因为每个走法函数用的是同一套词汇。
 
-游戏 composable 持有共享状态：棋盘、已选格子、合法走法、当前玩家、被吃棋子、走法历史、计时器、升变状态和 AI 走棋时机。
+共享状态放在 game composable 里：棋盘、选中格、合法走法、当前玩家、被吃棋子、走法历史、计时器、升变状态和 AI 走棋时机。
 
 ## 走法验证
 
-走法验证器处理标准棋子移动、过路兵和王车易位等特殊情况，以及幽灵兵、重骑士、主教狙击手行为和车冲锋行为等自定义模式。
+走法验证覆盖标准棋子移动、吃过路兵和易位这些特殊情况，另外还支持几种自定义模式：幽灵兵、重骑士、主教狙击和车冲锋。
 
-一个重要的模式是模拟：候选走法在克隆的棋盘上验证，以便在 UI 接受之前过滤掉会暴露王的非法走法。
+模拟是这里反复用到的做法。候选走法先在克隆的棋盘上试一遍，会把自己的王暴露出去的走法在这一步就被过滤掉，UI 不会接受它。
 
 ## 将军与终局检测
 
-将军检测与一般走法生成分离处理。项目通过在判断王是否受威胁时使用攻击走法，来避免递归验证循环。
+将军检测和一般走法生成是分开的。判断王是否受威胁时，项目用的是攻击走法，以此避开递归校验的循环。
 
-检测器还实现了将死、逼和以及材料不足等终局条件。这些功能指向更完整的游戏体验，尽管项目在作为精良游戏展示之前还需要更多打磨。
+检测器也会检查将死、逼和、子力不足这几种终局。项目离一个打磨好的游戏还差一段收尾工作。
 
 ## 知识点
 
-- Vue composable 是集中管理游戏状态并向组件暴露操作的简洁方式。
-- TypeScript 联合类型和接口让棋盘游戏逻辑更安全、更易于调试。
-- 国际象棋验证通常需要模拟，因为一个局部合法的走法可能在全局不合法。
-- 将军检测应该避免以递归方式调用完整的合法走法生成。
-- 当基础规则模块化时，自定义游戏模式更容易扩展。
-- UI 高亮应该从状态派生，而不是手动与 DOM 行为同步。
-- 计时器、历史记录、被吃棋子和升变 UI 是产品体验的一部分，不是可选项。
+- Vue composable 很适合集中放游戏状态，再向组件暴露操作。
+- TypeScript 的联合类型和接口让棋盘逻辑更安全，也更好检查。
+- 象棋验证经常需要模拟，因为一步棋可能局部合法，放到全局就不合法。
+- 将军检测不要递归调用完整的合法走法生成。
+- 基础规则模块化之后，加自定义模式会容易很多。
+- UI 高亮应该从状态算出来，不要手动去同步 DOM。
+- 计时器、历史、被吃棋子和升变界面是游戏的一部分，不是可选项。
 
 ## 总结
 
-这个仓库最适合被理解为一个进行中的游戏逻辑原型。它最核心的教训是如何在打磨完整游戏体验之前，先把状态、规则验证、终局检测和渲染分离清楚。
+这个仓库是一个进行中的游戏逻辑原型。最值得学的是它把状态、规则验证、终局检测和渲染拆开的方式，而且是在玩法还没打磨之前就拆开的。
 
 </ArticleLanguage>

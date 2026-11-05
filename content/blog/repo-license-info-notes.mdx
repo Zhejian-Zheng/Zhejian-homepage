@@ -2,7 +2,7 @@ import ArticleLanguage from "@/app/components/ArticleLanguage";
 
 export const metadata = {
   "title": "Repo License Info: Notes on Open-Source License Choices",
-  "summary": "A learning note repository comparing common open-source licenses and the tradeoffs between permissive, copyleft, and public-domain-style terms.",
+  "summary": "Notes comparing common open-source licenses, and where permissive, copyleft, and public-domain-style terms actually differ.",
   "publishedAt": "2026-05-16",
   "tags": [
     "Open Source",
@@ -12,78 +12,78 @@ export const metadata = {
   "category": "archive",
   "zh": {
     "title": "开源许可证笔记：如何选择合适的许可证",
-    "summary": "一个学习笔记仓库，比较常见开源许可证，以及宽松型、著佐权和公共域风格条款之间的权衡。"
+    "summary": "一份开源许可证笔记，比较常见许可证，以及宽松型、著佐权和公共域风格条款之间的区别。"
   }
 };
 
 <ArticleLanguage language="en">
 
-Repo License Info is a documentation-style repo about common open-source licenses. It compares licenses such as MIT, Apache, GPL, LGPL, AGPL, BSD, MPL, EPL, Unlicense, and CC0.
+Repo License Info is a set of notes I keep on open-source licenses. It covers MIT, Apache, GPL, LGPL, AGPL, BSD, MPL, EPL, Unlicense, and CC0, and it focuses on the differences that change how a project can be used.
 
-The important idea is that a license is a design choice. It shapes how other people can use, modify, redistribute, and integrate a project.
+A license is a design choice. It sets what other people may do with the code: use it, modify it, redistribute it, ship it inside their own product.
 
 ## License Families
 
-Permissive licenses such as MIT, BSD, and Apache are friendly to broad reuse. They usually require attribution but allow use in closed-source products.
+MIT, BSD, and Apache are permissive. When the goal is broad reuse, they are the easy choice: attribution is usually required, and the code can end up inside a closed-source product.
 
-Copyleft licenses such as GPL require derivative works to preserve similar freedoms. Stronger network-oriented licenses such as AGPL also consider software used over a network.
+GPL is copyleft. A derivative work has to carry similar freedoms. AGPL extends that requirement to software people reach over a network instead of installing.
 
-Public-domain-style options such as CC0 and Unlicense aim to remove restrictions, though legal treatment can vary across jurisdictions.
+CC0 and Unlicense try to remove the restrictions altogether. What that means in practice depends on the jurisdiction, so I would not assume the two behave the same everywhere.
 
 ## Practical Considerations
 
-Choosing a license depends on the project goal. A portfolio demo, a library, a commercial tool, and a collaborative research project may need different terms.
+The right license depends on what the project is for. A portfolio demo, a library other people import, a commercial tool, and a collaborative research project can want very different terms.
 
-The repo is a useful learning note, but license decisions for production or company work should always be checked carefully.
+I use the repo to compare clauses before I pick a license. For production or company work, I would read the original license text again rather than act on notes like these.
 
 ## Knowledge Points
 
-- A repo without a license is not automatically free for others to reuse.
-- Permissive licenses optimize for adoption and integration.
-- Copyleft licenses optimize for preserving openness in derivative works.
-- Apache 2.0 includes explicit patent-related language, which can matter for companies.
-- AGPL is important when software is primarily delivered as a network service.
-- License compatibility can affect whether dependencies can be combined.
-- Documentation repos should distinguish learning notes from legal advice.
+- A repo with no license is not automatically free for others to reuse.
+- Permissive licenses lower the cost of adoption and integration.
+- Copyleft licenses keep derivative works open.
+- Apache 2.0 carries explicit patent language, which is the part companies tend to care about.
+- AGPL matters when the software is delivered mainly as a network service.
+- License compatibility decides whether two dependencies can sit in the same project.
+- A notes repo should say plainly that it is not legal advice.
 
 ## Takeaway
 
-This repo captures a practical software engineering topic that is easy to overlook. Code is technical, but reuse is legal and social too.
+License choice sits half in engineering and half in law. The code is technical; reuse is not.
 
 </ArticleLanguage>
 
 <ArticleLanguage language="zh">
 
-Repo License Info 是一个关于常见开源许可证的文档型仓库，比较了 MIT、Apache、GPL、LGPL、AGPL、BSD、MPL、EPL、Unlicense 和 CC0 等许可证。
+Repo License Info 是我整理的一份开源许可证笔记，覆盖 MIT、Apache、GPL、LGPL、AGPL、BSD、MPL、EPL、Unlicense 和 CC0，重点放在真正影响项目使用方式的差异上。
 
-核心观点是：许可证是一个设计选择，它决定了其他人如何使用、修改、再发布和集成你的项目。
+许可证是设计决策。它规定了别人能拿这份代码做什么：使用、修改、再发布，或者集成进自己的产品。
 
 ## 许可证家族
 
-MIT、BSD 和 Apache 等宽松型许可证对广泛复用友好，通常要求署名，但允许在闭源产品中使用。
+MIT、BSD 和 Apache 属于宽松型。想让代码被广泛复用时，这类许可证最省事：一般要保留署名，但允许代码进入闭源产品。
 
-GPL 等著佐权许可证要求衍生作品保留相似的自由。更强的网络导向许可证如 AGPL 还将通过网络提供的软件纳入考虑范围。
+GPL 是著佐权许可证，衍生作品必须保留类似的自由。AGPL 把这套要求延伸到通过网络使用软件的场景，用户不一定要把程序装到本地。
 
-CC0 和 Unlicense 等公共域风格的选项旨在移除所有限制，但法律处理方式在不同司法管辖区可能不同。
+CC0 和 Unlicense 想把限制降到最低。实际效果跟司法管辖区有关，不能默认这两者在哪儿都一样。
 
 ## 实际考量
 
-许可证的选择取决于项目目标。Portfolio 演示、库、商业工具和协作研究项目可能需要不同的条款。
+选哪个许可证，取决于项目要做什么。作品集演示、别人会当依赖引入的库、商业工具、协作研究项目，需要的条款可以完全不同。
 
-这个仓库是有用的学习笔记，但生产环境或公司项目的许可证决策应该认真审查。
+这份笔记我拿来对比条款。真要上生产、或者涉及公司项目，我会把原始条款再读一遍，而不是照着笔记直接定。
 
 ## 知识点
 
-- 没有许可证的仓库不代表其他人可以自由复用。
-- 宽松型许可证优化的是采用率和集成便利性。
-- 著佐权许可证优化的是保留衍生作品的开放性。
-- Apache 2.0 包含明确的专利相关条款，这对企业可能很重要。
-- 当软件主要作为网络服务交付时，AGPL 很重要。
-- 许可证兼容性会影响依赖项能否被组合使用。
-- 文档仓库应该区分学习笔记和法律建议。
+- 仓库没有许可证，不代表别人可以随便复用。
+- 宽松型许可证降低采用和集成的门槛。
+- 著佐权许可证让衍生作品保持开放。
+- Apache 2.0 有明确的专利条款，企业选许可证时通常最在意这一条。
+- 软件主要以网络服务形式交付时，AGPL 就适用了。
+- 许可证兼容性决定两个依赖能不能放进同一个项目。
+- 笔记仓库要写清楚：这里是学习记录，不是法律意见。
 
 ## 总结
 
-这个仓库记录了一个容易被忽视的实用软件工程话题。代码是技术的，但复用是法律的，也是社会的。
+许可证这个题目，一半在工程，一半在法律。代码是技术的，复用不是。
 
 </ArticleLanguage>

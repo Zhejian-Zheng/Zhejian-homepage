@@ -1,8 +1,8 @@
 import ArticleLanguage from "@/app/components/ArticleLanguage";
 
 export const metadata = {
-  "title": "Resume in LaTeX: Treating a CV as Source-Controlled Design",
-  "summary": "A LaTeX resume project that uses reusable commands, typography, spacing, and version control to keep a technical CV maintainable.",
+  "title": "Resume in LaTeX: A CV That Lives in Version Control",
+  "summary": "A LaTeX resume kept in version control, with reusable commands for layout, entries, and spacing.",
   "publishedAt": "2026-05-16",
   "tags": [
     "LaTeX",
@@ -12,75 +12,75 @@ export const metadata = {
   ],
   "category": "product",
   "zh": {
-    "title": "用 LaTeX 写简历：把 CV 当作可版本控制的设计",
-    "summary": "一个 LaTeX 简历项目，用可复用命令、排版、间距和版本控制来保持技术简历的可维护性。"
+    "title": "用 LaTeX 写简历：把 CV 放进版本控制",
+    "summary": "一个用 LaTeX 维护的简历项目：自定义命令管排版和条目格式，版本控制管改动。"
   }
 };
 
 <ArticleLanguage language="en">
 
-The Resume repo keeps a CV as code. Instead of editing a visual document by hand, the resume is written in LaTeX with reusable commands for sections, projects, education, work experience, and layout.
+My CV lives in this repo as a LaTeX project. Sections, projects, education, work experience, and page layout each have their own reusable commands, so a new entry is a few lines of LaTeX rather than a manual layout change.
 
-This is a small project, but it reflects a useful engineering habit: documents that change often can benefit from structure and version control.
+It is a small repo, but the habit is general: a document that changes often is easier to keep straight when it lives in files and shows up in a diff.
 
 ## Document System
 
-The LaTeX source uses packages for page geometry, fonts, color, section titles, tables, list spacing, icons, and links. Custom commands help keep entries consistent across the document.
+The preamble loads packages for page geometry, fonts, color, section titles, tables, list spacing, icons, and links. The custom commands sit on top of those and keep each entry's format in one place.
 
-That consistency matters. A resume needs to be easy to scan, and small spacing differences can make the whole page feel less professional.
+Consistency is the point. A resume gets scanned, not read, and small differences in spacing or heading size are easy to feel and hard to point at.
 
 ## Information Architecture
 
-The content emphasizes education, experience, projects, technical skills, and achievements. A strong technical resume is not just a list of tools; it shows what was built, what stack was used, and what impact the work had.
+The content runs through education, experience, projects, technical skills, and achievements. What I want from each entry is what was built, which stack it used, and what came of it. A list of tools on its own says very little.
 
-Sensitive contact or referee details should be handled carefully when a resume is public, which is one reason source control hygiene matters.
+Contact details and referee information need care once the repo is public. Deleting a line later is more work than leaving it out, so I decide what goes in before committing.
 
 ## Knowledge Points
 
-- LaTeX is strong for precise typography and repeatable document generation.
-- Custom commands reduce formatting drift across resume sections.
-- Version control makes it easy to track changes for different job applications.
-- A technical CV should connect skills to concrete projects and outcomes.
-- Layout density should support scanning rather than squeezing in every detail.
-- Public repositories should avoid exposing private referee or contact details unnecessarily.
-- Treating writing as code encourages review, iteration, and reuse.
+- LaTeX gives precise typography and a document that can be rebuilt from source.
+- Custom commands cut down formatting drift between sections.
+- Version control keeps a version per application target and still shows what changed.
+- A technical CV should tie skills to concrete projects and results.
+- Density should help someone scan the page, not squeeze in every detail.
+- A public repo should not carry referee or contact details it does not need.
+- Treating writing as code invites review, iteration, and reuse.
 
 ## Takeaway
 
-This repo shows that engineering thinking applies to personal documents too. A resume becomes easier to maintain when layout, content, and structure are separated.
+With layout, content, and structure kept apart, a change to one does not disturb the other. That is most of what makes the resume maintainable, and it is the same reason I keep code in a repo.
 
 </ArticleLanguage>
 
 <ArticleLanguage language="zh">
 
-这个简历仓库把 CV 当代码来维护。不是手动编辑可视化文档，而是用 LaTeX 写简历，为章节、项目、教育经历、工作经历和排版定义可复用的命令。
+这个简历仓库就是我的 CV，用 LaTeX 写的。章节、项目、教育经历、工作经历和页面布局各有一套可复用的命令，加一条新经历只要写几行，不用手动去调版面。
 
-这是个小项目，但它反映了一个实用的工程习惯：经常变动的文档可以从结构化和版本控制中受益。
+仓库很小，但这个习惯是通用的：一份经常要改的文档，放进文件里、有 diff 可看，维护起来会清楚很多。
 
 ## 文档系统
 
-LaTeX 源文件使用了页面几何、字体、颜色、章节标题、表格、列表间距、图标和链接等包。自定义命令帮助保持文档中各条目格式的一致性。
+导言区加载了页面尺寸、字体、颜色、章节标题、表格、列表间距、图标和链接这些宏包。自定义命令建在它们之上，把每条经历的格式收在一处。
 
-这种一致性很重要——简历需要容易浏览，细微的间距差异就可能让整个页面感觉不够专业。
+一致性是重点。简历是被扫读的，不是被逐字读的。行距或者标题字号差一点，读者未必说得出哪里不对，但会觉得整页不够整齐。
 
 ## 信息架构
 
-内容重点突出教育经历、工作经验、项目、技术技能和成就。一份好的技术简历不只是工具列表，它展示了构建了什么、使用了什么技术栈，以及工作产生了什么影响。
+内容按教育经历、工作经验、项目、技术技能和成果来排。每个条目我想看到的是：做了什么、用了什么技术栈、得到了什么结果。只列一串工具名说明不了什么。
 
-当简历公开时，敏感的联系方式或推荐人信息应该谨慎处理，这也是版本控制卫生很重要的原因之一。
+简历公开以后，联系方式和推荐人信息就要当心。事后再删一行，比当初不写进去麻烦，所以提交之前我就先想清楚哪些内容不该进仓库。
 
 ## 知识点
 
-- LaTeX 在精确排版和可重复文档生成方面非常强大。
-- 自定义命令减少了简历各节之间的格式漂移。
-- 版本控制让针对不同职位申请的改动追踪变得简单。
-- 技术简历应该把技能与具体项目和成果联系起来。
-- 排版密度应该支持快速浏览，而不是把所有细节都塞进去。
-- 公开仓库应该避免不必要地暴露推荐人或私人联系信息。
-- 把写作当代码对待，鼓励审查、迭代和复用。
+- LaTeX 的排版精确，文档可以从源码重新生成。
+- 自定义命令减少了各章节之间的格式漂移。
+- 版本控制让不同岗位的简历版本各自可追踪，也看得清每次改了什么。
+- 技术简历要把技能落到具体项目和结果上。
+- 排版密度要方便扫读，而不是把每个细节都塞进去。
+- 公开仓库不该带着用不上的推荐人信息和联系方式。
+- 把写作当代码来管，评审、迭代和复用都会顺一些。
 
 ## 总结
 
-这个仓库说明工程思维也适用于个人文档。当排版、内容和结构分离时，简历更容易维护。
+排版、内容和结构分开以后，改一边不会牵动另一边。简历能一直维护下去，靠的就是这一点。这跟我把代码放进仓库是同一个理由。
 
 </ArticleLanguage>

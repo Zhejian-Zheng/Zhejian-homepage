@@ -2,7 +2,7 @@ import ArticleLanguage from "@/app/components/ArticleLanguage";
 
 export const metadata = {
   "title": "Solana OrderFlow: Event-Driven Escrow with Anchor and Kafka",
-  "summary": "A Solana escrow project that connects an Anchor smart contract with Kafka consumers, Postgres projections, risk rules, and notifications.",
+  "summary": "An escrow program on Solana, plus the off-chain pipeline that turns its logs into Kafka events, Postgres tables, risk alerts, and notifications.",
   "publishedAt": "2026-05-16",
   "tags": [
     "Solana",
@@ -12,83 +12,83 @@ export const metadata = {
   ],
   "category": "systems",
   "zh": {
-    "title": "Solana OrderFlow：使用 Anchor 与 Kafka 构建事件驱动托管系统",
-    "summary": "一个 Solana 托管项目，将 Anchor 智能合约、Kafka 消费者、Postgres 投影、风险规则和通知系统连接起来。"
+    "title": "Solana OrderFlow：用 Anchor 和 Kafka 做事件驱动托管",
+    "summary": "一个 Solana 托管项目：Anchor 合约、Kafka 消费者、Postgres 投影、风险规则和通知服务如何接成一条链路。"
   }
 };
 
 <ArticleLanguage language="en">
 
-Solana OrderFlow is an event-driven escrow system. The interesting part is not only the on-chain token exchange, but the full path from smart contract event logs to off-chain indexing, risk detection, and notification workers.
+The Anchor program is the part people ask about. The rest of the system is about what happens after a transaction lands.
 
-The project has two worlds. The Anchor program owns the escrow state and token custody. The off-chain services listen for program logs, normalize them, publish them to Kafka, persist them into Postgres, and run consumer-side workflows.
+Solana OrderFlow has two halves. On chain, an Anchor program owns the escrow state and the tokens. Off chain, services read the program logs, normalize them, publish to Kafka, write Postgres, and run the consumer workflows.
 
 ## On-Chain Layer
 
-The Anchor program supports three core instructions: creating an offer, taking an offer, and canceling an offer. When an offer is created, tokens are moved into a vault associated token account. When it is filled or canceled, the program uses PDA signer seeds to move tokens out safely.
+Three instructions cover the flow: create an offer, take an offer, cancel an offer. Creating one moves tokens into a vault token account tied to that offer. Filling or canceling empties that vault, and the program authorizes the transfer with PDA signer seeds instead of a private key.
 
-The escrow state keeps the maker, mint accounts, requested amount, offered amount, status, and bump information. Status values such as Created, Filled, and Cancelled make the state transition explicit, which is important in financial flows.
+The escrow account holds the maker address, the mint accounts, the requested amount, the offered amount, the status, and the bump. Status is Created, Filled, or Cancelled, and the transition is explicit, which matters in a flow that moves money.
 
 ## Off-Chain Pipeline
 
-The listener subscribes to Solana logs over WebSocket, parses JSON-like program messages, normalizes them into event records, and publishes them to Kafka. The storage writer consumes those events and writes an append-only event table plus an offer snapshot table.
+The listener opens a WebSocket subscription to program logs, turns each JSON-like message into an event record, and publishes it to Kafka. A storage writer consumes the events and writes two tables: an append-only event table and an offer snapshot table.
 
-That separation is useful: the event table preserves history, while the snapshot table makes dashboards and queries fast. The storage writer also uses idempotent keys and manual Kafka commits so a database failure does not silently lose work.
+The split earns its keep. Events keep history; the snapshot keeps queries cheap. The writer also uses idempotent keys and commits Kafka offsets by hand, so a failed database write leaves the event available for retry instead of dropping it or counting it twice.
 
 ## Risk and Notification
 
-The risk engine consumes the same event stream and applies rule-based checks. Examples include large offer amounts and frequent cancel behavior. Alerts are emitted to a separate topic so notification logic can be developed independently from detection logic.
+The risk engine reads the same stream and applies rules. Large offer amounts and repeated cancels are the two it starts with. Alerts go to their own topic, so notification code can change without touching detection.
 
 ## Knowledge Points
 
-- Solana programs should keep token custody and state transitions explicit, especially around escrow flows.
-- PDA signer seeds let a program authorize movements from program-owned accounts without a private key.
-- Logs are a practical bridge between on-chain execution and off-chain indexing.
-- Kafka partition keys, idempotent producers, and manual commits help build reliable event pipelines.
-- Append-only events plus snapshot tables are a common event-sourcing pattern for dashboards.
-- Amounts should be handled carefully across language boundaries because JavaScript number precision can be unsafe for token values.
-- Risk engines can start with simple rules before moving toward more complex scoring models.
+- An escrow program is easier to review when custody and state transitions are explicit.
+- PDA signer seeds let a program move tokens out of accounts it owns without holding a private key.
+- Program logs are the practical bridge between on-chain execution and off-chain indexing.
+- Partition keys, idempotent producers, and manual commits are the parts of a Kafka pipeline that decide whether it stays correct under retries.
+- Append-only events plus snapshot tables are the usual event-sourcing shape behind a dashboard.
+- Amounts crossing a language boundary need care, because a JavaScript number cannot hold every token amount exactly.
+- A risk engine can start with rules and move to scoring later.
 
 ## Takeaway
 
-This repo is a good example of full-stack blockchain engineering: the smart contract is only one layer. The production shape also needs ingestion, storage, idempotency, monitoring, and downstream consumers.
+The contract is one layer. Ingestion, storage, idempotency, monitoring, and downstream consumers are the rest, and each of them can fail on its own.
 
 </ArticleLanguage>
 
 <ArticleLanguage language="zh">
 
-Solana OrderFlow 是一个事件驱动的托管系统。有意思的地方不只是链上代币交换本身，而是从智能合约事件日志到链下索引、风险检测和通知服务的完整链路。
+Anchor 程序是大家最先问到的部分。交易上链之后发生的事，占了另外一半。
 
-这个项目有两个世界。Anchor 程序负责托管状态和代币托管；链下服务监听程序日志、规范化事件、发布到 Kafka、持久化到 Postgres，并运行下游消费者工作流。
+Solana OrderFlow 分成两半。链上是 Anchor 程序，持有托管状态和代币；链下是一组服务，监听程序日志、整理成事件、发到 Kafka、写入 Postgres，再各自跑消费者逻辑。
 
 ## 链上层
 
-Anchor 程序支持三条核心指令：创建 Offer、接受 Offer、取消 Offer。创建 Offer 时，代币被转移到和 Offer 关联的金库账户。当 Offer 被成交或取消时，程序使用 PDA signer seeds 安全地将代币转出。
+三条指令撑起主流程：创建 Offer、接受 Offer、取消 Offer。创建时，代币进入与该 Offer 关联的 vault token account。成交或取消时，程序用 PDA signer seeds 授权把代币转出，这个账户本身没有私钥。
 
-托管状态记录了 maker 地址、mint 账户、请求数量、提供数量、状态和 bump 信息。Created、Filled、Cancelled 这样的明确状态值让状态转换清晰可见，这在金融流程里非常重要。
+托管账户里存 maker、mint 账户、请求数量、提供数量、状态和 bump。状态取 Created、Filled、Cancelled，状态转换是显式的；钱在动的流程里，状态必须一眼能看懂。
 
 ## 链下流水线
 
-监听器通过 WebSocket 订阅 Solana 日志，解析程序消息，规范化为事件记录，然后发布到 Kafka。存储写入器消费这些事件，写入仅追加的事件表和 Offer 快照表。
+监听器通过 WebSocket 订阅程序日志，把每条类似 JSON 的消息整理成事件记录，发到 Kafka。存储写入器消费这些事件，写两张表：仅追加的事件表和 Offer 快照表。
 
-这种分离很有价值：事件表保留完整历史，快照表让仪表盘查询更快。存储写入器还使用幂等键和手动 Kafka 提交，确保数据库故障不会静默丢失数据。
+这样拆开是有用的。事件表留着历史，快照表让查询不用扫全表。写入器还用幂等键和手动提交 offset，数据库写失败时事件还在，可以重放，不会静默丢失，也不会重复计数。
 
 ## 风险与通知
 
-风险引擎消费同一个事件流，应用规则检查，比如大额 Offer 和频繁取消行为。告警被推送到独立的 Kafka topic，这样通知逻辑可以独立于检测逻辑单独演进。
+风险引擎读同一条流，按规则做检查，比如金额特别大的 Offer、短时间内反复取消。告警写到单独的 topic，通知逻辑改起来不用碰检测逻辑。
 
 ## 知识点
 
-- Solana 程序应该让代币托管和状态转换保持显式，尤其是在 escrow 流程中。
-- PDA signer seeds 允许程序在没有私钥的情况下授权从程序拥有的账户进行代币转移。
-- 日志是链上执行和链下索引之间实用的桥梁。
-- Kafka partition key、幂等 producer 和手动提交有助于构建可靠的事件流水线。
-- 仅追加事件表加快照表是仪表盘场景下常见的事件溯源模式。
-- 跨语言边界处理金额时需要格外小心，因为 JavaScript 的数字精度对代币值可能不安全。
-- 风险引擎可以先从简单规则开始，之后再演进到更复杂的评分模型。
+- escrow 流程里，代币托管和状态转换写得越显式，越容易审。
+- PDA signer seeds 让程序在没有私钥的情况下，从自己拥有的账户转出代币。
+- 程序日志是链上执行和链下索引之间最实际的一层桥。
+- Kafka 流水线在重试下还对不对，取决于 partition key、幂等 producer 和手动提交这几处。
+- 仅追加事件加快照表，是仪表盘类需求里常见的事件溯源做法。
+- 金额跨语言传递要小心，JavaScript 的 number 装不下所有代币金额。
+- 风险引擎可以先从规则写起，之后再换成评分模型。
 
 ## 总结
 
-这个仓库是全栈区块链工程的典型案例：智能合约只是其中一层，生产环境还需要数据摄取、存储、幂等处理、监控和下游消费者。
+合约只是其中一层。数据摄取、存储、幂等、监控和下游消费者是其余部分，每一层都能单独出问题。
 
 </ArticleLanguage>

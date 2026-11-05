@@ -2,7 +2,7 @@ import ArticleLanguage from "@/app/components/ArticleLanguage";
 
 export const metadata = {
   "title": "Shell Script Automarking System: Building a File-Backed Autograder",
-  "summary": "A dash shell project that models assignment creation, submission storage, test execution, output comparison, and marking.",
+  "summary": "A dash shell autograder: assignment creation, submission storage, test runs, output comparison, and marking, all backed by the filesystem.",
   "publishedAt": "2026-05-16",
   "tags": [
     "Shell",
@@ -12,83 +12,83 @@ export const metadata = {
   ],
   "category": "systems",
   "zh": {
-    "title": "Shell Script 自动评分系统：构建基于文件的 Autograder",
-    "summary": "一个 Shell 自动评分系统，围绕测试发现、输出对比、评分规则和文件结构展开。"
+    "title": "Shell 自动评分系统：把状态放在文件系统里",
+    "summary": "一个用 dash 写的自动评分系统：作业创建、提交存储、跑测试、比对输出和算分，全部靠文件系统完成。"
   }
 };
 
 <ArticleLanguage language="en">
 
-This repo implements an automarking workflow with shell scripts. It models the core lifecycle of a university-style assignment system: add an assignment, submit files, summarize submissions, run tests, and calculate marks.
+This repo is an autograder written in shell. It covers the loop a university assignment system needs: create an assignment, take submissions, summarize them, run tests, and produce a mark.
 
-The project is interesting because it uses only shell and the filesystem to model state.
+The constraint shapes the design. All state lives in the filesystem, and dash is the only language available.
 
 ## Assignment and Submission Flow
 
-The add script validates assignment names, solution files, autotest specifications, and automarking specifications before storing them under a hidden project directory.
+The add script checks the assignment name, the solution file, the autotest spec, and the automarking spec before it writes anything. What passes goes under a hidden project directory.
 
-The submit script validates the assignment, student zID format, and submitted file. It creates per-student submission folders and records metadata such as timestamp and file size.
+The submit script checks that the assignment exists, that the student zID is in the expected format, and that the submitted file is there. It then creates a folder per student and records the timestamp and file size.
 
 ## Marking Flow
 
-The marking script reads automarking specs, runs the latest student submission against the reference solution, captures stdout, stderr, and exit status, then compares results.
+The marking script reads the automarking spec and runs the student's latest submission against the reference solution. It captures stdout, stderr, and the exit status separately, then compares.
 
-It supports comparison options for blanks, case, digits, and whitespace. These switches are important because real grading often needs flexible output matching rather than byte-for-byte strictness.
+Comparison has switches for blank lines, case, digits, and whitespace. They matter because byte-for-byte equality is the wrong test for most student output: a trailing newline or a capitalized word is rarely what the assignment was asking for.
 
 ## Design Constraints
 
-Writing this in dash keeps the project close to POSIX-style scripting. That means the implementation must be careful with quoting, path validation, process exit codes, and temporary output files.
+Dash keeps the code close to POSIX. That shows up in the places that are easy to get wrong: quoting, path validation, exit codes, and temporary output files. An unquoted variable is one space away from a broken path.
 
 ## Knowledge Points
 
-- Shell scripts can model real systems when the data model maps cleanly to files and folders.
-- Input validation is essential in CLI tools because every argument can become a path or command input.
-- Autograders need to capture stdout, stderr, and exit status separately.
-- Flexible diff options make tests fairer for harmless formatting differences.
-- File-backed state is simple to inspect but needs consistent naming and cleanup rules.
-- POSIX shell encourages small commands and explicit control flow.
-- A robust CLI should fail loudly and consistently when inputs are malformed.
+- Shell can model a real system when the data already looks like files and folders.
+- Every CLI argument is a potential path or command input, so validation is not optional.
+- An autograder has to keep stdout, stderr, and exit status apart. Merging them loses the difference between wrong output and a crash.
+- Diff options make marking fairer for differences that do not matter.
+- File-backed state is easy to inspect. It stays that way only with consistent naming and cleanup rules.
+- POSIX shell pushes toward small commands and explicit control flow.
+- A CLI should fail loudly and consistently when inputs are malformed.
 
 ## Takeaway
 
-This project shows how much system behavior can be built with shell alone. It is a practical exercise in automation, validation, and test infrastructure.
+Most of the behavior here comes from the directory layout and the exit codes, not from a framework. Writing it in dash made the boundaries obvious, because nothing else was validating for me.
 
 </ArticleLanguage>
 
 <ArticleLanguage language="zh">
 
-仓库使用 shell 脚本实现了一个自动评分工作流程。它模拟了大学作业系统的核心生命周期：添加作业、提交文件、汇总提交内容、运行测试和计算分数。
+这个仓库用 shell 写了一个自动评分器，覆盖大学作业系统的完整流程：建作业、收提交、汇总提交、跑测试、算分。
 
-该项目的独特之处在于它仅使用 shell 和文件系统来模拟状态。
+限制条件决定了它的写法：所有状态都放在文件系统里，能用的语言只有 dash。
 
 ## 作业和提交流程
 
-添加脚本会在将作业名称、答案文件、自动测试规范和自动评分规范存储到隐藏的项目目录之前对其进行验证。
+添加脚本先校验作业名、标准答案、自动测试规范和评分规范，都通过以后才写进隐藏的项目目录。
 
-提交脚本会验证作业、学生 zID 格式和提交的文件。它会为每个学生创建提交文件夹，并记录时间戳和文件大小等元数据。
+提交脚本校验作业是否存在、学生 zID 的格式、提交的文件是否齐全，然后给每个学生建目录，记下时间戳和文件大小。
 
 ## 评分流程
 
-评分脚本读取自动评分规范，将学生的最新提交与参考答案进行比较，捕获标准输出 (stdout)、标准错误输出 (stderr) 和退出状态，然后比较结果。
+评分脚本读取评分规范，拿学生最新一次提交去跑参考答案，分别捕获 stdout、stderr 和退出码，再做比较。
 
-它支持空格、大小写、数字和空白字符的比较选项。这些选项非常重要，因为实际评分通常需要灵活的输出匹配，而不是逐字节的严格匹配。
+比较支持忽略空行、大小写、数字和空白字符的开关。这些开关有实际作用。学生输出很难做到逐字节一致，多一个换行、首字母大写，通常跟作业要考的内容无关。
 
 ## 设计约束
 
-使用 Dash 编写此项目可使其接近 POSIX 风格的脚本。这意味着实现必须谨慎处理引用、路径验证、进程退出代码和临时输出文件。
+用 dash 写的代码贴近 POSIX，代价是引用、路径校验、退出码和临时文件这些地方都要格外小心。变量忘了加引号，路径里多一个空格就会出错。
 
 ## 知识点
 
-- 当数据模型能够清晰地映射到文件和文件夹时，Shell 脚本可以模拟真实系统。
-- 输入验证在 CLI 工具中至关重要，因为每个参数都可能成为路径或命令输入。
-- 自动评分器需要分别捕获标准输出 (stdout)、标准错误输出 (stderr) 和退出状态。
-- 灵活的差异选项使测试对无害的格式差异更加公平。
-- 基于文件的状态易于检查，但需要一致的命名和清理规则。
-- POSIX shell 鼓励使用简短的命令和显式的控制流。
-- 一个健壮的 CLI 在输入格式错误时应该发出清晰且一致的错误信息。
+- 数据本来就能映射成文件和目录时，shell 也能撑起一套真实系统。
+- CLI 的每个参数都可能变成路径或命令输入，校验不能省。
+- 自动评分器要分开保存 stdout、stderr 和退出状态，混在一起就分不清"输出错"和"程序崩了"。
+- 忽略格式差异的比对选项，能让评分对无害的排版差异更公平。
+- 文件状态看得很清楚，但前提是命名和清理规则统一。
+- POSIX shell 会推着你写小命令和显式控制流。
+- 输入不合法时，CLI 应该明确、稳定地报错。
 
 ## 总结
 
-本项目展示了仅使用 shell 可以构建多少系统行为。它是一个自动化、验证和测试基础设施的实践练习。
+这里大部分行为来自目录结构和退出码，跟框架没什么关系。用 dash 写反而把边界暴露出来：没有任何一层在替我兜底做校验。
 
 </ArticleLanguage>

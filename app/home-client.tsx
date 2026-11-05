@@ -6,7 +6,6 @@ import { useLanguage } from "./components/language";
 import { LocalizedDate, LocalizedPostSummary, LocalizedPostTitle, LocalizedTag } from "./blog/localizedPostText";
 import profileImg from "@/app/images/profile.webp";
 import journeyImg from "@/app/images/world_exploring/mount-fuji.webp";
-import HomeMotion from "./components/HomeMotion";
 
 export type HomePostPreview = {
 	slug: string;
@@ -55,6 +54,7 @@ function ProjectCard({ post, featured = false }: { post: HomePostPreview; featur
 	return (
 		<Link href={`/blog/${post.slug}`} className={`project-card group${featured ? " project-featured" : ""}`}>
 			{featured && <div className="project-visual" aria-hidden="true">
+				<div className="project-console-bar"><span><i />TRACE / SIDECAR</span><span>LOOP.04</span></div>
 				<div className="project-wordmark">Sidecar<span>伴行</span></div>
 				<div className="agent-loop">{copy.loop.map((step, index) => <span key={step}>{step}{index < 3 && <i>→</i>}</span>)}</div>
 				<p>{copy.loopNote}</p>
@@ -74,7 +74,6 @@ export default function HomeClient({ selectedBuilds, latestNotes }: { selectedBu
 	const copy = homeCopy[language];
 	return (
 		<div className="home-page">
-			<HomeMotion />
 			<main id="main-content" tabIndex={-1} className="home-main">
 				<div className="field-wrap">
 					<section className="home-hero">

@@ -24,7 +24,7 @@ Long-term memory sounds simple until an Agent has to correct an old fact, explai
 
 This article follows one memory through the source code. Suppose a user says, "Keep my release notes short and include migration risks." ReMe can record the conversation, turn it into a daily note, index that note, retrieve it later, and consolidate the useful preference into a digest file. If the file is deleted, the related search entries and graph node are removed too.
 
-The four useful entry points are [`BaseStep`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/steps/base_step.py), [`LocalFileStore`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/components/file_store/local_file_store.py), [`BM25Index`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/components/keyword_index/bm25_index.py), and the [Auto Dream steps](https://github.com/agentscope-ai/ReMe/tree/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/steps/evolve/dream).
+The four main entry points are [`BaseStep`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/steps/base_step.py), [`LocalFileStore`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/components/file_store/local_file_store.py), [`BM25Index`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/components/keyword_index/bm25_index.py), and the [Auto Dream steps](https://github.com/agentscope-ai/ReMe/tree/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/steps/evolve/dream).
 
 ## The path of one memory
 
@@ -76,7 +76,7 @@ Each indexed file has two representations:
 - `FileNode` describes the file path, modification time, links, and chunk IDs.
 - `FileChunk` contains a piece of text, its source path, line range, optional embedding, and search scores.
 
-Chunks are the search unit. Files remain the ownership unit. That difference matters when a file changes.
+Chunks are the search unit, files the ownership unit. That difference matters when a file changes.
 
 During `upsert`, `LocalFileStore` first looks up the old node. It removes the old chunks from the in-memory map, stages the new node and chunks, and reuses an embedding when both the chunk ID and text are unchanged. It then updates the file graph, creates any missing embeddings, marks old keyword documents as deleted, and adds the new chunk text to the keyword index.
 
@@ -91,7 +91,7 @@ old FileNode
     -> add new BM25 documents
 ```
 
-Embedding failure does not make local keyword search unusable. `LocalFileStore` disables the failing embedding path and can continue with BM25. This is a useful failure mode for a local memory system because an unavailable model should not hide every saved file.
+Embedding failure does not make local keyword search unusable. `LocalFileStore` disables the failing embedding path and can continue with BM25. That failure mode suits a local memory system: an unavailable model should not hide every saved file.
 
 Deleting a file follows the same boundary. The store resolves its `FileNode`, removes every chunk ID, deletes the graph node, and tells the keyword index to delete those document IDs. The source file and the derived search data do not silently drift apart.
 
@@ -130,7 +130,7 @@ Each returned chunk includes its path and line range. Link expansion also loads 
 
 ## Auto Dream consolidates daily memory
 
-Daily notes are useful evidence, but they grow quickly and repeat the same facts. Auto Dream processes changed daily files and writes longer-lived digest nodes. Its workflow has four steps.
+Daily notes are evidence, but they grow quickly and repeat the same facts. Auto Dream processes changed daily files and writes longer-lived digest nodes. Its workflow has four steps.
 
 `DreamExtractStep` scans recent daily paths and compares file modification times with the file catalog. Unchanged files are skipped. Deleted paths are removed from the catalog. Changed files are packed into an LLM request that returns memory units and topic candidates.
 
@@ -152,7 +152,7 @@ ReMe does not currently apply automatic age decay, TTL expiry, or an importance 
 
 Forgetting is explicit here. A person or Agent can correct, move, or delete a memory file. When a watched file disappears, the indexing path removes its chunks, keyword documents, and graph node. BM25 hides lazy-deleted entries immediately and later reclaims their storage during optimization.
 
-This policy favors control and traceability. It also leaves a product decision to the application: when should old evidence be removed, and who is allowed to do it? A time-based retention rule can be added outside this core, but it should delete or update the source files through the same path so every derived index stays consistent.
+This policy keeps control and traceability in the application, and it leaves one product decision there as well: when should old evidence be removed, and who is allowed to do it? A time-based retention rule can be added outside this core, but it should delete or update the source files through the same path so every derived index stays consistent.
 
 ## Reading the design as an engineer
 
@@ -173,11 +173,11 @@ That design costs more filesystem and index coordination than saving messages in
 
 <ArticleLanguage language="zh">
 
-长期记忆听起来不复杂。真正写进工程以后，问题很快就会出现：旧信息怎样纠正，检索结果怎样找到原文，索引损坏后能不能重建，删除一条记忆时又要清理哪些数据。
+长期记忆听起来不复杂。真写进工程里，问题很快就会出现：旧信息怎样纠正，检索结果怎样找到原文，索引损坏后能不能重建，删除一条记忆时又要清理哪些数据。
 
-ReMe 的做法是把文件留作事实来源，再用小型工作步骤和可重建索引处理搜索。本篇沿着一条记忆阅读源码。假设用户提出一项偏好：发布说明要简短，并写清迁移风险。ReMe 可以保存原始对话，生成 daily 笔记，建立索引，在后续任务中找到它，再把有用偏好整理进 digest 文件。源文件删除后，对应的搜索项和图节点也会清理。
+ReMe 的做法是把文件留作事实来源，再用小型工作步骤和可重建索引处理搜索。本篇沿着一条记忆读源码。假设用户提出一项偏好：发布说明要简短，并写清迁移风险。ReMe 可以保存原始对话，生成 daily 笔记，建立索引，在后续任务中找到它，再把有用偏好整理进 digest 文件。源文件删除后，对应的搜索项和图节点也会清理。
 
-阅读入口主要有四处：[`BaseStep`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/steps/base_step.py)、[`LocalFileStore`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/components/file_store/local_file_store.py)、[`BM25Index`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/components/keyword_index/bm25_index.py)，以及 [Auto Dream steps](https://github.com/agentscope-ai/ReMe/tree/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/steps/evolve/dream)。
+主要入口有四个：[`BaseStep`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/steps/base_step.py)、[`LocalFileStore`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/components/file_store/local_file_store.py)、[`BM25Index`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/components/keyword_index/bm25_index.py)，以及 [Auto Dream steps](https://github.com/agentscope-ai/ReMe/tree/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/steps/evolve/dream)。
 
 ## 一条记忆经过哪些地方
 
@@ -193,11 +193,11 @@ conversation
     -> digest/personal, digest/procedure, or digest/wiki
 ```
 
-`session`、`daily`、`resource` 和 `digest` 中的文件保存人可以阅读和编辑的记忆。索引、chunk 缓存、catalog 和文件图放在 metadata 下，它们属于派生数据。如果这些数据不一致，系统可以清空它们，再扫描源文件重建。
+`session`、`daily`、`resource` 和 `digest` 中的文件保存人可以阅读和编辑的记忆。索引、chunk 缓存、catalog 和文件图放在 metadata 下，属于派生数据。这些数据一旦不一致，系统可以清空它们，再扫描源文件重建。
 
 理解这条边界以后，后面的代码会容易很多。搜索需要快，但索引不应该成为一条记忆唯一的副本。
 
-## Step 是一次工作单元
+## Step 是基本工作单元
 
 `BaseStep` 是 ReMe 工作流中的通用执行单元。搜索、抽取、整合和 catalog 更新都由 Step 完成。每个 Step 接收 `RuntimeContext`，执行 `execute()`，最后返回 response。
 
@@ -283,7 +283,7 @@ vector weight 默认为 `0.7`，因此关键词分支权重是 `0.3`。RRF 比�
 
 ## Auto Dream 整理 daily 记忆
 
-Daily 笔记保留了证据，但数量会不断增加，同一事实也可能重复出现。Auto Dream 只处理发生变化的 daily 文件，再把适合长期使用的信息写进 digest。整个流程分为四个 Step。
+daily 笔记保留了证据，但数量会不断增加，同一事实也可能重复出现。Auto Dream 只处理发生变化的 daily 文件，再把适合长期使用的信息写进 digest。整个流程分为四个 Step。
 
 `DreamExtractStep` 扫描最近的 daily 路径，用文件修改时间和 catalog 记录做比较。未变化的文件直接跳过，已经消失的路径会从 catalog 删除。变化的文件被放进 LLM 请求，输出 memory unit 和候选 topic。
 
@@ -297,15 +297,15 @@ Daily 笔记保留了证据，但数量会不断增加，同一事实也可能�
 
 `DreamTopicsStep` 选择兴趣 topic，去掉近期重复内容，再写入 `interests.yaml`。`DreamFinishStep` 更新 catalog 并记录 checkpoint。失败 unit 关联的路径不会进入 checkpoint，下一次运行还能继续尝试。
 
-Auto Dream 不会改写 daily 笔记。Daily 层继续保存证据，digest 层保存整理后的结论，并保留到来源的链接。这里的压缩是语义整合，不是压缩文件包，也不是把每段对话裁成固定 token 数。
+Auto Dream 不会改写 daily 笔记。daily 层继续保存证据，digest 层保存整理后的结论，并保留到来源的链接。这里的压缩是语义整合，不是压缩文件包，也不是把每段对话裁成固定 token 数。
 
 ## 当前代码怎样处理遗忘
 
-ReMe 当前没有自动时间衰减、TTL 过期或按重要性静默删除旧记忆的逻辑。把这些行为写成现有功能，会和源码不符。
+ReMe 当前没有自动时间衰减、TTL 过期或按重要性静默删除旧记忆的逻辑。把这些行为说成现有功能，和源码不符。
 
 这里的遗忘是显式操作。人或 Agent 可以修改、移动或删除记忆文件。监听中的文件消失后，索引流程会移除相应 chunk、关键词文档和文件图节点。BM25 会立即隐藏 lazy-deleted 项，并在后续优化时回收存储空间。
 
-这种策略把控制权和可追踪性留给应用，同时也留下一个产品问题：旧证据应该在什么情况下删除，谁有权限执行？应用可以在 ReMe 外层加入保留期限，但删除或修改仍应经过相同的源文件路径，保证派生索引保持一致。
+这种策略把控制权和可追踪性留在应用手里，同时也留下一个产品问题：旧证据应该在什么情况下删除，谁有权限执行？应用可以在 ReMe 外层加入保留期限，但删除或修改仍应经过相同的源文件路径，保证派生索引保持一致。
 
 ## 从工程角度看这套设计
 

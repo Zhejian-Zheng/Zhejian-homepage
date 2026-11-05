@@ -5,7 +5,7 @@ export const postInfo: PostInfo[] = [
   {
     "slug": "engineering-recovery-evidence-notes",
     "title": "Engineering notes: recovery is a product feature",
-    "summary": "Three recurring design lessons from agent runtimes, GUI automation, and this portfolio rebuild.",
+    "summary": "Three design lessons on recovery, drawn from agent runtimes, GUI automation, and this portfolio rebuild.",
     "publishedAt": "2026-11-05",
     "tags": [
       "Agent Engineering",
@@ -15,7 +15,7 @@ export const postInfo: PostInfo[] = [
     "category": "systems",
     "zh": {
       "title": "工程总结：恢复能力也是产品功能",
-      "summary": "从 Agent 运行时、GUI 自动化与这次个人站改造中，整理三个反复出现的设计问题。"
+      "summary": "从 Agent 运行时、GUI 自动化和这次个人站改造里，整理出三个反复出现的设计问题。"
     }
   },
   {
@@ -37,7 +37,7 @@ export const postInfo: PostInfo[] = [
   {
     "slug": "sidecar-gui-agent-harness",
     "title": "Sidecar: a GUI agent that checks its own work",
-    "summary": "A source-level look at fresh observations, action journals, and evidence-based completion in Sidecar.",
+    "summary": "How Sidecar uses fresh observations, an action journal, and separate verification to decide when a GUI task is done.",
     "publishedAt": "2026-11-05",
     "tags": [
       "Agent Engineering",
@@ -47,13 +47,13 @@ export const postInfo: PostInfo[] = [
     "category": "agents",
     "zh": {
       "title": "Sidecar：让 GUI Agent 核对自己的工作",
-      "summary": "从新观察、动作日志与完成证据，理解 Sidecar 如何组织 GUI Agent 的执行。"
+      "summary": "Sidecar 如何用新观察、动作日志和独立验证，判断一个 GUI 任务何时算完成。"
     }
   },
   {
     "slug": "llm-wiki-in-practice",
     "title": "LLM Wiki in Practice: Turning Documents into Traceable Engineering Knowledge",
-    "summary": "How I use an LLM-compiled wiki to turn project documents into searchable, linked, and source-aware engineering knowledge.",
+    "summary": "How I use an LLM-compiled wiki to make project documents searchable, connected, and traceable to their sources.",
     "publishedAt": "2026-09-05",
     "tags": [
       "LLM Wiki",
@@ -64,7 +64,7 @@ export const postInfo: PostInfo[] = [
     "category": "agents",
     "zh": {
       "title": "LLM Wiki 实践：把项目资料整理成可追溯的工程知识",
-      "summary": "我如何使用由 LLM 编译的 Wiki，把项目文档整理成可搜索、有关联并且能够追溯来源的工程知识。"
+      "summary": "用 LLM 编译的 Wiki，把项目文档变成能搜索、能互相关联、也能追溯来源的工程知识。"
     }
   },
   {
@@ -177,8 +177,8 @@ export const postInfo: PostInfo[] = [
   },
   {
     "slug": "github-repo-review-agent",
-    "title": "GitHub Repo Review Agent: Engineering an AI Code Review Workflow",
-    "summary": "A bilingual engineering note on building an AI agent that reviews GitHub repositories through indexing, static analysis, verification, and risk-ranked findings.",
+    "title": "GitHub Repo Review Agent: Building an AI Code Review Workflow",
+    "summary": "Notes on building an AI agent that reviews GitHub repositories with indexing, static analysis, local verification, and risk-ranked findings.",
     "publishedAt": "2026-06-07",
     "tags": [
       "AI Agent",
@@ -189,7 +189,7 @@ export const postInfo: PostInfo[] = [
     "category": "agents",
     "zh": {
       "title": "GitHub Repo Review Agent：工程化 AI 代码审查工作流",
-      "summary": "一篇中英双语工程笔记，介绍如何通过仓库索引、静态分析、本地验证和风险排序构建 GitHub repo review agent。"
+      "summary": "如何通过仓库索引、静态分析、本地验证和风险排序，搭建一个能审查 GitHub 仓库的 agent。"
     }
   },
   {
@@ -211,7 +211,7 @@ export const postInfo: PostInfo[] = [
   {
     "slug": "mongodb-postgresql-practical-takeaways",
     "title": "MongoDB and PostgreSQL: Practical Takeaways",
-    "summary": "A practical reflection on when to choose PostgreSQL for structure and consistency, and when MongoDB is useful for flexible document-style data.",
+    "summary": "Notes on picking PostgreSQL for structure and consistency, and MongoDB for document-style data whose shape keeps changing.",
     "publishedAt": "2026-05-17",
     "tags": [
       "MongoDB",
@@ -222,7 +222,7 @@ export const postInfo: PostInfo[] = [
     "category": "systems",
     "zh": {
       "title": "MongoDB 与 PostgreSQL：实践心得",
-      "summary": "关于什么时候选择 PostgreSQL 的结构与一致性，以及什么时候选择 MongoDB 的灵活文档模型。"
+      "summary": "什么时候用 PostgreSQL 换结构和一致性，什么时候用 MongoDB 换文档模型的灵活度。"
     }
   },
   {
@@ -330,7 +330,7 @@ export const postInfo: PostInfo[] = [
   {
     "slug": "python-automation-projects",
     "title": "Python Automation Projects: Connecting Scripts, Storage, and Delivery",
-    "summary": "A broader note on using Python as glue code for batch workflows, data movement, metadata tracking, and repeatable delivery.",
+    "summary": "Notes on using Python as glue code for batch workflows, data movement, metadata tracking, and repeatable delivery.",
     "publishedAt": "2026-05-16",
     "tags": [
       "Python",
@@ -341,13 +341,13 @@ export const postInfo: PostInfo[] = [
     "category": "systems",
     "zh": {
       "title": "Python 自动化项目：连接脚本、存储与交付",
-      "summary": "关于把 Python 作为胶水代码用于批处理工作流、数据移动、元数据追踪和可重复交付的笔记。"
+      "summary": "用 Python 做胶水，处理批处理工作流、数据移动、元数据追踪和可重复交付的笔记。"
     }
   },
   {
     "slug": "python-automation-s3-mongodb",
     "title": "Shipping Faster at Jobgen.ai: Python Automation with AWS S3 & MongoDB",
-    "summary": "How Python automation, AWS S3, and MongoDB helped speed up delivery and keep task artifacts easier to track.",
+    "summary": "How Python automation, AWS S3, and MongoDB helped speed up delivery and make task artifacts easier to track.",
     "publishedAt": "2026-05-16",
     "tags": [
       "Python",
@@ -364,7 +364,7 @@ export const postInfo: PostInfo[] = [
   {
     "slug": "repo-license-info-notes",
     "title": "Repo License Info: Notes on Open-Source License Choices",
-    "summary": "A learning note repository comparing common open-source licenses and the tradeoffs between permissive, copyleft, and public-domain-style terms.",
+    "summary": "Notes comparing common open-source licenses, and where permissive, copyleft, and public-domain-style terms actually differ.",
     "publishedAt": "2026-05-16",
     "tags": [
       "Open Source",
@@ -374,13 +374,13 @@ export const postInfo: PostInfo[] = [
     "category": "archive",
     "zh": {
       "title": "开源许可证笔记：如何选择合适的许可证",
-      "summary": "一个学习笔记仓库，比较常见开源许可证，以及宽松型、著佐权和公共域风格条款之间的权衡。"
+      "summary": "一份开源许可证笔记，比较常见许可证，以及宽松型、著佐权和公共域风格条款之间的区别。"
     }
   },
   {
     "slug": "resume-latex-system",
-    "title": "Resume in LaTeX: Treating a CV as Source-Controlled Design",
-    "summary": "A LaTeX resume project that uses reusable commands, typography, spacing, and version control to keep a technical CV maintainable.",
+    "title": "Resume in LaTeX: A CV That Lives in Version Control",
+    "summary": "A LaTeX resume kept in version control, with reusable commands for layout, entries, and spacing.",
     "publishedAt": "2026-05-16",
     "tags": [
       "LaTeX",
@@ -390,14 +390,14 @@ export const postInfo: PostInfo[] = [
     ],
     "category": "product",
     "zh": {
-      "title": "用 LaTeX 写简历：把 CV 当作可版本控制的设计",
-      "summary": "一个 LaTeX 简历项目，用可复用命令、排版、间距和版本控制来保持技术简历的可维护性。"
+      "title": "用 LaTeX 写简历：把 CV 放进版本控制",
+      "summary": "一个用 LaTeX 维护的简历项目：自定义命令管排版和条目格式，版本控制管改动。"
     }
   },
   {
     "slug": "safe-rl-supervised-shield",
     "title": "Safe Reinforcement Learning with a Supervised Shield",
-    "summary": "A grid-world experiment where Q-learning is combined with a supervised safety classifier to reduce hazard violations.",
+    "summary": "A grid-world experiment with a supervised safety classifier in front of a Q-learning agent, and a threshold that decides how much safety costs.",
     "publishedAt": "2026-05-16",
     "tags": [
       "Reinforcement Learning",
@@ -408,13 +408,13 @@ export const postInfo: PostInfo[] = [
     "category": "systems",
     "zh": {
       "title": "带监督保护层的安全强化学习",
-      "summary": "一个网格世界实验，将 Q-learning 与监督式安全分类器结合，减少智能体进入危险状态的次数。"
+      "summary": "一个网格世界实验：在 Q-learning 前面加一层监督式安全分类器，看阈值如何决定安全的代价。"
     }
   },
   {
     "slug": "shell-script-automarking-system",
     "title": "Shell Script Automarking System: Building a File-Backed Autograder",
-    "summary": "A dash shell project that models assignment creation, submission storage, test execution, output comparison, and marking.",
+    "summary": "A dash shell autograder: assignment creation, submission storage, test runs, output comparison, and marking, all backed by the filesystem.",
     "publishedAt": "2026-05-16",
     "tags": [
       "Shell",
@@ -424,14 +424,14 @@ export const postInfo: PostInfo[] = [
     ],
     "category": "systems",
     "zh": {
-      "title": "Shell Script 自动评分系统：构建基于文件的 Autograder",
-      "summary": "一个 Shell 自动评分系统，围绕测试发现、输出对比、评分规则和文件结构展开。"
+      "title": "Shell 自动评分系统：把状态放在文件系统里",
+      "summary": "一个用 dash 写的自动评分系统：作业创建、提交存储、跑测试、比对输出和算分，全部靠文件系统完成。"
     }
   },
   {
     "slug": "solana-orderflow-event-driven-escrow",
     "title": "Solana OrderFlow: Event-Driven Escrow with Anchor and Kafka",
-    "summary": "A Solana escrow project that connects an Anchor smart contract with Kafka consumers, Postgres projections, risk rules, and notifications.",
+    "summary": "An escrow program on Solana, plus the off-chain pipeline that turns its logs into Kafka events, Postgres tables, risk alerts, and notifications.",
     "publishedAt": "2026-05-16",
     "tags": [
       "Solana",
@@ -441,14 +441,14 @@ export const postInfo: PostInfo[] = [
     ],
     "category": "systems",
     "zh": {
-      "title": "Solana OrderFlow：使用 Anchor 与 Kafka 构建事件驱动托管系统",
-      "summary": "一个 Solana 托管项目，将 Anchor 智能合约、Kafka 消费者、Postgres 投影、风险规则和通知系统连接起来。"
+      "title": "Solana OrderFlow：用 Anchor 和 Kafka 做事件驱动托管",
+      "summary": "一个 Solana 托管项目：Anchor 合约、Kafka 消费者、Postgres 投影、风险规则和通知服务如何接成一条链路。"
     }
   },
   {
     "slug": "tcp-udp-simulator",
     "title": "TCP/UDP Simulator: Heartbeats, Auth, and P2P File Sharing",
-    "summary": "A Python networking simulator that separates UDP control messages from TCP peer-to-peer file transfer.",
+    "summary": "A Python simulator that keeps UDP for control and TCP for peer-to-peer file transfer, plus the server state that makes the split work.",
     "publishedAt": "2026-05-16",
     "tags": [
       "Networking",
@@ -459,7 +459,7 @@ export const postInfo: PostInfo[] = [
     "category": "systems",
     "zh": {
       "title": "TCP/UDP 模拟器：心跳、认证与 P2P 文件共享",
-      "summary": "一个 Python 网络模拟器，将 UDP 控制消息与 TCP 点对点文件传输分离，展示协议设计取舍。"
+      "summary": "一个 Python 网络模拟器：UDP 负责控制消息，TCP 负责点对点文件传输，并处理这种分工带来的状态管理。"
     }
   }
 ];

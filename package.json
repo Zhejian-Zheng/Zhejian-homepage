@@ -7,10 +7,12 @@
         "build": "next build",
         "start": "next start",
         "lint": "next lint",
-        "check": "npm run lint && npm run build",
+        "test": "node --test scripts/redesign.test.mjs",
+        "check": "npm run test && npm run lint && npm run build",
+        "content:check": "node scripts/check-bilingual.mjs",
         "content:generate": "node scripts/generate-posts.mjs",
-        "predev": "npm run content:generate",
-        "prebuild": "npm run content:generate",
+        "predev": "npm run content:check && npm run content:generate",
+        "prebuild": "npm run content:check && npm run content:generate",
         "typecheck": "tsc --noEmit"
     },
     "dependencies": {

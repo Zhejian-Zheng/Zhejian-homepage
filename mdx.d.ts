@@ -8,6 +8,11 @@ declare module "*.mdx" {
 		summary: string;
 		publishedAt: string;
 		tags: string[];
+		category: "agents" | "systems" | "product" | "archive";
+		zh: {
+			title: string;
+			summary: string;
+		};
 	};
 
 	const MDXComponent: ComponentType;

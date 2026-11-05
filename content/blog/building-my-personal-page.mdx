@@ -19,82 +19,82 @@ export const metadata = {
 
 <ArticleLanguage language="en">
 
-This personal homepage started as a small portfolio surface and gradually became a place to practice product thinking.
+This personal homepage started as a small portfolio page and gradually became a place to practice product thinking.
 
-The goal was simple: build a site that feels personal, loads quickly, and gives visitors a clear path through my background, projects, writing, and contact details.
+I wanted a site that felt personal, loaded quickly, and gave a visitor a clear path through my background, projects, writing, and contact details.
 
 ## Stack
 
-- Next.js App Router for routing and static generation.
-- Tailwind CSS for fast visual iteration.
-- MDX for blog content that can mix Markdown with React components later.
-- Web3Forms for a lightweight contact workflow.
+- Next.js App Router handles routing and static generation.
+- Tailwind CSS, because I wanted to iterate on the visuals quickly.
+- MDX for the blog, so posts can mix Markdown with React components later.
+- Web3Forms for the contact form, which keeps the setup light.
 
 ## Architecture
 
-The site is split into focused routes: the homepage introduces my profile, the about page expands the story, the blog route renders MDX posts, and the contact route sends messages through an external form service.
+The site is split into a few routes. The homepage introduces my profile, the about page goes deeper into my background, the blog route renders MDX posts, and the contact route sends messages through an external form service.
 
-The MDX layer is intentionally simple. Each post exports metadata, the blog index imports those posts, and the dynamic route uses the slug to render a statically generated article page. This keeps the writing flow close to the codebase while still giving the site real blog behavior.
+The MDX layer is intentionally simple. Each post exports metadata, the blog index imports those posts, and the dynamic route uses the slug to render a statically generated article page. Writing stays close to the codebase, and the site still works like a blog.
 
-## Design Notes
+## Design notes
 
 I kept the layout direct and readable: a homepage intro, an about page with a visual travel section, a blog area for technical notes, and a contact page that can actually send messages.
 
-Small interactions matter here. The rotating travel section resets its timer after manual navigation, the contact form reports submission state, and the footer text is written to match the site's ongoing nature.
+The small interactions matter here. The travel section rotates on a timer and resets that timer after manual navigation. The contact form reports what is happening while it submits. I wrote the footer copy to fit a site that is still being built.
 
-## Knowledge Points
+## Notes
 
 - App Router routes can combine server-rendered pages with client components where interaction is needed.
-- MDX works well for a developer portfolio because articles can stay version controlled beside the application.
-- Environment variables should keep public form access keys out of committed source while still allowing local and Vercel deployments.
-- User experience details such as timer reset, loading text, and disabled submit states make a small site feel much more polished.
-- A personal page benefits from being treated as a product: clear navigation, purposeful copy, and real contact paths matter as much as visuals.
+- MDX works well for a developer portfolio because articles stay version controlled alongside the application.
+- Putting the public form access key in an environment variable keeps it out of committed source and still lets the form work locally and on Vercel.
+- Timer resets, loading text, and disabled submit states make a small site feel finished.
+- Treating the page like a product helped: navigation, copy, and a working contact path matter as much as the visuals.
 
-## What I Would Improve Next
+## What I would change next
 
-- Add richer project case studies with screenshots and design decisions.
-- Add analytics to understand which pages visitors actually read.
-- Add Playwright checks for core routes and the contact form.
+- Add richer project case studies, with screenshots and the design decisions behind them.
+- Add analytics to see which pages visitors actually read.
+- Add Playwright checks for the core routes and the contact form.
 
 </ArticleLanguage>
 
 <ArticleLanguage language="zh">
 
-这个个人主页最初只是一个小型作品集展示，逐渐变成了一个练习产品思维的地方。
+这个主页一开始只是个小作品集页面，后来慢慢变成了我练习产品思维的地方。
 
-目标很简单：建一个感觉是个人的、加载很快，并且能让访问者清晰地了解我的背景、项目、写作和联系方式的网站。
+目标不复杂：站点要有个人味，加载快，访问者能顺着背景、项目、文章和联系方式一路看下去。
 
 ## 技术栈
 
-- Next.js App Router，负责路由和静态生成。
-- Tailwind CSS，用于快速视觉迭代。
-- MDX，用于博客内容，后续可以把 Markdown 和 React 组件混用。
-- Web3Forms，提供轻量级的联系表单工作流。
+- Next.js App Router 负责路由和静态生成。
+- Tailwind CSS，改视觉的时候不用来回折腾。
+- MDX 写博客，之后可以在 Markdown 里混 React 组件。
+- Web3Forms 做联系表单，接入成本低。
 
 ## 架构
 
-网站被分成几个专注的路由：首页介绍个人信息，About 页面展开故事，博客路由渲染 MDX 文章，联系页面通过外部表单服务发送消息。
+网站拆成几个路由，各管一块：首页介绍我，About 页把经历展开，博客路由渲染 MDX 文章，联系页通过外部表单服务发消息。
 
-MDX 层有意保持简单：每篇文章导出 metadata，博客索引引入这些文章，动态路由通过 slug 渲染静态生成的文章页面。这样写作流程和代码库保持紧密关联，同时让网站具备真实的博客功能。
+MDX 这一层故意做得很薄。每篇文章导出 metadata，博客索引页把这些文章引进来，动态路由根据 slug 静态生成文章页。写作留在仓库里，网站也有正常博客该有的功能。
 
 ## 设计思路
 
-我保持了布局直接、易读：首页介绍、附带旅行照片展示的 About 页面、用于技术笔记的博客区域，以及真正能发送消息的联系页面。
+布局没有绕弯子：首页一段自我介绍，About 页带一块旅行照片区，博客放技术笔记，联系页是真的能发消息的。
 
-小的交互细节很重要：旅行照片轮播在手动切换后重置计时器，联系表单汇报提交状态，页脚文字反映了网站持续更新的本质。
+小交互很影响观感。旅行照片区自动轮播，手动切换之后计时器会重置；联系表单会显示提交状态；页脚那句话是按“这个站还在长”的感觉写的。
 
-## 知识点
+## 笔记
 
-- App Router 路由可以将服务端渲染页面与需要交互的客户端组件结合使用。
-- MDX 非常适合开发者作品集，因为文章可以与应用代码一起做版本控制。
-- 环境变量应该让表单 access key 不进入提交的源码，同时支持本地和 Vercel 部署。
-- 计时器重置、加载文字、禁用提交状态等用户体验细节能让小网站感觉打磨得更精良。
-- 个人主页适合被当作产品来对待：清晰的导航、有目的的文案、真实的联系路径，和视觉设计一样重要。
+- App Router 里，服务端渲染的页面和需要交互的客户端组件可以放在同一条路由上。
+- MDX 适合开发者作品集：文章和代码在同一个仓库，一起进版本控制。
+- 表单的 access key 应该放在环境变量里，不进提交的源码，同时本地和 Vercel 都要能跑。
+- 计时器重置、加载文案、提交按钮禁用，这些小细节决定了站点看起来是不是做完了。
+- 把个人主页当产品做，确实有帮助：导航、文案、一条能用的联系方式，和视觉一样重要。
 
-## 下一步想改进的地方
+## 接下来想改的
 
-- 添加更丰富的项目案例研究，包含截图和设计决策。
-- 添加分析功能，了解访问者实际在读哪些页面。
-- 为核心路由和联系表单添加 Playwright 测试。
+- 给项目写更完整的案例，配截图，把当时的设计决策写清楚。
+- 接分析工具，看看访问者实际在读哪些页面。
+- 给主要路由和联系表单补 Playwright 测试。
 
 </ArticleLanguage>
