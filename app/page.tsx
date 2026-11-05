@@ -1,22 +1,10 @@
+import { siteMetadata } from "./site";
 import type { Metadata } from "next";
 import HomeClient, { type HomePostPreview } from "./home-client";
 import { selectedBuildSlugs } from "./home-data";
 import { blogPosts } from "./blog/posts";
 
-export const metadata: Metadata = {
-	title: "Zhejian Zheng – Software Engineer",
-	description: "Personal homepage of Zhejian Zheng, Software Engineer & Developer based in Sydney. Passionate about full-stack development, data-driven solutions, web design, and human-computer interaction.",
-	openGraph: {
-		title: "Zhejian Zheng – Software Engineer",
-		description: "Personal homepage of Zhejian Zheng, Software Engineer & Developer based in Sydney. Passionate about full-stack development, data-driven solutions, web design, and human-computer interaction.",
-		type: "website",
-	},
-	twitter: {
-		card: "summary",
-		title: "Zhejian Zheng – Software Engineer",
-		description: "Personal homepage of Zhejian Zheng, Software Engineer & Developer based in Sydney.",
-	},
-};
+export function generateMetadata(): Metadata { return siteMetadata("Zhejian Zheng \u2013 Software Engineer", "Recoverable agents, reliable backend systems, and clear product interfaces. Engineering notes by Zhejian Zheng.", "郑哲坚的工程实践：可恢复 Agent、可靠后端与清晰的产品界面。"); }
 
 export default function Page() {
 	const selectedBuildSet = new Set<string>(selectedBuildSlugs);

@@ -1,11 +1,23 @@
+import ArticleLanguage from "@/app/components/ArticleLanguage";
+
 export const metadata = {
-	title: "Python Automation Projects: Connecting Scripts, Storage, and Delivery",
-	summary: "A broader note on using Python as glue code for batch workflows, data movement, metadata tracking, and repeatable delivery.",
-	publishedAt: "2026-05-16",
-	tags: ["Python", "Automation", "Data", "Workflow"]
+  "title": "Python Automation Projects: Connecting Scripts, Storage, and Delivery",
+  "summary": "A broader note on using Python as glue code for batch workflows, data movement, metadata tracking, and repeatable delivery.",
+  "publishedAt": "2026-05-16",
+  "tags": [
+    "Python",
+    "Automation",
+    "Data",
+    "Workflow"
+  ],
+  "category": "systems",
+  "zh": {
+    "title": "Python 自动化项目：连接脚本、存储与交付",
+    "summary": "关于把 Python 作为胶水代码用于批处理工作流、数据移动、元数据追踪和可重复交付的笔记。"
+  }
 };
 
-<div className="article-language article-language-en">
+<ArticleLanguage language="en">
 
 Several projects in my work use Python as the glue layer between data, storage, scripts, and delivery workflows. The pattern is simple: take repetitive work that humans do manually, encode it as a repeatable process, and keep enough metadata to debug it later.
 
@@ -37,9 +49,9 @@ The most important design choice is keeping enough state to resume safely. Witho
 
 The common thread across these projects is not one library. It is the habit of turning repeated operational work into clear, inspectable, and repeatable systems.
 
-</div>
+</ArticleLanguage>
 
-<div className="article-language article-language-zh">
+<ArticleLanguage language="zh">
 
 我的多个项目都把 Python 作为数据、存储、脚本和交付工作流之间的胶水层。模式很简单：把人工重复执行的工作编码为可重复的流程，并保留足够的元数据供后续调试。
 
@@ -71,4 +83,4 @@ Python 写起来快，易于检查，在 API 集成方面也很强。它有成�
 
 这些项目的共同线索不是某一个库，而是把重复的运维工作转化为清晰、可检查、可重复系统的习惯。
 
-</div>
+</ArticleLanguage>

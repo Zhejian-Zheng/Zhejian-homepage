@@ -1,41 +1,26 @@
 import type { Metadata } from "next";
-import { Barlow_Condensed, Noto_Sans_SC } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
 import { LanguageProvider } from "./components/language";
 import PageTransition from "./components/PageTransition";
+import SiteNav from "./components/SiteNav";
+import { getLanguage, siteUrl } from "./site";
 import "./globals.css";
 
-const displayFont = Barlow_Condensed({
-	subsets: ["latin"],
-	weight: ["500", "600", "700"],
-	variable: "--font-display"
-});
-
-const bodyFont = Noto_Sans_SC({
-	subsets: ["latin"],
-	weight: ["400", "500", "600", "700"],
-	variable: "--font-body"
-});
-
 export const metadata: Metadata = {
-	metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.kzheng.asia"),
-	title: "Zhejian Zheng – Software Engineer",
-	description: "Software Engineer & Developer passionate about full-stack development, data-driven solutions, web design, and human-computer interaction.",
-	openGraph: {
-		type: "website",
-		siteName: "Zhejian Zheng",
-		locale: "en_US",
-	},
-	twitter: {
-		card: "summary",
-	},
+	metadataBase: new URL(siteUrl),
+	title: "Zhejian Zheng – Software Engineer"
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+	const language = getLanguage();
 	return (
-		<html lang="en" suppressHydrationWarning>
-			<body className={`${displayFont.variable} ${bodyFont.variable} min-h-screen bg-field-ink text-field-paper antialiased`}>
-				<LanguageProvider>
-					<PageTransition>{children}</PageTransition>
+		<html lang={language === "zh" ? "zh-CN" : "en"}>
+			<body className={`${GeistSans.variable} min-h-screen bg-field-ink text-field-paper antialiased`}>
+				<a className="skip-link" href="#main-content">{language === "zh" ? "跳到主要内容" : "Skip to main content"}</a>
+				<LanguageProvider initialLanguage={language}>
+					<SiteNav />
+					<PageTransition />
+					{children}
 				</LanguageProvider>
 			</body>
 		</html>

@@ -1,7 +1,6 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
-import SiteNav from "../components/SiteNav";
 import { useLanguage } from "../components/language";
 
 const WEB3FORMS_ENDPOINT = "https://api.web3forms.com/submit";
@@ -120,10 +119,9 @@ export default function ContactContent() {
 	];
 
 	return (
-		<div className="field-page">
-			<SiteNav active="contact" />
+		<div className="field-page contact-page">
 
-			<main className="field-wrap">
+			<main id="main-content" tabIndex={-1} className="field-wrap">
 				<header className="grid gap-8 border-b border-white/15 pb-10 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
 					<div>
 						<p className="field-meta text-accent">{copy.eyebrow}</p>
@@ -154,6 +152,7 @@ export default function ContactContent() {
 										key={channel.label}
 										href={channel.href}
 										target={channel.external ? "_blank" : undefined}
+ aria-label={channel.external ? `${channel.label} (${language === "zh" ? "在新窗口打开" : "opens in a new window"})` : undefined}
 										rel={channel.external ? "noreferrer" : undefined}
 										className="group field-record-link flex items-center justify-between gap-4 border-t border-white/15 py-4"
 									>

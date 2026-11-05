@@ -1,11 +1,24 @@
+import ArticleLanguage from "@/app/components/ArticleLanguage";
+
 export const metadata = {
-	title: "ReMe Long-Term Memory: Recording, Retrieval, Consolidation, and Forgetting",
-	summary: "A bilingual source code walkthrough of how ReMe uses Step, FileStore, BM25, and Auto Dream to manage agent memory.",
-	publishedAt: "2026-08-17",
-	tags: ["AI Agent", "ReMe", "Memory", "BM25", "Python"]
+  "title": "ReMe Long-Term Memory: Recording, Retrieval, Consolidation, and Forgetting",
+  "summary": "A bilingual source code walkthrough of how ReMe uses Step, FileStore, BM25, and Auto Dream to manage agent memory.",
+  "publishedAt": "2026-08-17",
+  "tags": [
+    "AI Agent",
+    "ReMe",
+    "Memory",
+    "BM25",
+    "Python"
+  ],
+  "category": "agents",
+  "zh": {
+    "title": "ReMe 长期记忆：记录、检索、压缩与遗忘",
+    "summary": "从源码出发，说明 ReMe 如何用 Step、FileStore、BM25 和 Auto Dream 记录、检索、整合与删除 Agent 记忆。"
+  }
 };
 
-<div className="article-language article-language-en">
+<ArticleLanguage language="en">
 
 Long-term memory sounds simple until an Agent has to correct an old fact, explain where a memory came from, or rebuild its index after a crash. ReMe handles these problems with files, small workflow steps, and derived indexes that can be rebuilt.
 
@@ -156,9 +169,9 @@ That design costs more filesystem and index coordination than saving messages in
 - [`SearchStep`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/steps/index/search.py)
 - [Auto Dream steps](https://github.com/agentscope-ai/ReMe/tree/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/steps/evolve/dream)
 
-</div>
+</ArticleLanguage>
 
-<div className="article-language article-language-zh">
+<ArticleLanguage language="zh">
 
 长期记忆听起来不复杂。真正写进工程以后，问题很快就会出现：旧信息怎样纠正，检索结果怎样找到原文，索引损坏后能不能重建，删除一条记忆时又要清理哪些数据。
 
@@ -309,4 +322,4 @@ ReMe 当前没有自动时间衰减、TTL 过期或按重要性静默删除旧�
 - [`SearchStep`](https://github.com/agentscope-ai/ReMe/blob/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/steps/index/search.py)
 - [Auto Dream steps](https://github.com/agentscope-ai/ReMe/tree/c937be9d94f2228a3ac5a10515eceef6a2656e65/reme/steps/evolve/dream)
 
-</div>
+</ArticleLanguage>

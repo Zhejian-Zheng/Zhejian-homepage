@@ -1,0 +1,93 @@
+import ArticleLanguage from "@/app/components/ArticleLanguage";
+
+export const metadata = {
+  "title": "Sidecar: separating conversation from device execution",
+  "summary": "Why a message, a queued task, and a running device action need distinct lifecycles.",
+  "publishedAt": "2026-11-05",
+  "tags": [
+    "Agent Engineering",
+    "Recovery",
+    "Systems"
+  ],
+  "category": "agents",
+  "zh": {
+    "title": "Sidecar：把对话入口与设备任务分开",
+    "summary": "为什么一条聊天消息、一个队列任务与一次设备动作，需要不同的生命周期。"
+  }
+};
+
+<ArticleLanguage language="en">
+
+A chat interface makes device automation approachable, but a message is not always a request to operate a phone. Sidecar’s conversation service makes that distinction explicit. This review uses the local working tree on November 5, 2026, based on `9a28e63` with uncommitted changes. Linked sources show the baseline; this note does not claim a new end-to-end acceptance run.
+
+## Classify before creating work
+
+`conversation.py` defines four decision kinds: reply, clarify, time, and device. A capability question can receive an ordinary answer. An ambiguous app request can ask for clarification. Time queries use the server clock with a validated timezone instead of creating a device job.
+
+The same service supports the web entry and the OpenAI-compatible chat entry. Keeping this routing in one place reduces the chance that two interfaces give the same sentence different operational meanings.
+
+## The connection is not the task
+
+According to the README, the server starts an independent worker and persists the queue in SQLite. Closing the browser or ending a chat stream does not cancel the task. The host and device still need to stay online.
+
+A client should retain the task ID and render its status separately from the chat transport. A response timeout means that the client stopped waiting; it does not establish that device execution stopped.
+
+## Retrying is different from asking again
+
+The compatibility interface persists request deduplication across restarts. Retrying the same request can reuse the task; deliberately repeating the goal needs a new conversation turn or a fresh idempotency key. Reusing a key for a different request is invalid.
+
+This boundary prevents transport retries from silently becoming duplicate device actions. It does not promise exactly-once effects in a third-party app.
+
+## Make handoff visible
+
+The interface needs to show whether a task is queued, active, paused or waiting for a person, together with its latest observation. A generic “continue” button must not be interpreted as permission to send a prepared email.
+
+My takeaway is to design the task lifecycle before polishing the chat bubble. Conversation makes intent easier to express; durable task state makes execution easier to inspect.
+
+
+## Sources
+
+- [Sidecar README](https://github.com/Zhejian-Zheng/sidecar/blob/9a28e63/README.md)
+- [Harness implementation](https://github.com/Zhejian-Zheng/sidecar/blob/9a28e63/src/sidecar/harness.py)
+- [Harness regression tests](https://github.com/Zhejian-Zheng/sidecar/blob/9a28e63/tests/test_harness.py)
+- [Conversation routing](https://github.com/Zhejian-Zheng/sidecar/blob/9a28e63/src/sidecar/conversation.py)
+
+</ArticleLanguage>
+
+<ArticleLanguage language="zh">
+
+聊天界面让设备自动化更容易使用，但一条消息不一定意味着“现在操作手机”。Sidecar 的对话服务显式区分了两者。本文依据 2026 年 11 月 5 日的本地工作区阅读入口设计，基线为 `9a28e63`，包含尚未提交的修改。文末链接展示基线版本，不宣称完成新的端到端验收。
+
+## 先分类，再创建工作
+
+`conversation.py` 定义 reply、clarify、time、device 四种决策。询问能力可以直接回答；应用指代不明可以澄清；报时使用服务端时钟和经过校验的时区，不创建手机任务。
+
+网页入口和 OpenAI 兼容聊天入口复用这个服务。把路由判断放在同一处，能减少两个界面对同一句话给出不同操作含义的风险。
+
+## 连接不等于任务
+
+README 说明服务启动独立 worker，并通过 SQLite 保存队列。关闭网页或断开聊天流不会取消任务，但宿主机与设备仍需在线。
+
+客户端应保留任务编号，把任务状态与聊天连接分开呈现。请求超时只能说明客户端不再等待，不能说明设备停止执行。
+
+## 重试与再次提出请求不同
+
+兼容接口的请求去重记录可以跨重启保留。重试同一请求可以复用任务；主动再次执行同一目标，需要新的对话轮次或新的幂等键。不同请求不能复用同一个键。
+
+这个边界避免网络重试悄悄变成重复设备动作，但不承诺第三方 App 中的副作用具备 exactly-once 保证。
+
+## 让交接状态可见
+
+界面需要区分排队、执行、暂停和等待本人处理，并展示最近观察。一个笼统的“继续”按钮，不应被解释成授权发送已经准备好的邮件。
+
+我的总结是，先设计任务生命周期，再打磨聊天气泡。对话帮助表达意图，持久化任务状态帮助检查执行。
+
+
+## 参考源码
+
+- [Sidecar README](https://github.com/Zhejian-Zheng/sidecar/blob/9a28e63/README.md)
+- [Harness implementation](https://github.com/Zhejian-Zheng/sidecar/blob/9a28e63/src/sidecar/harness.py)
+- [Harness regression tests](https://github.com/Zhejian-Zheng/sidecar/blob/9a28e63/tests/test_harness.py)
+- [Conversation routing](https://github.com/Zhejian-Zheng/sidecar/blob/9a28e63/src/sidecar/conversation.py)
+
+</ArticleLanguage>

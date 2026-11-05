@@ -1,11 +1,23 @@
+import ArticleLanguage from "@/app/components/ArticleLanguage";
+
 export const metadata = {
-	title: "TCP/UDP Simulator: Heartbeats, Auth, and P2P File Sharing",
-	summary: "A Python networking simulator that separates UDP control messages from TCP peer-to-peer file transfer.",
-	publishedAt: "2026-05-16",
-	tags: ["Networking", "Python", "TCP", "UDP"]
+  "title": "TCP/UDP Simulator: Heartbeats, Auth, and P2P File Sharing",
+  "summary": "A Python networking simulator that separates UDP control messages from TCP peer-to-peer file transfer.",
+  "publishedAt": "2026-05-16",
+  "tags": [
+    "Networking",
+    "Python",
+    "TCP",
+    "UDP"
+  ],
+  "category": "systems",
+  "zh": {
+    "title": "TCP/UDP 模拟器：心跳、认证与 P2P 文件共享",
+    "summary": "一个 Python 网络模拟器，将 UDP 控制消息与 TCP 点对点文件传输分离，展示协议设计取舍。"
+  }
 };
 
-<div className="article-language article-language-en">
+<ArticleLanguage language="en">
 
 I built a TCP/UDP simulator to explore reliable messaging, heartbeat-driven liveness, authentication, and peer-to-peer file sharing.
 
@@ -47,9 +59,9 @@ This was designed as a lab simulator, but it can be extended with TLS, chunk che
 - Protocol commands should have clear validation and error responses so clients know what happened.
 - Real systems would add authentication hardening, encryption, retries, and checksums.
 
-</div>
+</ArticleLanguage>
 
-<div className="article-language article-language-zh">
+<ArticleLanguage language="zh">
 
 我构建了这个 TCP/UDP 模拟器，用来探索可靠消息传递、心跳驱动的活跃性检测、身份认证和点对点文件共享。
 
@@ -91,4 +103,4 @@ This was designed as a lab simulator, but it can be extended with TLS, chunk che
 - 协议命令应该有清晰的校验和错误响应，让客户端知道发生了什么。
 - 真实系统还需要加固认证、加密传输、重试机制和数据校验和。
 
-</div>
+</ArticleLanguage>

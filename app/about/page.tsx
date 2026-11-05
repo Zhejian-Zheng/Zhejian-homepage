@@ -1,20 +1,8 @@
+import { siteMetadata } from "../site";
 import type { Metadata } from "next";
-import AboutContent from "./content";
+import AboutContent from "./about-client";
 
-export const metadata: Metadata = {
-	title: "About – Zhejian Zheng",
-	description: "Learn about Zhejian Zheng, a full-stack developer based in Sydney, Australia. Originally from Ningbo, China, graduated from UNSW with distinction.",
-	openGraph: {
-		title: "About – Zhejian Zheng",
-		description: "Learn about Zhejian Zheng, a full-stack developer based in Sydney, Australia. Originally from Ningbo, China, graduated from UNSW with distinction.",
-		type: "profile",
-	},
-	twitter: {
-		card: "summary",
-		title: "About – Zhejian Zheng",
-		description: "Learn about Zhejian Zheng, a full-stack developer based in Sydney, Australia.",
-	},
-};
+export function generateMetadata(): Metadata { return siteMetadata("About \u2013 Zhejian Zheng", "From Ningbo to Sydney: the person behind recoverable agents and reliable systems.", "从宁波到悉尼：可恢复 Agent 与可靠系统背后的工程经历。"); }
 
 export default function AboutPage() {
 	return <AboutContent />;

@@ -1,15 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { LanguageToggle, useLanguage } from "./language";
+
+import { usePathname } from "next/navigation";
 
 type NavKey = "home" | "about" | "blog" | "contact";
 
 const navCopy = {
 	en: {
-		brand: "ZHEJIAN / FIELD NOTES",
-		shortBrand: "ZZ / FIELD NOTES",
+		brand: "Zhejian Zheng",
+		shortBrand: "Zhejian",
 		about: "About",
 		blog: "Blog",
 		contact: "Contact",
@@ -17,8 +19,8 @@ const navCopy = {
 		closeMenu: "Close navigation"
 	},
 	zh: {
-		brand: "郑哲坚 / 工程现场笔记",
-		shortBrand: "ZZ / 现场笔记",
+		brand: "郑哲坚",
+		shortBrand: "郑哲坚",
 		about: "关于",
 		blog: "博客",
 		contact: "联系",
@@ -33,17 +35,20 @@ const navItems: Array<{ key: Exclude<NavKey, "home">; href: string }> = [
 	{ key: "contact", href: "/contact" }
 ];
 
-export default function SiteNav({ active, children }: { active: NavKey; children?: React.ReactNode }) {
-	const { language } = useLanguage();
+export default function SiteNav() {
+	const pathname = usePathname();
+ const active: NavKey = pathname.startsWith("/blog") ? "blog" : pathname === "/about" ? "about" : pathname === "/contact" ? "contact" : "home";
+ const { language } = useLanguage();
 	const copy = navCopy[language];
 	const [menuOpen, setMenuOpen] = useState(false);
-	const closeMenu = () => setMenuOpen(false);
+	useEffect(() => { setMenuOpen(false); }, [pathname]);
+ const closeMenu = () => setMenuOpen(false);
 
 	return (
-		<nav className="fixed inset-x-0 top-0 z-[100] border-b border-white/10 bg-field-ink/95 backdrop-blur-lg">
+		<nav onKeyDown={(event) => { if (event.key === "Escape") { closeMenu(); document.getElementById("menu-toggle")?.focus(); } }} className="fixed inset-x-0 top-0 z-[100] border-b border-white/10 bg-field-ink/95 backdrop-blur-lg">
 			<div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4">
-				<Link href="/" onClick={closeMenu} className="field-display text-base font-semibold text-field-paper transition hover:text-accent sm:text-lg">
-					<span className="hidden sm:inline">{copy.brand}</span>
+				<Link href="/" onClick={closeMenu} className="brand-link text-base font-semibold text-field-paper transition hover:text-accent sm:text-lg">
+					<span className="brand-monogram" aria-hidden="true">z.</span><span className="hidden sm:inline">{copy.brand}</span>
 					<span className="sm:hidden">{copy.shortBrand}</span>
 				</Link>
 
@@ -65,8 +70,9 @@ export default function SiteNav({ active, children }: { active: NavKey; children
 						))}
 					</div>
 					<LanguageToggle />
-					{children}
+
 					<button
+                        id="menu-toggle"
 						type="button"
 						className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/15 text-field-paper transition hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary md:hidden"
 						onClick={() => setMenuOpen((open) => !open)}
@@ -84,6 +90,7 @@ export default function SiteNav({ active, children }: { active: NavKey; children
 
 			<div
 				id="mobile-navigation"
+ hidden={!menuOpen}
 				className={`border-t border-white/10 bg-field-navy px-4 transition-[max-height,opacity] duration-200 md:hidden ${
 					menuOpen ? "max-h-64 opacity-100" : "pointer-events-none max-h-0 overflow-hidden opacity-0"
 				}`}

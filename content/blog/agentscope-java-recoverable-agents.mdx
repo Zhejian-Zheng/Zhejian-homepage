@@ -1,11 +1,24 @@
+import ArticleLanguage from "@/app/components/ArticleLanguage";
+
 export const metadata = {
-	title: "Recoverable Agents in AgentScope Java 2.0: Event Streams, HITL, and Resume Semantics",
-	summary: "A bilingual source code walkthrough of AgentScope Java 2.0 event streams, human approval, external tool execution, interruption, and session recovery.",
-	publishedAt: "2026-08-29",
-	tags: ["AI Agent", "AgentScope", "Java", "Event Streaming", "HITL"]
+  "title": "Recoverable Agents in AgentScope Java 2.0: Event Streams, HITL, and Resume Semantics",
+  "summary": "A bilingual source code walkthrough of AgentScope Java 2.0 event streams, human approval, external tool execution, interruption, and session recovery.",
+  "publishedAt": "2026-08-29",
+  "tags": [
+    "AI Agent",
+    "AgentScope",
+    "Java",
+    "Event Streaming",
+    "HITL"
+  ],
+  "category": "agents",
+  "zh": {
+    "title": "AgentScope Java 2.0 可恢复 Agent：事件流、HITL 与恢复语义",
+    "summary": "从源码分析 AgentScope Java 2.0 的事件流、人工批准、外部工具执行、中断机制和 session 恢复边界。"
+  }
 };
 
-<div className="article-language article-language-en">
+<ArticleLanguage language="en">
 
 An Agent becomes difficult to operate when one call lasts longer than one HTTP request. The model may stream text, request two tools, wait for approval, and continue several minutes later. A process may restart between those steps. If the runtime exposes only a final string, the application cannot tell whether the task finished, paused, or lost its place.
 
@@ -173,9 +186,9 @@ These checks expose the difference between a fluent demo and a recoverable servi
 - [`RequireExternalExecutionEvent`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/event/RequireExternalExecutionEvent.java)
 - [`InterruptControl`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/interruption/InterruptControl.java)
 
-</div>
+</ArticleLanguage>
 
-<div className="article-language article-language-zh">
+<ArticleLanguage language="zh">
 
 一次 Agent 调用超过一个 HTTP 请求的生命周期后，运行问题就会变复杂。模型可能先流式输出文字，再申请两个工具，等待人工批准，几分钟后继续执行。进程也可能在中间重启。如果运行时只返回最终字符串，应用无法判断任务已经完成、正在等待，还是已经丢失执行位置。
 
@@ -343,4 +356,4 @@ Agent state 说明工作流原本想做什么。部署系统才是部署是否�
 - [`RequireExternalExecutionEvent`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/event/RequireExternalExecutionEvent.java)
 - [`InterruptControl`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-core/src/main/java/io/agentscope/core/interruption/InterruptControl.java)
 
-</div>
+</ArticleLanguage>

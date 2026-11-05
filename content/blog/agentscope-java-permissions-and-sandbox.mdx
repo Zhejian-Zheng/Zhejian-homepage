@@ -1,11 +1,24 @@
+import ArticleLanguage from "@/app/components/ArticleLanguage";
+
 export const metadata = {
-	title: "AgentScope Java 2.0 Permissions: From ALLOW, ASK, and DENY to Sandbox Isolation",
-	summary: "A bilingual engineering analysis of AgentScope Java 2.0 permission evaluation, HITL approval, tool validation, sandbox isolation, snapshots, and concurrency guards.",
-	publishedAt: "2026-08-29",
-	tags: ["AI Agent", "AgentScope", "Java", "Security", "Sandbox"]
+  "title": "AgentScope Java 2.0 Permissions: From ALLOW, ASK, and DENY to Sandbox Isolation",
+  "summary": "A bilingual engineering analysis of AgentScope Java 2.0 permission evaluation, HITL approval, tool validation, sandbox isolation, snapshots, and concurrency guards.",
+  "publishedAt": "2026-08-29",
+  "tags": [
+    "AI Agent",
+    "AgentScope",
+    "Java",
+    "Security",
+    "Sandbox"
+  ],
+  "category": "agents",
+  "zh": {
+    "title": "AgentScope Java 2.0 权限系统：从 ALLOW、ASK、DENY 到沙箱隔离",
+    "summary": "从工程角度分析 AgentScope Java 2.0 的权限判断、人工确认、工具校验、沙箱隔离、快照和并发保护。"
+  }
 };
 
-<div className="article-language article-language-en">
+<ArticleLanguage language="en">
 
 An Agent that can call a shell or write files has two separate security problems. The application must decide whether an operation is allowed, and the runtime must limit the damage if the decision is wrong. AgentScope Java 2.0 addresses the first problem with permission evaluation and the second with tool validation and optional sandbox execution.
 
@@ -170,9 +183,9 @@ The final security claim should be narrow and testable. For example: this sessio
 - [`SandboxIsolationKey`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-harness/src/main/java/io/agentscope/harness/agent/sandbox/SandboxIsolationKey.java)
 - [`SandboxExecutionGuard`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-harness/src/main/java/io/agentscope/harness/agent/sandbox/SandboxExecutionGuard.java)
 
-</div>
+</ArticleLanguage>
 
-<div className="article-language article-language-zh">
+<ArticleLanguage language="zh">
 
 能够调用 shell 或写文件的 Agent 面临两个不同的安全问题。应用需要判断一项操作是否允许执行，运行时还要在判断错误时限制影响范围。AgentScope Java 2.0 用权限判断处理前一个问题，再用工具校验和可选沙箱处理后一个问题。
 
@@ -337,4 +350,4 @@ Execution guard       -> exclusive access to a shared persistent slot
 - [`SandboxIsolationKey`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-harness/src/main/java/io/agentscope/harness/agent/sandbox/SandboxIsolationKey.java)
 - [`SandboxExecutionGuard`](https://github.com/agentscope-ai/agentscope-java/blob/d60414a6fc74113ca05c73c79b30601323b0dea5/agentscope-harness/src/main/java/io/agentscope/harness/agent/sandbox/SandboxExecutionGuard.java)
 
-</div>
+</ArticleLanguage>

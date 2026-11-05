@@ -1,7 +1,7 @@
+import { getLanguage, siteMetadata } from "../../site";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import SiteNav from "../../components/SiteNav";
 import { LocalizedText } from "../../components/language";
 import { LocalizedDate, LocalizedPostSummary, LocalizedPostTitle, LocalizedTag } from "../localizedPostText";
 import { blogPosts, getBlogPost } from "../posts";
@@ -23,21 +23,9 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
 		};
 	}
 
-	return {
-		title: `${post.title} – Zhejian Blog`,
-		description: post.summary,
-		openGraph: {
-			title: post.title,
-			description: post.summary,
-			type: "article",
-			publishedTime: post.publishedAt,
-		},
-		twitter: {
-			card: "summary",
-			title: `${post.title} – Zhejian Blog`,
-			description: post.summary,
-		},
-	};
+ const title = getLanguage() === "zh" ? post.zh.title : post.title;
+ const metadata = siteMetadata(`${title} – Zhejian Blog`, post.summary, post.zh.summary);
+ return { ...metadata, openGraph: { ...metadata.openGraph, type: "article", publishedTime: post.publishedAt } };
 }
 
 export default function BlogPostPage({ params }: { params: { slug: string } }) {
@@ -53,10 +41,9 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
 	const Post = post.Component;
 
 	return (
-		<div className="field-page">
-			<SiteNav active="blog" />
+		<div className="field-page article-page">
 
-			<div className="field-wrap">
+			<main id="main-content" tabIndex={-1} className="field-wrap">
 				<Link
 					href="/blog"
 					className="field-meta inline-flex min-h-10 items-center border-b border-primary text-primary transition hover:border-accent hover:text-accent"
@@ -173,7 +160,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
 						</div>
 					</aside>
 				</div>
-			</div>
+			</main>
 		</div>
 	);
 }

@@ -1,11 +1,23 @@
+import ArticleLanguage from "@/app/components/ArticleLanguage";
+
 export const metadata = {
-	title: "Balatro Rust: Building a Deterministic Card Scoring Engine",
-	summary: "A Rust CLI that parses round data, evaluates poker hands, applies card and joker effects, and returns a final score.",
-	publishedAt: "2026-05-16",
-	tags: ["Rust", "CLI", "Game Logic", "Scoring"]
+  "title": "Balatro Rust: Building a Deterministic Card Scoring Engine",
+  "summary": "A Rust CLI that parses round data, evaluates poker hands, applies card and joker effects, and returns a final score.",
+  "publishedAt": "2026-05-16",
+  "tags": [
+    "Rust",
+    "CLI",
+    "Game Logic",
+    "Scoring"
+  ],
+  "category": "systems",
+  "zh": {
+    "title": "Balatro Rust：构建确定性的卡牌计分引擎",
+    "summary": "一个 Rust 计分引擎练习，关注状态建模、规则顺序、可测试性和确定性游戏逻辑。"
+  }
 };
 
-<div className="article-language article-language-en">
+<ArticleLanguage language="en">
 
 Balatro Rust is a command-line scoring engine. It reads round input, evaluates the played hand, applies card effects and joker modifiers, then outputs the final chip times multiplier score.
 
@@ -43,9 +55,9 @@ That structure keeps one large scoring problem from turning into a single unread
 
 This repo shows how to turn a rule-heavy game into a staged evaluation system. The main engineering lesson is to make timing and priority explicit.
 
-</div>
+</ArticleLanguage>
 
-<div className="article-language article-language-zh">
+<ArticleLanguage language="zh">
 
 Balatro Rust 是一个命令行计分引擎。它读取回合输入，评估已打出的牌型，应用牌效果和小丑牌修正，然后输出最终的筹码乘以倍数后的分数。
 
@@ -83,4 +95,4 @@ Balatro Rust 是一个命令行计分引擎。它读取回合输入，评估已�
 
 本仓库展示了如何将规则繁多的游戏转换为分阶段评估系统。主要的工程教训是要明确规定时间和优先级。
 
-</div>
+</ArticleLanguage>

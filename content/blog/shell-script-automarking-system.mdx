@@ -1,11 +1,23 @@
+import ArticleLanguage from "@/app/components/ArticleLanguage";
+
 export const metadata = {
-	title: "Shell Script Automarking System: Building a File-Backed Autograder",
-	summary: "A dash shell project that models assignment creation, submission storage, test execution, output comparison, and marking.",
-	publishedAt: "2026-05-16",
-	tags: ["Shell", "Testing", "Automation", "CLI"]
+  "title": "Shell Script Automarking System: Building a File-Backed Autograder",
+  "summary": "A dash shell project that models assignment creation, submission storage, test execution, output comparison, and marking.",
+  "publishedAt": "2026-05-16",
+  "tags": [
+    "Shell",
+    "Testing",
+    "Automation",
+    "CLI"
+  ],
+  "category": "systems",
+  "zh": {
+    "title": "Shell Script 自动评分系统：构建基于文件的 Autograder",
+    "summary": "一个 Shell 自动评分系统，围绕测试发现、输出对比、评分规则和文件结构展开。"
+  }
 };
 
-<div className="article-language article-language-en">
+<ArticleLanguage language="en">
 
 This repo implements an automarking workflow with shell scripts. It models the core lifecycle of a university-style assignment system: add an assignment, submit files, summarize submissions, run tests, and calculate marks.
 
@@ -41,9 +53,9 @@ Writing this in dash keeps the project close to POSIX-style scripting. That mean
 
 This project shows how much system behavior can be built with shell alone. It is a practical exercise in automation, validation, and test infrastructure.
 
-</div>
+</ArticleLanguage>
 
-<div className="article-language article-language-zh">
+<ArticleLanguage language="zh">
 
 仓库使用 shell 脚本实现了一个自动评分工作流程。它模拟了大学作业系统的核心生命周期：添加作业、提交文件、汇总提交内容、运行测试和计算分数。
 
@@ -79,4 +91,4 @@ This project shows how much system behavior can be built with shell alone. It is
 
 本项目展示了仅使用 shell 可以构建多少系统行为。它是一个自动化、验证和测试基础设施的实践练习。
 
-</div>
+</ArticleLanguage>

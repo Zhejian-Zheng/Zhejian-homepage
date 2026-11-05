@@ -1,0 +1,93 @@
+import ArticleLanguage from "@/app/components/ArticleLanguage";
+
+export const metadata = {
+  "title": "Sidecar: a GUI agent that checks its own work",
+  "summary": "A source-level look at fresh observations, action journals, and evidence-based completion in Sidecar.",
+  "publishedAt": "2026-11-05",
+  "tags": [
+    "Agent Engineering",
+    "Recovery",
+    "Systems"
+  ],
+  "category": "agents",
+  "zh": {
+    "title": "Sidecar：让 GUI Agent 核对自己的工作",
+    "summary": "从新观察、动作日志与完成证据，理解 Sidecar 如何组织 GUI Agent 的执行。"
+  }
+};
+
+<ArticleLanguage language="en">
+
+Sidecar operates Android apps from a natural-language task. Its most useful architectural choice is that deciding, acting, and claiming success are separate steps. This note reviews the local working tree on November 5, 2026, based on commit `9a28e63` with uncommitted changes. The source links pin that baseline and may not include the local additions. This is a code review, not a new device benchmark.
+
+## Observe again before acting
+
+In `src/sidecar/harness.py`, `_execute` captures a fresh observation before it touches the device. It checks whether the proposed target existed in the original observation, then asks the adapter whether the action is still current. A changed screen discards the stale action instead of guessing a new coordinate.
+
+This makes the observation an expiring input to a decision. The model’s previous response is not sufficient authority to act on a page that has since changed.
+
+## Record intent before the side effect
+
+The harness reserves an action identifier before calling `device.execute`. If execution raises an exception, the store records an uncertain outcome and the task waits for the user. A timeout can happen after a successful write; retrying immediately would risk writing twice.
+
+`test_uncertain_write_waits_and_resume_does_not_duplicate` exercises that exact case with a fake device. It verifies one item after recovery. That is evidence about the harness contract, not proof that every Android app behaves the same way.
+
+## Completion needs a separate observation
+
+`_verify` captures another fresh observation and asks the model to check the task’s criteria. Verification records include an observation ID, device identity, timestamp and policy hash. Supported app requirements can also invoke a program verifier.
+
+The distinction matters in the console: a live frame shows activity, a returned action shows that a call finished, and a verification result supports a completion claim. These are different kinds of evidence.
+
+## Boundaries are part of the design
+
+The current README describes single-app tasks and an allowlist. Sending, publishing, payments and destructive actions stop for human handling. Android hidden displays share app data and accounts; they are not isolated virtual machines. The iPhone Mirroring backend remains experimental and requires manual result checks.
+
+The next useful evaluation is a matrix of app version, task, failure injection and final evidence. A successful demonstration should remain one row in that matrix.
+
+
+## Sources
+
+- [Sidecar README](https://github.com/Zhejian-Zheng/sidecar/blob/9a28e63/README.md)
+- [Harness implementation](https://github.com/Zhejian-Zheng/sidecar/blob/9a28e63/src/sidecar/harness.py)
+- [Harness regression tests](https://github.com/Zhejian-Zheng/sidecar/blob/9a28e63/tests/test_harness.py)
+- [Conversation routing](https://github.com/Zhejian-Zheng/sidecar/blob/9a28e63/src/sidecar/conversation.py)
+
+</ArticleLanguage>
+
+<ArticleLanguage language="zh">
+
+Sidecar 接收自然语言任务，再操作 Android App。它最值得记录的架构选择，是把决策、执行与宣告成功拆成不同步骤。本文依据 2026 年 11 月 5 日的本地工作区阅读源码，基线为 `9a28e63`，包含尚未提交的修改。文末链接固定到基线版本，可能不包含这些本地增量；本文不代表新增的真机性能测试。
+
+## 执行之前重新观察
+
+`src/sidecar/harness.py` 中的 `_execute` 会在接触设备前获取新的观察。它先检查动作目标是否存在于原观察，再由适配器判断动作是否仍然有效。页面已经变化时，丢弃旧动作，而不是猜一个新坐标继续点。
+
+这意味着观察是有时效的决策输入。模型上一轮的回答，不能直接授权它操作已经变化的界面。
+
+## 副作用之前记录意图
+
+Harness 先登记动作标识，再调用 `device.execute`。执行抛出异常时，存储层记录不确定结果，任务转入等待用户核对。超时可能发生在写入成功之后，立即重试就可能写入两次。
+
+`test_uncertain_write_waits_and_resume_does_not_duplicate` 用模拟设备覆盖了这个场景，检查恢复后仍然只有一个条目。这证明的是 Harness 的行为契约，并不证明所有 Android App 都有相同表现。
+
+## 完成需要另一份观察
+
+`_verify` 再次获取新观察，请模型逐项核对验收条件。验证记录包括观察编号、设备身份、时间与策略哈希；受支持的应用条件还可以调用程序验证器。
+
+控制台因此需要区分三种证据：实时画面说明正在发生什么，动作返回说明调用结束，验证结果才支撑完成声明。录像本身不是成功证明。
+
+## 边界也是设计的一部分
+
+当前 README 限定一项任务操作一个目标 App，并使用允许列表。发送、发布、付款和破坏性操作交由本人处理。Android 隐藏副屏共享账号与应用数据，不是独立虚拟机；iPhone Mirroring 后端仍是实验能力，结果需要人工核对。
+
+下一步有价值的评估，是建立包含应用版本、任务、故障注入和最终证据的矩阵。一次成功演示只是矩阵中的一行。
+
+
+## 参考源码
+
+- [Sidecar README](https://github.com/Zhejian-Zheng/sidecar/blob/9a28e63/README.md)
+- [Harness implementation](https://github.com/Zhejian-Zheng/sidecar/blob/9a28e63/src/sidecar/harness.py)
+- [Harness regression tests](https://github.com/Zhejian-Zheng/sidecar/blob/9a28e63/tests/test_harness.py)
+- [Conversation routing](https://github.com/Zhejian-Zheng/sidecar/blob/9a28e63/src/sidecar/conversation.py)
+
+</ArticleLanguage>

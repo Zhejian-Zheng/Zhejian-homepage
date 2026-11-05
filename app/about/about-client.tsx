@@ -2,13 +2,12 @@
 
 import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
-import SiteNav from "../components/SiteNav";
 import { useLanguage, type Language } from "../components/language";
-import personalPage from "@/app/images/aboutme/personalPage.jpg";
-import imgHome from "@/app/images/world_exploring/home.jpg";
-import imgFairlight from "@/app/images/world_exploring/fairlight.jpg";
-import imgFujimt from "@/app/images/world_exploring/fujimt.jpg";
-import imgTokyo from "@/app/images/world_exploring/tokyo.jpg";
+import personalPage from "@/app/images/aboutme/personalPage.webp";
+import imgHome from "@/app/images/world_exploring/home.webp";
+import imgFairlight from "@/app/images/world_exploring/fairlight.webp";
+import imgFujimt from "@/app/images/world_exploring/mount-fuji.webp";
+import imgTokyo from "@/app/images/world_exploring/tokyo.webp";
 
 type LocalizedText = Record<Language, string>;
 type RouteEntry = {
@@ -133,7 +132,7 @@ const aboutCopy = {
 		journeyIntro: "Four points that shaped how I build and communicate.",
 		capabilities: "Core capabilities",
 		practiceLabel: "Practice",
-		capabilitiesIntro: "Eight areas backed by work you can inspect—not a wall of technology logos.",
+		capabilitiesIntro: "Four core disciplines, with further practice collected below.",
 		openEvidence: "Open evidence",
 		footer: "Still learning · Still building · Still recording"
 	},
@@ -149,7 +148,7 @@ const aboutCopy = {
 		journeyIntro: "四个节点，说明我如何形成现在的工程与沟通方式。",
 		capabilities: "核心能力",
 		practiceLabel: "实践",
-		capabilitiesIntro: "八项可以在实际项目中找到证据的能力，而不是一面技术 Logo 墙。",
+		capabilitiesIntro: "四个核心方向，以及持续积累的工程实践。",
 		openEvidence: "查看项目证据",
 		footer: "持续学习 · 持续构建 · 持续记录"
 	}
@@ -160,14 +159,13 @@ export default function AboutContent() {
 	const copy = aboutCopy[language];
 
 	return (
-		<div className="field-page">
-			<SiteNav active="about" />
+		<div className="field-page about-page">
 
-			<main className="field-wrap">
+			<main id="main-content" tabIndex={-1} className="field-wrap">
 				<header className="grid gap-10 border-b border-white/15 pb-12 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-end">
 					<div>
 						<p className="field-meta text-accent">{copy.eyebrow}</p>
-						<h1 className="field-display mt-5 max-w-3xl text-6xl font-semibold leading-[0.92] sm:text-8xl">{copy.title}</h1>
+						<h1 className="field-display mt-5 max-w-6xl text-4xl font-semibold leading-tight sm:text-6xl">{copy.title}</h1>
 						<p className="mt-7 max-w-2xl text-lg leading-8 text-slate-300">{copy.intro}</p>
 					</div>
 					<figure className="border border-white/15 bg-field-navy p-3 lg:-rotate-1">
@@ -181,7 +179,7 @@ export default function AboutContent() {
 				<section className="py-14">
 					<div className="grid gap-7 border-b border-white/15 pb-8 lg:grid-cols-[260px_minmax(0,1fr)]">
 						<div>
-							<p className="field-meta text-accent">{copy.routeLabel} / 04</p>
+							<p className="field-meta text-accent">{copy.routeLabel}</p>
 							<h2 className="field-display mt-3 text-4xl font-semibold">{copy.journey}</h2>
 						</div>
 						<p className="max-w-xl text-base leading-7 text-slate-400">{copy.journeyIntro}</p>
@@ -191,7 +189,7 @@ export default function AboutContent() {
 						{routeEntries.map((entry, index) => (
 							<article key={entry.code} className="grid bg-field-ink lg:grid-cols-[150px_minmax(0,1fr)_300px]">
 								<div className="border-b border-white/10 p-5 lg:border-b-0 lg:border-r">
-									<p className="field-meta text-accent">{entry.code}</p>
+
 									<p className="mt-3 font-mono text-xs uppercase tracking-[0.12em] text-slate-500">{entry.period[language]}</p>
 								</div>
 								<div className="p-5 sm:p-7">
@@ -213,15 +211,15 @@ export default function AboutContent() {
 				<section className="border-t border-white/15 py-14">
 					<div className="grid gap-7 lg:grid-cols-[260px_minmax(0,1fr)]">
 						<div>
-							<p className="field-meta text-secondary">{copy.practiceLabel} / 08</p>
+							<p className="field-meta text-secondary">{copy.practiceLabel}</p>
 							<h2 className="field-display mt-3 text-4xl font-semibold">{copy.capabilities}</h2>
 							<p className="mt-4 text-sm leading-6 text-slate-400">{copy.capabilitiesIntro}</p>
 						</div>
-						<div className="grid gap-px bg-white/10 sm:grid-cols-2">
-							{capabilities.map((capability, index) => (
+						<div className="grid grid-flow-dense gap-px bg-white/10 sm:grid-cols-2">
+							{capabilities.slice(0, 4).map((capability) => (
 								<Link key={capability.href} href={capability.href} className="group field-record-link bg-field-navy p-5 sm:p-6">
 									<div className="flex items-start justify-between gap-4">
-										<p className="field-meta text-accent">CAP-{String(index + 1).padStart(2, "0")}</p>
+
 										<span className="field-arrow" aria-hidden="true">↗</span>
 									</div>
 									<h3 className="mt-5 text-xl font-semibold text-field-paper group-hover:text-primary">{capability.title[language]}</h3>
@@ -233,7 +231,8 @@ export default function AboutContent() {
 					</div>
 				</section>
 
-				<footer className="site-footer border-t border-white/15">{copy.footer}</footer>
+				<details className="practice-details"><summary>{language === "zh" ? "更多工程实践" : "Further practice"}</summary><div className="practice-accordion">{capabilities.slice(4).map(capability => <Link href={capability.href} key={capability.href}><h3>{capability.title[language]}</h3><p>{capability.body[language]}</p></Link>)}</div></details>
+<footer className="site-footer border-t border-white/15">{copy.footer}</footer>
 			</main>
 		</div>
 	);

@@ -1,11 +1,23 @@
+import ArticleLanguage from "@/app/components/ArticleLanguage";
+
 export const metadata = {
-	title: "Building My Personal Page",
-	summary: "How this portfolio combines Next.js App Router, Tailwind CSS, static MDX writing, Web3Forms, and small UX interactions.",
-	publishedAt: "2026-05-16",
-	tags: ["Next.js", "Tailwind CSS", "MDX", "Portfolio"]
+  "title": "Building My Personal Page",
+  "summary": "How this portfolio combines Next.js App Router, Tailwind CSS, static MDX writing, Web3Forms, and small UX interactions.",
+  "publishedAt": "2026-05-16",
+  "tags": [
+    "Next.js",
+    "Tailwind CSS",
+    "MDX",
+    "Portfolio"
+  ],
+  "category": "product",
+  "zh": {
+    "title": "构建我的个人主页",
+    "summary": "关于这个 portfolio 的一次复盘：信息架构、视觉系统、交互细节、部署和持续打磨。"
+  }
 };
 
-<div className="article-language article-language-en">
+<ArticleLanguage language="en">
 
 This personal homepage started as a small portfolio surface and gradually became a place to practice product thinking.
 
@@ -44,9 +56,9 @@ Small interactions matter here. The rotating travel section resets its timer aft
 - Add analytics to understand which pages visitors actually read.
 - Add Playwright checks for core routes and the contact form.
 
-</div>
+</ArticleLanguage>
 
-<div className="article-language article-language-zh">
+<ArticleLanguage language="zh">
 
 这个个人主页最初只是一个小型作品集展示，逐渐变成了一个练习产品思维的地方。
 
@@ -85,4 +97,4 @@ MDX 层有意保持简单：每篇文章导出 metadata，博客索引引入这�
 - 添加分析功能，了解访问者实际在读哪些页面。
 - 为核心路由和联系表单添加 Playwright 测试。
 
-</div>
+</ArticleLanguage>

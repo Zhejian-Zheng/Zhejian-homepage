@@ -1,11 +1,23 @@
+import ArticleLanguage from "@/app/components/ArticleLanguage";
+
 export const metadata = {
-	title: "Solana OrderFlow: Event-Driven Escrow with Anchor and Kafka",
-	summary: "A Solana escrow project that connects an Anchor smart contract with Kafka consumers, Postgres projections, risk rules, and notifications.",
-	publishedAt: "2026-05-16",
-	tags: ["Solana", "Rust", "Kafka", "Postgres"]
+  "title": "Solana OrderFlow: Event-Driven Escrow with Anchor and Kafka",
+  "summary": "A Solana escrow project that connects an Anchor smart contract with Kafka consumers, Postgres projections, risk rules, and notifications.",
+  "publishedAt": "2026-05-16",
+  "tags": [
+    "Solana",
+    "Rust",
+    "Kafka",
+    "Postgres"
+  ],
+  "category": "systems",
+  "zh": {
+    "title": "Solana OrderFlow：使用 Anchor 与 Kafka 构建事件驱动托管系统",
+    "summary": "一个 Solana 托管项目，将 Anchor 智能合约、Kafka 消费者、Postgres 投影、风险规则和通知系统连接起来。"
+  }
 };
 
-<div className="article-language article-language-en">
+<ArticleLanguage language="en">
 
 Solana OrderFlow is an event-driven escrow system. The interesting part is not only the on-chain token exchange, but the full path from smart contract event logs to off-chain indexing, risk detection, and notification workers.
 
@@ -41,9 +53,9 @@ The risk engine consumes the same event stream and applies rule-based checks. Ex
 
 This repo is a good example of full-stack blockchain engineering: the smart contract is only one layer. The production shape also needs ingestion, storage, idempotency, monitoring, and downstream consumers.
 
-</div>
+</ArticleLanguage>
 
-<div className="article-language article-language-zh">
+<ArticleLanguage language="zh">
 
 Solana OrderFlow 是一个事件驱动的托管系统。有意思的地方不只是链上代币交换本身，而是从智能合约事件日志到链下索引、风险检测和通知服务的完整链路。
 
@@ -79,4 +91,4 @@ Anchor 程序支持三条核心指令：创建 Offer、接受 Offer、取消 Off
 
 这个仓库是全栈区块链工程的典型案例：智能合约只是其中一层，生产环境还需要数据摄取、存储、幂等处理、监控和下游消费者。
 
-</div>
+</ArticleLanguage>

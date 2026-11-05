@@ -1,11 +1,24 @@
+import ArticleLanguage from "@/app/components/ArticleLanguage";
+
 export const metadata = {
-	title: "AgentScope 2.0 vs LangChain: An Engineering Comparison",
-	summary: "A bilingual framework selection guide comparing AgentScope 2.0 with the current LangChain and LangGraph stack.",
-	publishedAt: "2026-08-14",
-	tags: ["AI Agent", "AgentScope", "LangChain", "LangGraph", "Framework Comparison"]
+  "title": "AgentScope 2.0 vs LangChain: An Engineering Comparison",
+  "summary": "A bilingual framework selection guide comparing AgentScope 2.0 with the current LangChain and LangGraph stack.",
+  "publishedAt": "2026-08-14",
+  "tags": [
+    "AI Agent",
+    "AgentScope",
+    "LangChain",
+    "LangGraph",
+    "Framework Comparison"
+  ],
+  "category": "agents",
+  "zh": {
+    "title": "AgentScope 2.0 与 LangChain：工程选型对比",
+    "summary": "面向已有 LLM 应用经验的工程师，对比 AgentScope 2.0 与当前 LangChain、LangGraph 技术栈。"
+  }
 };
 
-<div className="article-language article-language-en">
+<ArticleLanguage language="en">
 
 AgentScope 2.0 and LangChain can both build a tool-using Agent. That fact does not help much with framework selection. The useful questions are how each framework represents state, where workflow control lives, what happens when a run is interrupted, and how much of the production stack your team wants from one ecosystem.
 
@@ -210,9 +223,9 @@ Run a short proof of concept before committing. Implement the same research assi
 - [LangGraph persistence](https://docs.langchain.com/oss/python/langgraph/persistence)
 - [LangSmith evaluation](https://docs.langchain.com/langsmith/evaluation)
 
-</div>
+</ArticleLanguage>
 
-<div className="article-language article-language-zh">
+<ArticleLanguage language="zh">
 
 AgentScope 2.0 和 LangChain 都能实现会调用工具的 Agent，但这句话对选型帮助不大。真正影响工程成本的是它们怎样表示状态、工作流控制放在哪里、任务中断后怎样恢复，以及团队希望从同一套生态中获得多少生产能力。
 
@@ -417,4 +430,4 @@ AgentScope 以 Python 为主，Agent 开发模型更集中。它的生态包括 
 - [LangGraph persistence](https://docs.langchain.com/oss/python/langgraph/persistence)
 - [LangSmith evaluation](https://docs.langchain.com/langsmith/evaluation)
 
-</div>
+</ArticleLanguage>

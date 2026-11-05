@@ -1,25 +1,12 @@
+import { siteMetadata } from "../site";
 import type { Metadata } from "next";
 import Link from "next/link";
-import SiteNav from "../components/SiteNav";
 import { LocalizedText } from "../components/language";
 import { LocalizedDate, LocalizedPostSummary, LocalizedPostTitle, LocalizedTag } from "./localizedPostText";
 import { blogCategoryOrder, getBlogCategory, type BlogCategoryKey } from "./categories";
 import { blogPosts, type BlogPost } from "./posts";
 
-export const metadata: Metadata = {
-	title: "Blog – Zhejian Zheng",
-	description: "Field notes on agent engineering, backend systems, data workflows, product interfaces, and the decisions behind real projects.",
-	openGraph: {
-		title: "Blog – Zhejian Zheng",
-		description: "Engineering field notes on agents, systems, data, and product decisions.",
-		type: "website"
-	},
-	twitter: {
-		card: "summary",
-		title: "Blog – Zhejian Zheng",
-		description: "Engineering field notes on agents, systems, data, and product decisions."
-	}
-};
+export function generateMetadata(): Metadata { return siteMetadata("Notes \u2013 Zhejian Zheng", "Engineering notes on agents, recovery, memory, and product decisions.", "关于 Agent、恢复机制、记忆与产品决策的工程笔记。"); }
 
 const categoryCopy: Record<BlogCategoryKey, { index: string; titleEn: string; titleZh: string; bodyEn: string; bodyZh: string }> = {
 	agents: {
@@ -73,17 +60,16 @@ function ArticleRecord({ post }: { post: BlogPost }) {
 }
 
 export default function BlogPage() {
-	const featured = blogPosts[0];
-	const remaining = blogPosts.slice(1);
+	const featured = blogPosts.find(post => post.slug === "sidecar-gui-agent-harness") ?? blogPosts[0];
+	const remaining = blogPosts.filter(post => post.slug !== featured.slug);
 	const grouped = Object.fromEntries(
 		blogCategoryOrder.map((category) => [category, remaining.filter((post) => getBlogCategory(post.slug) === category)])
 	) as Record<BlogCategoryKey, BlogPost[]>;
 
 	return (
-		<div className="field-page">
-			<SiteNav active="blog" />
+		<div className="field-page blog-page">
 
-			<main className="field-wrap">
+			<main id="main-content" tabIndex={-1} className="field-wrap">
 				<header className="grid gap-8 border-b border-white/15 pb-10 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end">
 					<div>
 						<p className="field-meta text-accent"><LocalizedText en="Notebook index · 2024—2026" zh="笔记索引 · 2024—2026" /></p>
@@ -99,9 +85,9 @@ export default function BlogPage() {
 					</p>
 				</header>
 
-				<section className="grid border-b border-white/15 bg-field-navy/80 lg:grid-cols-[260px_minmax(0,1fr)]">
+				<section className="featured-note grid border-b border-white/15 bg-field-navy/80 lg:grid-cols-[260px_minmax(0,1fr)]">
 					<div className="border-b border-white/15 p-6 lg:border-b-0 lg:border-r lg:p-8">
-						<p className="field-meta text-secondary"><LocalizedText en="Featured record" zh="重点记录" /></p>
+						<p className="field-meta text-secondary"><LocalizedText en="In focus · Sidecar" zh="本期重点 · Sidecar" /></p>
 						<p className="mt-4 font-mono text-xs uppercase tracking-[0.15em] text-slate-500"><LocalizedDate date={featured.publishedAt} /></p>
 					</div>
 					<Link href={`/blog/${featured.slug}`} className="group field-record-link p-6 lg:p-8">
@@ -124,16 +110,17 @@ export default function BlogPage() {
 					</Link>
 				</section>
 
-				<div className="space-y-16 py-14">
+				<nav className="category-navigation" aria-label="Blog categories">{blogCategoryOrder.filter(category => grouped[category].length).map(category => <a key={category} href={`#category-${category}`}><LocalizedText en={categoryCopy[category].titleEn} zh={categoryCopy[category].titleZh} /><span>{grouped[category].length}</span></a>)}</nav>
+<div className="space-y-16 py-14">
 					{blogCategoryOrder.map((category) => {
 						const copy = categoryCopy[category];
 						const posts = grouped[category];
 						if (posts.length === 0) return null;
 
 						return (
-							<section key={category} className="grid gap-8 lg:grid-cols-[260px_minmax(0,1fr)]">
+							<section id={`category-${category}`} key={category} className="grid gap-8 lg:grid-cols-[260px_minmax(0,1fr)]">
 								<header>
-									<p className="field-meta text-accent">Section / {copy.index}</p>
+
 									<h2 className="field-display mt-3 text-4xl font-semibold">
 										<LocalizedText en={copy.titleEn} zh={copy.titleZh} />
 									</h2>
@@ -142,7 +129,8 @@ export default function BlogPage() {
 									</p>
 								</header>
 								<div className="border-b border-white/15">
-									{posts.map((post) => <ArticleRecord key={post.slug} post={post} />)}
+									{posts.slice(0, 3).map((post) => <ArticleRecord key={post.slug} post={post} />)}
+{posts.length > 3 && <details className="archive-details"><summary><LocalizedText en={`Show ${posts.length - 3} more notes`} zh={`展开另外 ${posts.length - 3} 篇笔记`} /></summary>{posts.slice(3).map(post => <ArticleRecord key={post.slug} post={post} />)}</details>}
 								</div>
 							</section>
 						);

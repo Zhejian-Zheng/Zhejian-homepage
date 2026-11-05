@@ -4,7 +4,7 @@ import createMDX from "@next/mdx";
 const nextConfig = {
 	pageExtensions: ["js", "jsx", "mdx", "ts", "tsx"],
 	images: {
-		unoptimized: true
+		formats: ["image/avif", "image/webp"]
 	},
 	async redirects() {
 		return [

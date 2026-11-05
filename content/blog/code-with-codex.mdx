@@ -1,11 +1,22 @@
+import ArticleLanguage from "@/app/components/ArticleLanguage";
+
 export const metadata = {
-	title: "Code with Codex",
-	summary: "How I use Codex as a coding partner for planning, implementation, verification, and polishing a personal portfolio.",
-	publishedAt: "2026-05-17",
-	tags: ["AI Agent", "Codex", "Workflow"]
+  "title": "Code with Codex",
+  "summary": "How I use Codex as a coding partner for planning, implementation, verification, and polishing a personal portfolio.",
+  "publishedAt": "2026-05-17",
+  "tags": [
+    "AI Agent",
+    "Codex",
+    "Workflow"
+  ],
+  "category": "agents",
+  "zh": {
+    "title": "Code with Codex",
+    "summary": "关于我如何把 Codex 当作编程伙伴：用它加快实现速度，同时保留自己的产品判断、验证习惯和个人表达。"
+  }
 };
 
-<div className="article-language article-language-en">
+<ArticleLanguage language="en">
 
 Working with Codex feels different from using a normal autocomplete tool. It is closer to having a coding partner that can read the project, make changes, run checks, and keep the work moving while I stay focused on direction and judgment.
 
@@ -41,9 +52,9 @@ Design judgment also stays human. Codex can propose layouts, but I still need to
 
 Codex helps me move faster, but the best results come from collaboration. The agent handles a lot of implementation detail, while I keep responsibility for the decisions that make the work honest and useful.
 
-</div>
+</ArticleLanguage>
 
-<div className="article-language article-language-zh">
+<ArticleLanguage language="zh">
 
 和 Codex 一起工作，感觉和用普通的代码补全工具完全不同。更像是有了一个能读懂项目、直接修改代码、跑验证脚本，同时让我保持对方向和判断的掌控的编程伙伴。
 
@@ -79,4 +90,4 @@ Codex 在重复性工程工作上非常擅长。它可以更新文案、添加�
 
 Codex 让我迭代更快，但最好的结果来自协作。agent 处理大量实现细节，而我保留对让作品真实有价值的那些决策的责任。
 
-</div>
+</ArticleLanguage>

@@ -1,11 +1,23 @@
+import ArticleLanguage from "@/app/components/ArticleLanguage";
+
 export const metadata = {
-	title: "MongoDB and PostgreSQL: Practical Takeaways",
-	summary: "A practical reflection on when to choose PostgreSQL for structure and consistency, and when MongoDB is useful for flexible document-style data.",
-	publishedAt: "2026-05-17",
-	tags: ["MongoDB", "PostgreSQL", "Database", "Data"]
+  "title": "MongoDB and PostgreSQL: Practical Takeaways",
+  "summary": "A practical reflection on when to choose PostgreSQL for structure and consistency, and when MongoDB is useful for flexible document-style data.",
+  "publishedAt": "2026-05-17",
+  "tags": [
+    "MongoDB",
+    "PostgreSQL",
+    "Database",
+    "Data"
+  ],
+  "category": "systems",
+  "zh": {
+    "title": "MongoDB 与 PostgreSQL：实践心得",
+    "summary": "关于什么时候选择 PostgreSQL 的结构与一致性，以及什么时候选择 MongoDB 的灵活文档模型。"
+  }
 };
 
-<div className="article-language article-language-en">
+<ArticleLanguage language="en">
 
 Working with MongoDB and PostgreSQL taught me that database choice is less about which one is better and more about how the data wants to live.
 
@@ -45,9 +57,9 @@ In a real full-stack system, they can also work together: PostgreSQL can handle 
 
 In short: PostgreSQL gives me confidence; MongoDB gives me flexibility.
 
-</div>
+</ArticleLanguage>
 
-<div className="article-language article-language-zh">
+<ArticleLanguage language="zh">
 
 使用 MongoDB 和 PostgreSQL 的经历让我意识到，数据库选型不是"哪个更好"的问题，而是数据本身更适合以哪种方式存活。
 
@@ -87,4 +99,4 @@ PostgreSQL 需要更多前期 schema 设计，但这种结构在项目增长时�
 
 简单说：PostgreSQL 给我信心，MongoDB 给我灵活性。
 
-</div>
+</ArticleLanguage>

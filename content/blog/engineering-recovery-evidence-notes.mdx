@@ -1,0 +1,89 @@
+import ArticleLanguage from "@/app/components/ArticleLanguage";
+
+export const metadata = {
+  "title": "Engineering notes: recovery is a product feature",
+  "summary": "Three recurring design lessons from agent runtimes, GUI automation, and this portfolio rebuild.",
+  "publishedAt": "2026-11-05",
+  "tags": [
+    "Agent Engineering",
+    "Recovery",
+    "Systems"
+  ],
+  "category": "systems",
+  "zh": {
+    "title": "工程总结：恢复能力也是产品功能",
+    "summary": "从 Agent 运行时、GUI 自动化与这次个人站改造中，整理三个反复出现的设计问题。"
+  }
+};
+
+<ArticleLanguage language="en">
+
+Across the existing AgentScope notes, the Sidecar harness, and this portfolio rebuild, a common question keeps returning: what can a user safely understand and do after an interruption? This is a design synthesis, not a performance report.
+
+## Persist what changes the next decision
+
+A useful checkpoint contains enough state to choose the next safe action. A transcript alone may omit whether a tool already changed the outside world. Sidecar’s intent journal illustrates why an uncertain side effect needs a distinct state.
+
+For a form, the analogous state is the saved answer and the step that can be resumed. For an agent, it may also include an approval boundary and a pending external result. Storage should follow the recovery question.
+
+## Match the interface to the evidence
+
+“Working”, “waiting for you”, and “verified” should be different interface states. Do not let an attractive activity animation imply progress that the system cannot substantiate.
+
+This also applies to a website audit. Compressed asset size can be measured locally; a claim about real-user LCP requires field data. A successful build verifies compilation, not every keyboard or language interaction.
+
+## Reduce hidden work
+
+The portfolio previously delayed navigation to play a fade. Its bilingual articles also rendered both languages and hid one with CSS. Both choices did work that a reader did not ask for.
+
+The new direction is direct navigation, a keyboard skip link, server-selected article language, and motion below the first screen. The goal is to make the next useful action arrive sooner and remain understandable.
+
+## Review failure paths as part of the product
+
+A practical review asks four questions: what survives a restart, which effects are uncertain, what evidence supports success, and what the user can do next. These questions work across backend services, agent tools and interfaces because interruption is a normal operating condition.
+
+
+## Sources
+
+- [Sidecar README](https://github.com/Zhejian-Zheng/sidecar/blob/9a28e63/README.md)
+- [Harness implementation](https://github.com/Zhejian-Zheng/sidecar/blob/9a28e63/src/sidecar/harness.py)
+- [Harness regression tests](https://github.com/Zhejian-Zheng/sidecar/blob/9a28e63/tests/test_harness.py)
+- [Conversation routing](https://github.com/Zhejian-Zheng/sidecar/blob/9a28e63/src/sidecar/conversation.py)
+
+</ArticleLanguage>
+
+<ArticleLanguage language="zh">
+
+从已有的 AgentScope 笔记、Sidecar 执行核心，到这次个人站改造，一个问题反复出现：中断之后，用户能可靠地理解什么、继续做什么？这是一篇设计总结，不是性能报告。
+
+## 保存能改变下一步决策的状态
+
+有用的检查点应该足以支持下一步安全决策。聊天记录可能没有说明工具是否已经改变外部世界。Sidecar 的动作意图日志说明，不确定的副作用需要独立状态。
+
+对于表单，相应状态可能是保存的答案和可恢复步骤；对于 Agent，还可能包括审批边界和等待中的外部结果。存储设计应该回应恢复时的问题。
+
+## 界面表达要匹配证据
+
+“正在处理”“等待你介入”和“已验证”应该是不同状态。漂亮的活动动画不能暗示系统无法证明的进展。
+
+网站评审也是如此：压缩后的文件大小可以本地测量，真实用户 LCP 则需要现场数据。构建成功证明编译通过，不等于所有键盘和语言交互都正确。
+
+## 减少隐形工作
+
+这个个人站原先为了淡出动效延迟导航，双语文章也同时输出两种语言，再用 CSS 隐藏其中一种。这些都是读者并没有要求的额外工作。
+
+这次调整的方向是直接导航、键盘跳转入口、服务端选择文章语言，以及首屏以下的动效。目标是让下一步有效操作更早出现，也更容易理解。
+
+## 把失败路径纳入产品评审
+
+一次实用的评审可以问四个问题：重启后什么还在、哪些副作用不确定、什么证据支持完成、用户接下来能做什么。这些问题适用于后端服务、Agent 工具和界面，因为中断本来就是正常运行条件。
+
+
+## 参考源码
+
+- [Sidecar README](https://github.com/Zhejian-Zheng/sidecar/blob/9a28e63/README.md)
+- [Harness implementation](https://github.com/Zhejian-Zheng/sidecar/blob/9a28e63/src/sidecar/harness.py)
+- [Harness regression tests](https://github.com/Zhejian-Zheng/sidecar/blob/9a28e63/tests/test_harness.py)
+- [Conversation routing](https://github.com/Zhejian-Zheng/sidecar/blob/9a28e63/src/sidecar/conversation.py)
+
+</ArticleLanguage>

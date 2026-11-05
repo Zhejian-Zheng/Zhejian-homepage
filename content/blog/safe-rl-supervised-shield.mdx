@@ -1,11 +1,23 @@
+import ArticleLanguage from "@/app/components/ArticleLanguage";
+
 export const metadata = {
-	title: "Safe Reinforcement Learning with a Supervised Shield",
-	summary: "A grid-world experiment where Q-learning is combined with a supervised safety classifier to reduce hazard violations.",
-	publishedAt: "2026-05-16",
-	tags: ["Reinforcement Learning", "Supervised Learning", "Python", "Safety"]
+  "title": "Safe Reinforcement Learning with a Supervised Shield",
+  "summary": "A grid-world experiment where Q-learning is combined with a supervised safety classifier to reduce hazard violations.",
+  "publishedAt": "2026-05-16",
+  "tags": [
+    "Reinforcement Learning",
+    "Supervised Learning",
+    "Python",
+    "Safety"
+  ],
+  "category": "systems",
+  "zh": {
+    "title": "带监督保护层的安全强化学习",
+    "summary": "一个网格世界实验，将 Q-learning 与监督式安全分类器结合，减少智能体进入危险状态的次数。"
+  }
 };
 
-<div className="article-language article-language-en">
+<ArticleLanguage language="en">
 
 This project explores a simple but powerful idea: reinforcement learning agents can learn faster or behave more safely when a supervised model filters risky actions.
 
@@ -43,9 +55,9 @@ That tradeoff is exactly the kind of behavior safe RL systems need to expose.
 
 This repo shows how classical RL and supervised learning can cooperate. The agent still learns a policy, but the classifier adds a safety boundary around exploration and action selection.
 
-</div>
+</ArticleLanguage>
 
-<div className="article-language article-language-zh">
+<ArticleLanguage language="zh">
 
 这个项目探索了一个简单但有力的想法：当监督学习模型过滤掉危险动作时，强化学习 agent 可以学得更快，也能表现得更安全。
 
@@ -83,4 +95,4 @@ This repo shows how classical RL and supervised learning can cooperate. The agen
 
 这个仓库展示了经典 RL 与监督学习如何协作。agent 仍然在学习策略，但分类器在探索和动作选择周围添加了安全边界。
 
-</div>
+</ArticleLanguage>

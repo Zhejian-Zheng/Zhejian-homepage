@@ -1,11 +1,23 @@
+import ArticleLanguage from "@/app/components/ArticleLanguage";
+
 export const metadata = {
-	title: "Resume in LaTeX: Treating a CV as Source-Controlled Design",
-	summary: "A LaTeX resume project that uses reusable commands, typography, spacing, and version control to keep a technical CV maintainable.",
-	publishedAt: "2026-05-16",
-	tags: ["LaTeX", "Resume", "Design", "Documentation"]
+  "title": "Resume in LaTeX: Treating a CV as Source-Controlled Design",
+  "summary": "A LaTeX resume project that uses reusable commands, typography, spacing, and version control to keep a technical CV maintainable.",
+  "publishedAt": "2026-05-16",
+  "tags": [
+    "LaTeX",
+    "Resume",
+    "Design",
+    "Documentation"
+  ],
+  "category": "product",
+  "zh": {
+    "title": "用 LaTeX 写简历：把 CV 当作可版本控制的设计",
+    "summary": "一个 LaTeX 简历项目，用可复用命令、排版、间距和版本控制来保持技术简历的可维护性。"
+  }
 };
 
-<div className="article-language article-language-en">
+<ArticleLanguage language="en">
 
 The Resume repo keeps a CV as code. Instead of editing a visual document by hand, the resume is written in LaTeX with reusable commands for sections, projects, education, work experience, and layout.
 
@@ -37,9 +49,9 @@ Sensitive contact or referee details should be handled carefully when a resume i
 
 This repo shows that engineering thinking applies to personal documents too. A resume becomes easier to maintain when layout, content, and structure are separated.
 
-</div>
+</ArticleLanguage>
 
-<div className="article-language article-language-zh">
+<ArticleLanguage language="zh">
 
 这个简历仓库把 CV 当代码来维护。不是手动编辑可视化文档，而是用 LaTeX 写简历，为章节、项目、教育经历、工作经历和排版定义可复用的命令。
 
@@ -71,4 +83,4 @@ LaTeX 源文件使用了页面几何、字体、颜色、章节标题、表格�
 
 这个仓库说明工程思维也适用于个人文档。当排版、内容和结构分离时，简历更容易维护。
 
-</div>
+</ArticleLanguage>

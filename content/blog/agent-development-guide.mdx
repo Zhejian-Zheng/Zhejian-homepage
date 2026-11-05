@@ -1,11 +1,23 @@
+import ArticleLanguage from "@/app/components/ArticleLanguage";
+
 export const metadata = {
-	title: "Agent Development Without the Mystery",
-	summary: "A bilingual beginner's guide to Agent execution loops, tools, state, memory, safety, debugging, and evaluation.",
-	publishedAt: "2026-08-14",
-	tags: ["AI Agent", "LLM", "Agent Development", "Engineering"]
+  "title": "Agent Development Without the Mystery",
+  "summary": "A bilingual beginner's guide to Agent execution loops, tools, state, memory, safety, debugging, and evaluation.",
+  "publishedAt": "2026-08-14",
+  "tags": [
+    "AI Agent",
+    "LLM",
+    "Agent Development",
+    "Engineering"
+  ],
+  "category": "agents",
+  "zh": {
+    "title": "Agent 开发入门：从执行循环到可靠应用",
+    "summary": "面向 Agent 开发初学者，介绍执行循环、工具、状态、记忆、安全控制、调试和评估。"
+  }
 };
 
-<div className="article-language article-language-en">
+<ArticleLanguage language="en">
 
 An Agent is easier to understand once you stop treating it as a special kind of intelligence. In software terms, it is usually a loop around a language model. The model reads the current state, decides whether to answer or use a tool, receives the tool result, and makes another decision.
 
@@ -201,9 +213,9 @@ Build one narrow path first:
 
 The last point saves a lot of work. Multi-agent coordination does not repair an unclear task, a weak tool contract, or missing evaluation. A small Agent with good boundaries is a better first system because you can see why it succeeds and why it fails.
 
-</div>
+</ArticleLanguage>
 
-<div className="article-language article-language-zh">
+<ArticleLanguage language="zh">
 
 理解 Agent 不需要先接受一套神秘概念。从软件结构看，它通常就是语言模型外面的一层循环。模型读取当前状态，决定直接回答还是调用工具，拿到工具结果后再做下一次判断。
 
@@ -399,4 +411,4 @@ Agent 补充缺失信息
 
 最后一点能省下很多无效工作。多个 Agent 解决不了模糊的任务定义、含糊的工具接口和缺失的评估。边界清楚的小 Agent 更适合作为第一版，因为你能看见它为什么成功，也能看见它为什么失败。
 
-</div>
+</ArticleLanguage>

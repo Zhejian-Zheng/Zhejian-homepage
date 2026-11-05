@@ -1,11 +1,23 @@
+import ArticleLanguage from "@/app/components/ArticleLanguage";
+
 export const metadata = {
-	title: "Magic Chess Prototype: Exploring a Vue Rule Engine",
-	summary: "An ongoing Vue 3 and TypeScript prototype for move validation, check detection, timers, history, and custom chess-like rules.",
-	publishedAt: "2026-05-16",
-	tags: ["Vue", "TypeScript", "Game Logic", "Prototype"]
+  "title": "Magic Chess Prototype: Exploring a Vue Rule Engine",
+  "summary": "An ongoing Vue 3 and TypeScript prototype for move validation, check detection, timers, history, and custom chess-like rules.",
+  "publishedAt": "2026-05-16",
+  "tags": [
+    "Vue",
+    "TypeScript",
+    "Game Logic",
+    "Prototype"
+  ],
+  "category": "systems",
+  "zh": {
+    "title": "Magic Chess 原型：探索 Vue 规则引擎",
+    "summary": "一个基于 Vue 3 和 TypeScript 的进行中浏览器象棋原型，涵盖走法验证、将军检测、计时器、历史记录和自定义棋类规则。"
+  }
 };
 
-<div className="article-language article-language-en">
+<ArticleLanguage language="en">
 
 Magic Chess is an ongoing browser chess prototype built with Vue 3 and TypeScript. It is not a fully shipped game yet, but it is a useful exploration of rule-engine structure, board state, and custom chess-like mechanics.
 
@@ -43,9 +55,9 @@ The detector also explores checkmate, stalemate, and insufficient material condi
 
 This repo is best understood as a work-in-progress game logic prototype. Its strongest lesson is how to separate state, rule validation, endgame detection, and rendering before polishing the full gameplay experience.
 
-</div>
+</ArticleLanguage>
 
-<div className="article-language article-language-zh">
+<ArticleLanguage language="zh">
 
 Magic Chess 是一个基于 Vue 3 和 TypeScript 的浏览器端国际象棋原型，目前仍在持续开发中。它还不是一个完整交付的游戏，但作为规则引擎结构、棋盘状态管理和自定义棋类规则的探索，价值很高。
 
@@ -83,4 +95,4 @@ Magic Chess 是一个基于 Vue 3 和 TypeScript 的浏览器端国际象棋原�
 
 这个仓库最适合被理解为一个进行中的游戏逻辑原型。它最核心的教训是如何在打磨完整游戏体验之前，先把状态、规则验证、终局检测和渲染分离清楚。
 
-</div>
+</ArticleLanguage>

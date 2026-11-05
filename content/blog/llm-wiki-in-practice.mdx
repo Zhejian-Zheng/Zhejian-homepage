@@ -1,11 +1,23 @@
+import ArticleLanguage from "@/app/components/ArticleLanguage";
+
 export const metadata = {
-	title: "LLM Wiki in Practice: Turning Documents into Traceable Engineering Knowledge",
-	summary: "How I use an LLM-compiled wiki to turn project documents into searchable, linked, and source-aware engineering knowledge.",
-	publishedAt: "2026-09-05",
-	tags: ["LLM Wiki", "Knowledge Base", "Documentation", "AI Agent"]
+  "title": "LLM Wiki in Practice: Turning Documents into Traceable Engineering Knowledge",
+  "summary": "How I use an LLM-compiled wiki to turn project documents into searchable, linked, and source-aware engineering knowledge.",
+  "publishedAt": "2026-09-05",
+  "tags": [
+    "LLM Wiki",
+    "Knowledge Base",
+    "Documentation",
+    "AI Agent"
+  ],
+  "category": "agents",
+  "zh": {
+    "title": "LLM Wiki 实践：把项目资料整理成可追溯的工程知识",
+    "summary": "我如何使用由 LLM 编译的 Wiki，把项目文档整理成可搜索、有关联并且能够追溯来源的工程知识。"
+  }
 };
 
-<div className="article-language article-language-en">
+<ArticleLanguage language="en">
 
 Most teams do not lack documents. They lack a reliable way to turn those documents into knowledge that can be found, checked, and updated.
 
@@ -87,9 +99,9 @@ My understanding of LLM Wiki is not "chat with a folder." It is a compilation wo
 
 The two wikis I use are still small, which is useful at this stage. I can see where the workflow saves time and where human review is still required before I trust it with a larger engineering knowledge base.
 
-</div>
+</ArticleLanguage>
 
-<div className="article-language article-language-zh">
+<ArticleLanguage language="zh">
 
 大多数团队并不缺文档。真正缺少的，是一种可靠的方法，把文档整理成能够查找、核对和持续更新的知识。
 
@@ -171,4 +183,4 @@ LLM Wiki 适合会被反复使用的资料，例如工程入门、架构笔记�
 
 我现在使用的两个 Wiki 规模还不大，这反而方便我观察真实效果。我能够看清哪些步骤节省了时间，也能知道哪些地方仍然需要人工审核，然后再决定是否把它扩展到更大的工程知识库。
 
-</div>
+</ArticleLanguage>

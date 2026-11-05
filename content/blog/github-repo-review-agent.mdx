@@ -1,11 +1,23 @@
+import ArticleLanguage from "@/app/components/ArticleLanguage";
+
 export const metadata = {
-	title: "GitHub Repo Review Agent: Engineering an AI Code Review Workflow",
-	summary: "A bilingual engineering note on building an AI agent that reviews GitHub repositories through indexing, static analysis, verification, and risk-ranked findings.",
-	publishedAt: "2026-06-07",
-	tags: ["AI Agent", "GitHub", "Code Review", "Static Analysis"]
+  "title": "GitHub Repo Review Agent: Engineering an AI Code Review Workflow",
+  "summary": "A bilingual engineering note on building an AI agent that reviews GitHub repositories through indexing, static analysis, verification, and risk-ranked findings.",
+  "publishedAt": "2026-06-07",
+  "tags": [
+    "AI Agent",
+    "GitHub",
+    "Code Review",
+    "Static Analysis"
+  ],
+  "category": "agents",
+  "zh": {
+    "title": "GitHub Repo Review Agent：工程化 AI 代码审查工作流",
+    "summary": "一篇中英双语工程笔记，介绍如何通过仓库索引、静态分析、本地验证和风险排序构建 GitHub repo review agent。"
+  }
 };
 
-<div className="article-language article-language-en">
+<ArticleLanguage language="en">
 
 Reviewing a GitHub repository is an engineering investigation. Before making any judgment, a reviewer needs to understand the project boundary, runtime model, dependency graph, testing surface, and the paths where bugs would actually hurt users.
 
@@ -171,9 +183,9 @@ The most important design principle is evidence-first review. The agent should r
 
 The goal is not to replace human code review. The goal is to make human review faster, more systematic, and more precise.
 
-</div>
+</ArticleLanguage>
 
-<div className="article-language article-language-zh">
+<ArticleLanguage language="zh">
 
 审查一个 GitHub 仓库，本质上不是简单地“看代码”，而是一次工程调查。真正有价值的 review 需要先弄清楚项目边界、运行方式、依赖关系、测试覆盖，以及哪些代码路径一旦出错会影响真实用户。
 
@@ -337,4 +349,4 @@ Evidence: import route 在 validateUploadMetadata(req) 之前调用了 parseUplo
 
 这个 agent 的目标不是替代人类 code review，而是让人类 review 更快、更系统、更精确。
 
-</div>
+</ArticleLanguage>
