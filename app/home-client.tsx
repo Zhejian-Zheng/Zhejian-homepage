@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import AsciiTrace from "./components/AsciiTrace";
 import Link from "next/link";
 import { useLanguage } from "./components/language";
 import { LocalizedDate, LocalizedPostSummary, LocalizedPostTitle, LocalizedTag } from "./blog/localizedPostText";
@@ -56,8 +57,7 @@ function ProjectCard({ post, featured = false }: { post: HomePostPreview; featur
 			{featured && <div className="project-visual" aria-hidden="true">
 				<div className="project-console-bar"><span><i />TRACE / SIDECAR</span><span>LOOP.04</span></div>
 				<div className="project-wordmark">Sidecar<span>伴行</span></div>
-				<div className="agent-loop">{copy.loop.map((step, index) => <span key={step}>{step}{index < 3 && <i>→</i>}</span>)}</div>
-				<p>{copy.loopNote}</p>
+				<AsciiTrace />
 			</div>}
 			<div className="project-description">
 				<div className="project-meta"><span>{post.tags[0]}</span><Arrow diagonal /></div>
@@ -78,15 +78,17 @@ export default function HomeClient({ selectedBuilds, latestNotes }: { selectedBu
 				<div className="field-wrap">
 					<section className="home-hero">
 						<div className="hero-copy">
+							<p className="hero-command" aria-hidden="true"><span>~/zhejian</span> $ whoami</p>
 							<p className="hero-byline"><span>{copy.name}</span><span>{copy.role}</span></p>
 							<h1 className="hero-title">{copy.title}<em>{copy.titleEnd}</em></h1>
 							<p className="hero-intro">{copy.intro}</p>
 							<div className="hero-actions"><a href="#selected-builds" className="btn-primary">{copy.work}<Arrow diagonal /></a><Link href="/blog" className="text-link">{copy.notes}<Arrow /></Link></div>
 							<p className="hero-location"><span aria-hidden="true">↳</span> {copy.location}</p>
 						</div>
-						<figure className="hero-portrait">
+						<figure className="hero-portrait ascii-frame">
+							<span className="ascii-frame__corner ascii-frame__corner--top" aria-hidden="true">+</span>
+							<span className="ascii-frame__corner ascii-frame__corner--bottom" aria-hidden="true">+</span>
 							<div className="portrait-image"><Image src={profileImg} alt={copy.name} fill priority sizes="(max-width: 767px) 90vw, 440px" className="object-cover" /></div>
-							<figcaption><span>{copy.photo}</span><span aria-hidden="true">ZZ.</span></figcaption>
 						</figure>
 					</section>
 
@@ -106,7 +108,7 @@ export default function HomeClient({ selectedBuilds, latestNotes }: { selectedBu
 					</section>
 
 					<section className="contact-section"><p>{copy.contact}</p><Link href="/contact" className="contact-cta">{copy.contactLink}<Arrow diagonal /></Link></section>
-					<footer className="home-footer"><span>{copy.footer}</span><div><a href="https://github.com/Zhejian-Zheng">GitHub <Arrow diagonal /></a><a href="mailto:zj.zheng1@gmail.com">Email <Arrow diagonal /></a></div></footer>
+					<footer className="home-footer"><span><span className="ascii-signoff" aria-hidden="true">[ EOF ] </span>{copy.footer}</span><div><a href="https://github.com/Zhejian-Zheng">GitHub <Arrow diagonal /></a><a href="mailto:zj.zheng1@gmail.com">Email <Arrow diagonal /></a></div></footer>
 				</div>
 			</main>
 		</div>
