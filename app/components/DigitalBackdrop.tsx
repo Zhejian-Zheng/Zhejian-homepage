@@ -48,7 +48,9 @@ export default function DigitalBackdrop() {
 			ripples = ripples.filter(ripple => time - ripple.born < 1.8);
 			for (const cell of cells) {
 				const x = cell.x;
-				const y = (cell.y + (reduced.matches ? 0 : time * cell.speed)) % loopHeight - 30;
+				const offset = cell.y + (reduced.matches ? 0 : time * cell.speed);
+				// Positive modulo keeps upward streams wrapping at the bottom as well.
+				const y = ((offset % loopHeight) + loopHeight) % loopHeight - 30;
 				let dx = 0;
 				let dy = 0;
 				let light = 0;
@@ -103,10 +105,11 @@ export default function DigitalBackdrop() {
 			const rows = Math.ceil(height / 30) + 2;
 			loopHeight = rows * 30;
 			for (let column = 0; column < Math.ceil(width / spacing); column++) {
+				const speed = (9 + column % 5 * 2) * (column % 2 === 0 ? 1 : -1);
 				for (let row = 0; row < rows; row++) {
 					const seed = (column * 73 + row * 31 + 4096) >>> 0;
 					if (seed % 5 === 0) continue;
-					cells.push({ x: column * spacing + spacing / 2, y: row * 30 + column * 17, speed: 9 + column % 5 * 2, glyphX: seed % glyphs.length * tileWidth * atlasScale, glyphY: (seed % 3 === 0 ? 1 : 0) * tileHeight * atlasScale, alpha: .10 + (seed % 7) * .015 });
+					cells.push({ x: column * spacing + spacing / 2, y: row * 30 + column * 17, speed, glyphX: seed % glyphs.length * tileWidth * atlasScale, glyphY: (seed % 3 === 0 ? 1 : 0) * tileHeight * atlasScale, alpha: .10 + (seed % 7) * .015 });
 				}
 			}
 			draw();
